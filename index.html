@@ -412,7 +412,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='47', updBtn=document.getElementById('upd');
+var BUILD='48', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -1096,7 +1096,15 @@ MODES.legami=(function(){
   var KIDS={drone:['arm1','piano','short1','basso'],arm1:['mel1','arm2'],piano:['mel1','mel2'],short1:['short2','short3','short4'],basso:['arm2','short2'],mel1:['mel2']};
   var CAN=['arm1','piano','short1','mel1','mel2','basso','arm2','short2','short3','short4'], DR={gv:1,level:0}, NP=46, GROW=2.8;
   var st=[], par=[], links=[], full=0, used=false, born=[], ps=[], snaps=[], dep=[];
-  function nx(i){ return ps[i].x*W; } function ny(i){ return TOP+ps[i].y*(BOT-TOP); }
+  var ZS=[0,.22,-.3,.28,-.2,.32,-.26,.18,-.34,.24], k3=0, rx=0, ry=0, tiltX=0, tiltY=0, base=null, gotTilt=false, asked=false;
+  function p3(i){              // posizione del punto dopo la rotazione: x, y sullo schermo e z (vicino > 0)
+    var X=ps[i].x-0.5, Y=(ps[i].y-0.5)*(BOT-TOP)/W, Z=ZS[i]*k3, cy=Math.cos(ry*k3), sy=Math.sin(ry*k3), cx=Math.cos(rx*k3), sx=Math.sin(rx*k3);
+    var x1=X*cy+Z*sy, z1=-X*sy+Z*cy, y1=Y*cx-z1*sx, z2=Y*sx+z1*cx, f=1/(1-z2*0.55);
+    return [W*(0.5+x1*f),TOP+(BOT-TOP)*0.5+W*y1*f,z2];
+  }
+  function nx(i){ return p3(i)[0]; } function ny(i){ return p3(i)[1]; }
+  function onTilt(e){ if(e.beta==null) return; gotTilt=true; if(!base) base=[e.beta,e.gamma]; tiltX=Math.max(-0.7,Math.min(0.7,(e.beta-base[0])*0.02)); tiltY=Math.max(-0.7,Math.min(0.7,(e.gamma-base[1])*0.025)); }
+  function askTilt(){ if(asked) return; asked=true; try{ if(window.DeviceOrientationEvent&&DeviceOrientationEvent.requestPermission) DeviceOrientationEvent.requestPermission().then(function(r){ if(r==='granted') window.addEventListener('deviceorientation',onTilt); }).catch(function(){}); else window.addEventListener('deviceorientation',onTilt); }catch(e){} }
   function maxLen(){ return 0.52*(BOT-TOP); }
   function near(i){ var d=Math.hypot(nx(i)-nx(0),ny(i)-ny(0))/(0.5*(BOT-TOP)); return 1-0.62*ss(0.3,0.95,d); }
   function goTo(i,q){ ps[i].tx=Math.max(0.07,Math.min(0.93,q.x/W)); ps[i].ty=Math.max(0.05,Math.min(0.95,(q.y-TOP)/(BOT-TOP))); }
@@ -1170,8 +1178,8 @@ MODES.legami=(function(){
   }
   return {
     hint:'', waits:true, PL:PL,
-    enter:function(){ st=PL.map(function(){ return null; }); st[0]='drone'; par=[]; links=[]; full=0; used=false; born=[]; snaps=[]; ps=PL.map(function(p){ return {x:p[0],y:p[1],tx:p[0],ty:p[1]}; }); dep=depths(true); },
-    down:function(q){ var i=at(q); q.node=i; q.lit=i>=0&&!!st[i]; q.sx=q.x; q.sy=q.y; q.far=false; q.hold=false; q.t0=performance.now(); q.raw=[]; q.fx=q.x; q.fy=q.y; },
+    enter:function(){ st=PL.map(function(){ return null; }); st[0]='drone'; par=[]; links=[]; full=0; used=false; born=[]; snaps=[]; k3=0; base=null; ps=PL.map(function(p){ return {x:p[0],y:p[1],tx:p[0],ty:p[1]}; }); dep=depths(true); },
+    down:function(q){ askTilt(); var i=at(q); q.node=i; q.lit=i>=0&&!!st[i]; q.sx=q.x; q.sy=q.y; q.far=false; q.hold=false; q.t0=performance.now(); q.raw=[]; q.fx=q.x; q.fy=q.y; },
     move:function(q){
       if(Math.hypot(q.x-q.sx,q.y-q.sy)>12) q.far=true;
       if(q.hold){ goTo(q.node,q); return; }
@@ -1204,7 +1212,9 @@ MODES.legami=(function(){
       links.forEach(function(l){ was=l.g; l.g=Math.min(1,l.g+dt/GROW); if(was<1&&l.g>=1){ dep=depths(true); if(!born[l.b]||tn-born[l.b]>3) born[l.b]=tn; } });
       o=openSet(); n=Object.keys(o).length; full=Math.max(0,Math.min(1,full+(n>=11&&dep.every(function(d,j){ return !st[j]||d<1e9; })?dt/14:-dt/4)));
       var live={}, plk=[]; links.forEach(function(l){ if(l.pl){ l.pl=Math.max(0,l.pl-dt/1.8); plk[l.a]=Math.max(plk[l.a]||0,l.pl); plk[l.b]=Math.max(plk[l.b]||0,l.pl); } });
-      for(i=1;i<st.length;i++) if(st[i]&&dep[i]<1e9) live[st[i]]={v:Math.min(1.25,near(i)*Math.pow(0.82,dep[i]-1)*(1+0.6*(plk[i]||0))),mu:Math.min(0.62,0.27*(dep[i]-1))*(1-full),pan:(ps[i].x-0.5)*1.5};
+      for(i=1;i<st.length;i++) if(st[i]&&dep[i]<1e9) live[st[i]]={v:Math.min(1.25,near(i)*Math.pow(0.82,dep[i]-1)*(1+0.6*(plk[i]||0))),mu:Math.min(0.62,0.27*(dep[i]-1))*(1-full),pan:Math.max(-1,Math.min(1,(p3(i)[0]/W-0.5)*1.9))}; for(i=1;i<st.length;i++) if(st[i]&&live[st[i]]){ var zz=p3(i)[2]; live[st[i]].v=Math.min(1.25,live[st[i]].v*(1+0.9*zz)); live[st[i]].mu=Math.min(0.8,live[st[i]].mu+Math.max(0,-zz)*1.1*k3); }
+      var nlive=Object.keys(live).length, tsec=performance.now()/1000; k3+=((nlive>=3?1:0)-k3)*(1-Math.exp(-dt/3));          // da tre voci in su la figura prende profondità
+      var gx=gotTilt?tiltX:0.22*Math.sin(tsec*0.23), gy=gotTilt?tiltY:0.34*Math.sin(tsec*0.17); rx+=(gx-rx)*(1-Math.exp(-dt/0.35)); ry+=(gy-ry)*(1-Math.exp(-dt/0.35));
       S.forEach(function(s){ var L=live[s.id], v=L?Math.min(1,(MX[s.id]+(1-MX[s.id])*full)*L.v):0; setWant(s,v,(L&&plk.length&&v>s.want)?false:v>s.want?2:true); if(L){ setRoom(s,L.mu); setPan(s,L.pan); } });
       droneTo(0.011*(1-0.6*(n-1)/10));
     },
