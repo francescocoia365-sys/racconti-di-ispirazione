@@ -167,6 +167,13 @@ body{height:100%;width:100%}
 .bnote{text-align:center;max-width:30ch;line-height:1.5}
 #bquo{min-height:0;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
 #bquo .lead{margin:0;max-width:24ch;text-align:center}
+.hapl{position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
+#sez.quote{overflow:hidden}
+#sez.quote .sz>*:not(.bbox){display:none}
+#sez.quote .bbox{position:fixed;inset:0;z-index:6;margin:0;justify-content:center;background:#000}
+#sez.quote .bnote{display:none}
+#sez.quote #bquo{padding:0}
+#sez.quote #bgo{position:absolute;bottom:calc(40px + var(--sb));background:none;color:rgba(255,255,255,.4)}
 #sez.breathing{overflow:hidden}
 #sez.breathing .sback{opacity:0;pointer-events:none}
 #sez.breathing .bbox{position:fixed;inset:0;z-index:6;margin:0;justify-content:center;gap:34px;background:radial-gradient(90% 60% at 50% 45%,#0b1b3a 0%,#050b1c 55%,#01030a 100%);animation:qin 1.6s ease both}
@@ -398,7 +405,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='38', updBtn=document.getElementById('upd');
+var BUILD='39', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -524,32 +531,26 @@ function breathInit(){
     breath.g.gain.cancelScheduledValues(n); breath.lp.frequency.cancelScheduledValues(n);
     breath.g.gain.setTargetAtTime(isIn?0.11:0.02,n,isIn?IN/3:OUT/3); breath.lp.frequency.setTargetAtTime(isIn?1500:420,n,isIn?IN/3:OUT/3);
   }
-  function tick(now){
-    if(!breath) return; var t=(now-breath.t0)/1000, dt=Math.min(0.05,(now-(breath.last||now))/1000), e; breath.last=now;
-    if(breath.touch){                                   // col dito: il cerchio segue te
-      breath.u=Math.max(0,Math.min(1,breath.u+(breath.held?dt/breath.inD:-dt/breath.outD))); e=breath.u*breath.u*(3-2*breath.u);
-      if(t>=TOTAL&&!breath.held&&breath.u<=0.01){ finish(); return; }
-    } else {                                            // senza toccare: guida lui, 4 e 6
-      var c=t%(IN+OUT), isIn=c<IN, u=isIn?c/IN:1-(c-IN)/OUT; e=u*u*(3-2*u);
-      if(isIn!==breath.isIn){ breath.isIn=isIn; phase(isIn); lab.textContent=isIn?'inspira':'espira'; }
-      if(t>=TOTAL&&!isIn&&c>IN+OUT-0.2){ finish(); return; }
-    }
+  var HOLD=4, hap=document.getElementById('hap');
+  function buzz(n){                                   // un segnale per chi tiene gli occhi chiusi: vibrazione dove il telefono la permette, e sempre un suono
+    try{ if(navigator.vibrate) navigator.vibrate(n===2?[40,90,40]:n===3?[220]:[40]); }catch(e){}
+    try{ for(var k=0;k<(n===2?2:1);k++) setTimeout(function(){ hap.click(); },k*130); }catch(e){}
+    if(breath&&breath.g){ var c=ctx.currentTime, o=ctx.createOscillator(), a=ctx.createGain(); o.type='sine'; o.frequency.value=n===1?659.26:n===2?493.88:329.63; a.gain.setValueAtTime(0,c); a.gain.linearRampToValueAtTime(0.05,c+0.03); a.gain.exponentialRampToValueAtTime(0.0004,c+1.6); o.connect(a); a.connect(breath.lp); o.start(c); o.stop(c+1.7); }
+  }
+  function tick(now){                                 // inspira 4, trattieni 4, espira 6
+    if(!breath) return; var t=(now-breath.t0)/1000, CY=IN+HOLD+OUT, c=t%CY, ph=c<IN?1:c<IN+HOLD?2:3, u=ph===1?c/IN:ph===2?1:1-(c-IN-HOLD)/OUT, e=u*u*(3-2*u);
+    if(ph!==breath.ph){ breath.ph=ph; if(ph!==2) phase(ph===1); buzz(ph); lab.textContent=ph===1?'inspira':ph===2?'trattieni':'espira'; }
     ring.style.transform='scale('+(0.5+0.5*e)+')'; ring.style.opacity=0.45+0.5*e;
+    if(t>=TOTAL&&ph===3&&c>CY-0.2){ finish(); return; }
     breath.raf=requestAnimationFrame(tick);
   }
-  box.onpointerdown=function(ev){ if(!breath||ev.target===btn) return; var n=performance.now();
-    if(!breath.touch){ breath.touch=true; breath.u=0; breath.inD=4; breath.outD=6; }
-    else if(breath.rel){ var o=(n-breath.rel)/1000; if(o>1.5&&o<14) breath.outD=Math.min(9,Math.max(4,o*1.06)); }      // l'espirazione che hai fatto, un filo più lunga
-    breath.held=true; breath.press=n; phase(true); lab.textContent='inspira'; };
-  box.onpointerup=box.onpointercancel=function(ev){ if(!breath||!breath.held) return; var n=performance.now(), i=(n-breath.press)/1000;
-    if(i>1.2&&i<12) breath.inD=Math.min(6.5,Math.max(3,i*1.06)); breath.held=false; breath.rel=n; phase(false); lab.textContent='espira'; };
   function finish(){
-    breathStop(); box.classList.remove('run'); box.classList.add('done'); vSez.classList.remove('breathing'); var q=QUOTES[Math.floor(Math.random()*QUOTES.length)];
+    breathStop(); box.classList.remove('run'); box.classList.add('done'); vSez.classList.remove('breathing'); vSez.classList.add('quote'); var q=QUOTES[Math.floor(Math.random()*QUOTES.length)];
     quo.innerHTML='<p class="lead">'+esc(q[0])+'</p><span class="tiny">'+esc(q[1])+'</span>'; btn.textContent='ancora'; lab.textContent='';
   }
   btn.addEventListener('click',function(){
     if(breath){ finish(); return; }
-    var s=sound()||{}; breath={t0:performance.now(),isIn:null,g:s.g,lp:s.lp,os:s.os}; box.classList.add('run'); box.classList.remove('done'); vSez.classList.add('breathing'); vSez.scrollTop=0; quo.innerHTML=''; btn.textContent='basta'; breath.raf=requestAnimationFrame(tick);
+    var s=sound()||{}; breath={t0:performance.now(),isIn:null,g:s.g,lp:s.lp,os:s.os}; box.classList.add('run'); box.classList.remove('done'); vSez.classList.remove('quote'); vSez.classList.add('breathing'); vSez.scrollTop=0; quo.innerHTML=''; btn.textContent='basta'; breath.raf=requestAnimationFrame(tick);
   });
 }
 /* taccuino: una scrivania. I fogli stanno sparsi, storti, uno sopra l'altro; trascini per spostarti, due dita o due tocchi per avvicinarti a un foglio */
@@ -612,11 +613,11 @@ function showSez(id){
   if(s.garden) h+='<div class="gar"><button type="button" class="upd press" id="gnear">vicino a me</button><form id="gform"><input id="gq" type="text" inputmode="search" enterkeyhint="search" autocomplete="off" placeholder="oppure una città" aria-label="Cerca una città"></form></div><p class="tiny" id="gmsg"></p><div id="glist"></div><p class="tiny gcred">dati © openstreetmap</p>';
   if(s.music) h+='<div class="rowi"><span class="tiny">spotify</span><iframe class="emb sp" title="This Is Paolo Buonvino, su Spotify" loading="lazy" allow="encrypted-media; clipboard-write; fullscreen; picture-in-picture" src="https://open.spotify.com/embed/playlist/37i9dQZF1DZ06evO4dUBlR?theme=0"></iframe></div>'
     +'<div class="rowi"><span class="tiny">youtube · i video più visti</span><div class="yt"><iframe class="emb" title="I video più visti del canale di Paolo Buonvino" loading="lazy" allowfullscreen allow="encrypted-media; picture-in-picture; fullscreen" src="https://www.youtube-nocookie.com/embed/videoseries?list=UULPQ0tBr09so4t1e8gzMhxS9Q"></iframe></div><a class="tiny lnk" target="_blank" rel="noopener" href="https://www.youtube.com/@paolobuonvino/videos">apri il canale →</a></div>';
-  if(s.breath) h='<div class="bbox" id="bbox"><div class="bstage"><div class="bring" id="bring"></div><span class="tiny" id="blab"></span></div><div id="bquo"></div><button type="button" class="upd press" id="bgo">inizia</button><span class="tiny bnote">tre minuti · tieni premuto mentre inspiri, lascia mentre espiri</span></div>'+h.replace(/<div class="sart">[\s\S]*?<\/div>/,'');
+  if(s.breath) h='<div class="bbox" id="bbox"><div class="bstage"><div class="bring" id="bring"></div><span class="tiny" id="blab"></span></div><div id="bquo"></div><button type="button" class="upd press" id="bgo">inizia</button><span class="tiny bnote">tre minuti a occhi chiusi. un suono e una vibrazione ti dicono quando inspirare, trattenere, espirare</span><label class="hapl" aria-hidden="true"><input type="checkbox" switch id="hap" tabindex="-1"></label></div>'+h.replace(/<div class="sart">[\s\S]*?<\/div>/,'');
   if(s.tac) h='<div class="deskv" id="deskv"><div class="desk" id="desk">'+TAC.map(function(f){ return '<img src="img/'+f[0]+'" alt="" style="left:'+f[1]+'px;top:'+f[2]+'px;width:'+f[3]+'px;transform:rotate('+f[4]+'deg)">'; }).join('')+'</div></div><div class="deskh" id="deskh"><span class="tiny">'+s.n+'</span><h2 class="word">'+esc(s.t)+'</h2></div>';
   if(s.anni) h='<div class="yrw"><div class="yr" id="yr">1997</div></div>'+h+'<div class="rcs">'+ANNI.map(function(a,i){ return '<div class="rc'+(i%2?' r':'')+'" data-y="'+a[0]+'" style="width:'+[66,54,72,58,62][i%5]+'%;margin-top:'+[40,-30,70,10,-10][i%5]+'px"><div class="rp"><b>'+esc(a[1])+'</b></div><span class="tiny">'+a[0]+(a[2]?' · '+esc(a[2].toLowerCase()):'')+'</span><b class="rt">'+esc(a[1])+'</b>'+(a[4]?'<span class="tiny rn">'+esc(a[4])+'</span>':'')+'</div>'; }).join('')+'</div><p class="tiny gcred">elenco e locandine da wikipedia · da rivedere</p>';
   if(s.map) h+=mapHtml();
-  vSez.onscroll=null; vSez.classList.remove('breathing');
+  vSez.onscroll=null; vSez.classList.remove('breathing'); vSez.classList.remove('quote');
   vSez.classList.toggle('full',!!s.tac);
   breathStop(); szEl.innerHTML=h; vSez.scrollTop=0; if(s.tac) tacInit();
   if(s.garden) gardenInit(); if(s.breath) breathInit(); if(s.anni) anniInit(); if(s.map) mapInit();
