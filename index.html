@@ -49,7 +49,8 @@ img{display:block;-webkit-user-drag:none;pointer-events:none}
 .press:active{transform:scale(.97)}
 
 /* ---------- Home ---------- */
-#home{overflow-y:auto;overflow-x:hidden;overscroll-behavior:none;-webkit-overflow-scrolling:touch;transform:scale(.97)}
+#home::-webkit-scrollbar{display:none;width:0;height:0}
+#home{scrollbar-width:none;-ms-overflow-style:none;overflow-y:auto;overflow-x:hidden;overscroll-behavior:none;-webkit-overflow-scrolling:touch;transform:scale(.97)}
 .hero{position:relative;height:min(78vh,640px);min-height:440px;display:flex;flex-direction:column;justify-content:flex-end;padding:0 22px 30px}
 .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%}
 .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.25) 0%,rgba(0,0,0,0) 22%,rgba(0,0,0,0) 48%,rgba(0,0,0,.8) 80%,#000 100%)}
@@ -88,7 +89,7 @@ footer{color:var(--secondary);font-size:13px;margin:0 6px;line-height:1.5}
 /* ---------- Laboratorio ---------- */
 #lab{background:#000;touch-action:none;transform:translateY(24px)}
 #stage{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
-.bartop{position:absolute;top:0;left:0;right:0;padding:calc(12px + var(--st)) 14px 0;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;pointer-events:none}
+.bartop{position:absolute;top:0;left:0;right:0;padding:calc(12px + var(--st)) 14px 0;display:grid;grid-template-columns:44px 44px 1fr 44px 44px;align-items:center;gap:8px;pointer-events:none}
 .round{pointer-events:auto;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
 .round svg{width:18px;height:18px}
 .piece{text-align:center;line-height:1.2}
@@ -108,7 +109,9 @@ footer{color:var(--secondary);font-size:13px;margin:0 6px;line-height:1.5}
 #go[disabled]{opacity:.6}
 #intro small{font-size:13px;color:var(--secondary);text-align:center;margin-top:-10px}
 
-.modes{position:absolute;left:0;right:0;top:calc(72px + var(--st));display:flex;gap:6px;padding:0 14px;overflow-x:auto;scrollbar-width:none;touch-action:pan-x;-webkit-overflow-scrolling:touch}
+.prog{position:absolute;left:16px;right:16px;top:calc(66px + var(--st));height:2px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden}
+.prog i{display:block;height:100%;background:rgba(255,255,255,.6);transform-origin:left;transform:scaleX(0)}
+.modes{position:absolute;left:0;right:0;top:calc(78px + var(--st));display:flex;gap:6px;padding:0 14px;overflow-x:auto;scrollbar-width:none;touch-action:pan-x;-webkit-overflow-scrolling:touch}
 .modes::-webkit-scrollbar{display:none}
 .modes button{flex:none;height:38px;padding:0 15px;border-radius:999px;font-size:16px;font-weight:600;letter-spacing:-.01em;color:var(--secondary);transition:background .25s,color .25s}
 .modes button.on{background:var(--glass);color:var(--label)}
@@ -118,6 +121,7 @@ footer{color:var(--secondary);font-size:13px;margin:0 6px;line-height:1.5}
 .dots i.on{background:#fff}
 .walk{pointer-events:auto;height:40px;padding:0 18px;border-radius:999px;background:var(--glass);font-size:15px;font-weight:600;color:var(--label)}
 .walk.on{background:#fff;color:#000}
+.walkrow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 .introp{margin:0;font-size:19px;line-height:1.3;color:var(--secondary);font-weight:500;letter-spacing:-.01em;max-width:30ch}
 @media (prefers-reduced-motion:reduce){.view,.press,#intro,#status,#reset{transition:none}}
 </style>
@@ -136,7 +140,7 @@ footer{color:var(--secondary);font-size:13px;margin:0 6px;line-height:1.5}
     <a class="today press" href="#laboratorio">
       <img src="img/lab.jpg" alt="Paolo ai sintetizzatori, in una luce blu">
       <div class="top"><p class="cap">Laboratorio</p><h3>Componi la tua musica</h3></div>
-      <div class="bar"><p>Nove modi di toccare «L’incanto sospeso».</p><span class="pill">Apri</span></div>
+      <div class="bar"><p>Quattro modi di toccare «L’incanto sospeso».</p><span class="pill">Apri</span></div>
     </a>
 
     <section aria-labelledby="h-racconti">
@@ -167,28 +171,26 @@ footer{color:var(--secondary);font-size:13px;margin:0 6px;line-height:1.5}
   <canvas id="stage" aria-label="Superficie da toccare: la musica risponde ai gesti."></canvas>
   <div class="bartop">
     <a class="round press" href="#home" aria-label="Chiudi il laboratorio"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7l5 5 5-5"/></svg></a>
+    <span></span>
     <div class="piece"><b>L’incanto sospeso</b><span>Paolo Buonvino</span></div>
+    <button class="round press" id="again" type="button" aria-label="Ricomincia dall’inizio"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 9a5.5 5.5 0 1 0 1.8-4.1"/><path d="M3.2 2.6v3h3"/></svg></button>
     <button class="round press" id="pause" type="button" aria-label="Pausa"><svg viewBox="0 0 18 18" fill="currentColor" aria-hidden="true"><path id="pauseicon" d="M4.5 3h3v12h-3zM10.5 3h3v12h-3z"/></svg></button>
   </div>
+  <div class="prog" aria-hidden="true"><i id="prog"></i></div>
   <div class="modes" id="modes" role="tablist" aria-label="Modi di suonare">
-    <button type="button" role="tab" data-m="respiro" class="on">respiro</button>
-    <button type="button" role="tab" data-m="risonanza">risonanza</button>
-    <button type="button" role="tab" data-m="stanza">stanza</button>
-    <button type="button" role="tab" data-m="porte">porte</button>
-    <button type="button" role="tab" data-m="dirigere">dirigere</button>
-    <button type="button" role="tab" data-m="se">ricordarsi di sé</button>
-    <button type="button" role="tab" data-m="stop">stop</button>
-    <button type="button" role="tab" data-m="parti">quattro parti</button>
+    <button type="button" role="tab" data-m="stanza" class="on">stanza</button>
     <button type="button" role="tab" data-m="centri">tre centri</button>
+    <button type="button" role="tab" data-m="se">ricordarsi di sé</button>
+    <button type="button" role="tab" data-m="risonanza">risonanza</button>
   </div>
   <div class="barbot">
     <div class="dots" id="dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-    <button id="walk" class="walk press" type="button" hidden>cammina</button>
+    <div class="walkrow"><button id="walk" class="walk press" type="button" hidden>cammina</button><button id="cal" class="walk press" type="button" hidden>tara</button></div>
     <p id="hint"></p>
   </div>
   <div id="intro">
     <h2>Tocca la musica.</h2>
-    <p class="introp">Nove modi diversi di suonare lo stesso brano senza saperlo suonare. Cambiali dalla riga in alto.</p>
+    <p class="introp">Quattro modi di suonare lo stesso brano senza saperlo suonare. Cambiali dalla riga in alto.</p>
     <button id="go" class="press" type="button">Inizia</button>
     <small>Meglio con le cuffie. Su iPhone, togli il silenzioso.</small>
   </div>
@@ -299,7 +301,7 @@ function setRoom(s,mu){
 }
 
 /* ---- Griglia di aperture provvisoria: uno strato alla volta, il tutto solo al massimo ---- */
-var ORDER10=['piano','arm1','mel1','mel2','short1','basso','arm2','short2','short3','short4'];
+var ORDER10=['arm1','piano','mel1','mel2','short1','basso','arm2','short2','short3','short4'];
 var MX={piano:1,arm1:.85,mel1:.8,mel2:.8,short1:.75,basso:.7,arm2:.5,short2:.5,short3:.45,short4:.55};
 function barNow(){ return Math.floor((ctx.currentTime-t0)/(BEAT*4)); }
 function barFrac(){ var x=(ctx.currentTime-t0)/(BEAT*4); return x-Math.floor(x); }
@@ -330,40 +332,13 @@ cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
 function fingers(){ var a=[]; for(var k in P) a.push(P[k]); return a; }
 function lvl(s){ return s.level; }
 
-/* ================= I cinque modi ================= */
+/* ================= I quattro modi ================= */
 var MODES={};
+function ss(a,b,x){ x=Math.max(0,Math.min(1,(x-a)/(b-a))); return x*x*(3-2*x); }
 
-/* 1. respiro: tieni premuto e il brano inspira, una riga per ogni respiro */
-MODES.respiro=(function(){
-  var v=0, lines=[], cur=null, row=0;
-  return {
-    hint:'Tieni premuto: la musica inspira, piano. Lascia: espira.', dots:true,
-    enter:function(){ v=0; lines=[]; cur=null; row=0; },
-    down:function(){ if(cur) return; cur={row:row,len:0,age:0,live:true}; lines.push(cur); row++; },
-    up:function(){ if(fingers().length) return; if(cur){cur.live=false; cur=null;} },
-    update:function(dt){
-      var hold=fingers().length>0;
-      v=Math.max(0,Math.min(9.6,v+(hold?dt/6:-dt/8)));
-      applyLadder(Math.floor(v+0.001),2);
-      if(cur) cur.len=Math.min(1,cur.len+dt/57.6);
-      for(var i=lines.length-1;i>=0;i--){ if(!lines[i].live){ lines[i].age+=dt; if(lines[i].age>50) lines.splice(i,1); } }
-    },
-    draw:function(t){
-      var gap=22, rows=Math.max(4,Math.floor((BOT-TOP-20)/gap)), x0=28, x1=W-28;
-      g.lineCap='round';
-      lines.forEach(function(l){
-        var y=TOP+14+(l.row%rows)*gap, a=l.live?0.95:Math.max(0,0.55*(1-l.age/50));
-        g.strokeStyle='rgba('+INK+','+a+')'; g.lineWidth=l.live?4:3;
-        g.beginPath(); g.moveTo(x0,y); g.lineTo(x0+(x1-x0)*Math.max(0.004,l.len),y); g.stroke();
-      });
-      if(!lines.length){ g.strokeStyle='rgba('+INK+',.16)'; g.lineWidth=3; g.beginPath(); g.moveTo(x0,TOP+14); g.lineTo(x0+10+6*Math.sin(t*1.2),TOP+14); g.stroke(); }
-    }
-  };
-})();
-
-/* 2. risonanza: sfiori una corda e le vicine vibrano per simpatia */
+/* 1. risonanza: sfiori una corda e le vicine vibrano per simpatia */
 MODES.risonanza=(function(){
-  var ORDER=['short4','short2','basso','mel2','arm1','piano','mel1','short1','arm2','short3'], wake=[];
+  var ORDER=['short4','short2','basso','mel2','piano','arm1','mel1','short1','arm2','short3'], wake=[];
   function sx(i){ return W*0.1+i*(W*0.8/(ORDER.length-1)); }
   function excite(p){
     for(var i=0;i<ORDER.length;i++){
@@ -373,13 +348,13 @@ MODES.risonanza=(function(){
   }
   return {
     hint:'Sfiora una corda. Le vicine risuonano da sole.', dots:false,
-    enter:function(){ wake=ORDER.map(function(id){return id==='piano'?0.7:0;}); },
+    enter:function(){ wake=ORDER.map(function(id){return id==='arm1'?0.7:0;}); },
     down:excite, move:excite,
     update:function(dt){
       fingers().forEach(excite);
       for(var i=0;i<ORDER.length;i++){
         wake[i]*=Math.exp(-dt/9);
-        var floor=ORDER[i]==='piano'?0.45:0, wv=Math.max(floor,wake[i]);
+        var floor=ORDER[i]==='arm1'?0.45:0, wv=Math.max(floor,wake[i]);
         setWant(BY[ORDER[i]],MX[ORDER[i]]*Math.max(0,Math.min(1,(wv-0.12)/0.6)),false);
       }
     },
@@ -396,295 +371,169 @@ MODES.risonanza=(function(){
   };
 })();
 
-/* 3. stanza: quattro stanze e una sala al centro; da una stanza le altre si sentono attraverso il muro */
-function makeStanza(doors){
-  var ROOM={piano:0, arm1:1,mel1:1,mel2:1, short1:2,basso:2, arm2:3,short2:3,short3:3,short4:3};   // 0 giù-sx, 1 giù-dx, 2 su-sx, 3 su-dx
-  var POSN={piano:[.26,.76], arm1:[.68,.66],mel1:[.85,.8],mel2:[.64,.88], short1:[.3,.22],basso:[.16,.36], arm2:[.72,.16],short2:[.86,.3],short3:[.66,.36],short4:[.86,.12]};
-  var ADJ=[[1,2],[0,3],[0,3],[1,2]], HALL=0.19;
-  var me={x:.26,y:.94}, tgt={x:.26,y:.94}, c=0, open=[1,1,1,1], hall=true, stay=0, WAIT=12;
-  function ss(a,b,x){ x=Math.max(0,Math.min(1,(x-a)/(b-a))); return x*x*(3-2*x); }
-  function to(p){
-    var x=Math.max(0.04,Math.min(0.96,p.x/W)), y=Math.max(0.02,Math.min(0.98,(p.y-TOP)/(BOT-TOP)));
-    if(doors){
-      var rc=y>0.5?(x<0.5?0:1):(x<0.5?2:3), inHall=Math.hypot((x-.5)*W,(y-.5)*(BOT-TOP))/W<HALL*1.1;
-      if(!open[rc]||(inHall&&!hall)) return;      // porta ancora chiusa
-    }
-    tgt.x=x; tgt.y=y;
-  }
-  return {
-    hint:doors?'Le porte sono chiuse. Resta ad ascoltare: la prossima si apre da sola.':'Quattro stanze e una sala al centro. Sposta il punto: le altre stanze si sentono dal muro.', dots:false,
-    enter:function(){ me={x:.26,y:.94}; tgt={x:.26,y:.94}; c=0; stay=0; open=doors?[1,0,0,0]:[1,1,1,1]; hall=!doors; },
-    down:to, move:to,
-    update:function(dt){
-      var k=1-Math.exp(-dt/0.2); me.x+=(tgt.x-me.x)*k; me.y+=(tgt.y-me.y)*k;
-      var hh=BOT-TOP, wx=ss(0.44,0.56,me.x), wy=ss(0.45,0.55,me.y);
-      var m=[(1-wx)*wy, wx*wy, (1-wx)*(1-wy), wx*(1-wy)];
-      c=hall?1-ss(HALL*0.55,HALL*1.05,Math.hypot((me.x-.5)*W,(me.y-.5)*hh)/W):0;
-      if(doors&&!hall){ stay+=dt; if(stay>=WAIT){ stay=0; var nx=[1,2,3].filter(function(r){return !open[r];})[0]; if(nx) open[nx]=1; else hall=true; } }
-      S.forEach(function(s){
-        var r=ROOM[s.id], p=POSN[s.id], direct=Math.max(m[r],c), a=m[ADJ[r][0]]+m[ADJ[r][1]];
-        var near=0.6+0.4*(1-ss(0.08,0.4,Math.hypot(p[0]-me.x,p[1]-me.y)));
-        var pres=direct*(near+(1-near)*c)+(1-direct)*0.3*a, mx=MX[s.id];
-        if(!open[r]) pres=0;
-        setWant(s,(mx+(1-mx)*c)*pres,false);
-        setRoom(s,1-direct);
-        setPan(s,Math.max(-1,Math.min(1,(p[0]-me.x)*2.4*(1-0.6*c))));
-      });
-    },
-    draw:function(t){
-      var hh=BOT-TOP, cx=W/2, cy=TOP+hh/2, R=HALL*W, mx=me.x*W, my=TOP+me.y*hh;
-      g.strokeStyle='rgba(255,255,255,.2)'; g.lineWidth=1; g.lineCap='round';
-      g.beginPath();
-      g.moveTo(cx,TOP+4); g.lineTo(cx,cy-R); g.moveTo(cx,cy+R); g.lineTo(cx,BOT-4);
-      g.moveTo(14,cy); g.lineTo(cx-R,cy); g.moveTo(cx+R,cy); g.lineTo(W-14,cy);
-      g.stroke();
-      g.strokeStyle='rgba('+INK+','+(hall?0.2+0.6*c:0.08)+')'; g.lineWidth=1+c; g.beginPath(); g.arc(cx,cy,R,0,TAU); g.stroke();
-      if(doors&&!hall){ g.strokeStyle='rgba(255,255,255,.7)'; g.lineWidth=1.5; g.beginPath(); g.arc(mx,my,21,-TAU/4,-TAU/4+TAU*stay/WAIT); g.stroke(); }
-      S.forEach(function(s){
-        var p=POSN[s.id], x=p[0]*W, y=TOP+p[1]*hh, clear=1-s.mu, r=5+15*lvl(s)*s.gv+6*s.gv;
-        if(!open[ROOM[s.id]]){ g.fillStyle='rgba(255,255,255,.07)'; g.beginPath(); g.arc(x,y,3,0,TAU); g.fill(); return; }
-        if(s.mu>0.5){ g.strokeStyle='rgba('+INK+','+(0.12+0.5*s.gv)+')'; g.lineWidth=1; g.beginPath(); g.arc(x,y,r+3,0,TAU); g.stroke(); }
-        g.fillStyle='rgba('+INK+','+(0.08+0.85*s.gv*clear)+')'; g.beginPath(); g.arc(x,y,r,0,TAU); g.fill();
-      });
-      g.fillStyle='#fff'; g.beginPath(); g.arc(mx,my,7,0,TAU); g.fill();
-      g.strokeStyle='rgba(255,255,255,.45)'; g.lineWidth=1.25; g.beginPath(); g.arc(mx,my,14,0,TAU); g.stroke();
-    }
-  };
-}
-MODES.porte=makeStanza(true);
-
-/* 3. stanza: la pianta di un'orchestra vista dall'alto; cammini tra le file, sul podio senti tutti */
+/* 2. stanza: dieci cerchi su un palco buio; cammini e senti chi hai vicino, al centro tutti */
 MODES.stanza=(function(){
-  // angolo in gradi (180 = sinistra, 90 = davanti, 0 = destra) e fila (1 vicino al podio, 3 in fondo)
-  var SEAT={mel1:[152,1],mel2:[112,1],arm1:[68,1],arm2:[28,1], short1:[124,2],short2:[160,2],short3:[58,2],short4:[20,2], piano:[128,3],basso:[34,3]};
-  var ROWS=[0,0.44,0.72,1.0], me={x:0,y:0}, tgt={x:0,y:0}, c=0, R=100, KY=1, px=0, py=0, init=false;
-  function ss(a,b,x){ x=Math.max(0,Math.min(1,(x-a)/(b-a))); return x*x*(3-2*x); }
-  function geo(){ var hh=BOT-TOP; R=Math.min(W*0.46,hh*0.84); KY=Math.max(1,Math.min(1.75,hh*0.8/R)); px=W/2; py=BOT-14; }
-  function seat(id){ var a=SEAT[id][0]*Math.PI/180, r=ROWS[SEAT[id][1]]*R; return {x:px+Math.cos(a)*r,y:py-Math.sin(a)*r*KY}; }
-  function clampT(){ tgt.x=Math.max(12,Math.min(W-12,tgt.x)); tgt.y=Math.max(TOP+6,Math.min(BOT-6,tgt.y)); }
-  function to(q){ tgt.x=q.x; tgt.y=q.y; clampT(); }
+  var POSN={arm1:[.5,.86],piano:[.24,.70],mel1:[.76,.70],mel2:[.14,.48],short1:[.86,.48],basso:[.26,.27],arm2:[.74,.27],short2:[.5,.13],short3:[.18,.09],short4:[.82,.09]};
+  var RAD={arm1:56,piano:44,mel1:40,mel2:40,short1:34,basso:50,arm2:48,short2:36,short3:40,short4:32};
+  var me={x:.5,y:.93}, tgt={x:.5,y:.93}, c=0;
+  function clampT(){ tgt.x=Math.max(0.03,Math.min(0.97,tgt.x)); tgt.y=Math.max(0.02,Math.min(0.98,tgt.y)); }
+  function to(q){ tgt.x=q.x/W; tgt.y=(q.y-TOP)/(BOT-TOP); clampT(); }
   return {
-    hint:'Un’orchestra vista dall’alto. Cammina tra le file: sul podio, in basso, li senti tutti.', dots:false, walk:true,
-    enter:function(){ init=false; c=0; },
+    hint:'Cammina sul palco. Senti chi hai vicino; nel cerchio al centro ci sono tutti.', dots:false, walk:true,
+    enter:function(){ me={x:.5,y:.93}; tgt={x:.5,y:.93}; c=0; },
     down:to, move:to,
-    step:function(dir){ tgt.x+=Math.sin(dir)*R*0.085; tgt.y-=Math.cos(dir)*R*0.085; clampT(); },
+    step:function(dir,frac){ var hh=BOT-TOP, f=frac||0.055; tgt.x+=Math.sin(dir)*f*hh/W; tgt.y-=Math.cos(dir)*f; clampT(); },
     update:function(dt){
-      geo();
-      if(!init){ var a0=SEAT.piano[0]*Math.PI/180; me={x:px+Math.cos(a0)*R*1.2,y:py-Math.sin(a0)*R*1.2*KY}; tgt={x:me.x,y:me.y}; clampT(); me.x=tgt.x; me.y=tgt.y; init=true; }
       var k=1-Math.exp(-dt/0.22); me.x+=(tgt.x-me.x)*k; me.y+=(tgt.y-me.y)*k;
-      c=1-ss(0.1,0.3,Math.hypot(me.x-px,me.y-py)/R);
+      c=1-ss(0.07,0.2,Math.hypot(me.x-.5,me.y-.5));
       S.forEach(function(s){
-        var p=seat(s.id), d=Math.hypot(p.x-me.x,p.y-me.y)/R;
-        var near=1-ss(0.2,0.72,d), far=0.07*(1-ss(0.7,1.5,d)), pres=Math.max(near,far,c), mx=MX[s.id];
+        var p=POSN[s.id], d=Math.hypot(p[0]-me.x,p[1]-me.y);
+        var pres=Math.max(1-ss(0.12,0.42,d),0.06*(1-ss(0.4,0.9,d)),c), mx=MX[s.id];
+        if(s.id==='arm1') pres=Math.max(pres,0.4);      // gli archi lunghi restano sempre, come un fondo
         setWant(s,(mx+(1-mx)*c)*pres,false);
-        setRoom(s,ss(0.2,0.95,d)*(1-c));
-        setPan(s,Math.max(-1,Math.min(1,(p.x-me.x)/(R*0.7)))*(1-0.5*c));
+        setRoom(s,ss(0.12,0.6,d)*(1-c));
+        setPan(s,Math.max(-1,Math.min(1,(p[0]-me.x)*2.4))*(1-0.5*c));
       });
     },
     draw:function(t){
-      geo(); g.lineCap='round';
-      for(var r=1;r<=3;r++){
-        var rr=ROWS[r]*R;
-        g.strokeStyle='rgba(255,255,255,.13)'; g.lineWidth=1; g.beginPath(); g.ellipse(px,py,rr,rr*KY,0,Math.PI,TAU); g.stroke();
-        var n=r*7+2; g.fillStyle='rgba(255,255,255,.2)';
-        for(var i=0;i<n;i++){ var a=Math.PI*(0.06+0.88*i/(n-1)); g.beginPath(); g.arc(px+Math.cos(a)*rr,py-Math.sin(a)*rr*KY,1.6,0,TAU); g.fill(); }
-      }
-      g.strokeStyle='rgba('+INK+','+(0.3+0.6*c)+')'; g.lineWidth=1.25+c; g.beginPath(); g.arc(px,py,R*0.11,Math.PI,TAU); g.stroke();
+      var hh=BOT-TOP, k=Math.min(1.15,W/390);
       S.forEach(function(s){
-        var p=seat(s.id), rad=4+15*lvl(s)*s.gv+6*s.gv;
-        g.fillStyle='rgba('+INK+','+(0.1+0.85*s.gv)+')'; g.beginPath(); g.arc(p.x,p.y,rad,0,TAU); g.fill();
+        var p=POSN[s.id], x=p[0]*W, y=TOP+p[1]*hh, r=RAD[s.id]*k*(1+0.22*lvl(s)*s.gv);
+        g.fillStyle='rgba('+INK+','+(0.07+0.5*s.gv)+')'; g.beginPath(); g.arc(x,y,r,0,TAU); g.fill();
       });
-      if(!init) return;
-      g.fillStyle='#fff'; g.beginPath(); g.arc(me.x,me.y,7,0,TAU); g.fill();
-      g.strokeStyle='rgba(255,255,255,.45)'; g.lineWidth=1.25; g.beginPath(); g.arc(me.x,me.y,14,0,TAU); g.stroke();
+      g.strokeStyle='rgba('+INK+','+(0.28+0.6*c)+')'; g.lineWidth=1+c; g.beginPath(); g.arc(W/2,TOP+hh/2,W*0.13,0,TAU); g.stroke();
+      var mx=me.x*W, my=TOP+me.y*hh;
+      g.fillStyle='#fff'; g.beginPath(); g.arc(mx,my,7,0,TAU); g.fill();
+      g.strokeStyle='rgba(255,255,255,.5)'; g.lineWidth=1.25; g.beginPath(); g.arc(mx,my,14,0,TAU); g.stroke();
     }
   };
 })();
 
-
-/* 4. dirigere: conta l'energia del gesto, se ti fermi l'orchestra ti aspetta */
-MODES.dirigere=(function(){
-  var e=0, trail=[];
-  return {
-    hint:'Muovi il dito. Gesti ampi chiamano l’orchestra; se ti fermi, ti aspetta.', dots:true,
-    enter:function(){ e=0; trail=[]; },
-    down:function(q){ trail.push({x:q.x,y:q.y,t:performance.now(),brk:true}); },
-    move:function(q){
-      var d=Math.hypot(q.x-q.px,q.y-q.py); e=Math.min(1,e+d/(Math.hypot(W,H)*5));
-      trail.push({x:q.x,y:q.y,t:performance.now(),brk:false}); if(trail.length>400) trail.shift();
-    },
-    update:function(dt){ e*=Math.exp(-dt/5.5); applyLadder(Math.min(9,Math.floor(e*10.4))); },
-    draw:function(){
-      var now=performance.now(), life=2600; g.lineCap='round'; g.lineJoin='round';
-      while(trail.length&&now-trail[0].t>life) trail.shift();
-      for(var i=1;i<trail.length;i++){
-        var a=trail[i-1], b=trail[i]; if(b.brk) continue;
-        var f=1-(now-b.t)/life; g.strokeStyle='rgba('+INK+','+(0.9*f*f)+')'; g.lineWidth=1.5+5*f*(0.4+e);
-        g.beginPath(); g.moveTo(a.x,a.y); g.lineTo(b.x,b.y); g.stroke();
-      }
-    }
-  };
-})();
-
-/* 5. tre centri: corpo, cuore e mente si addormentano da soli; tenerli svegli insieme apre tutto */
-MODES.centri=(function(){
-  var C=[
-    {name:'mente',x:.5,y:.2,w:0,layers:[['piano',.08],['arm1',.5]]},
-    {name:'cuore',x:.24,y:.68,w:0,layers:[['mel1',.15],['mel2',.5],['arm2',.82]]},
-    {name:'corpo',x:.76,y:.68,w:0,layers:[['short1',.1],['basso',.35],['short2',.55],['short3',.72],['short4',.88]]}
-  ], pres=0;
-  function cx(c){return c.x*W;} function cy(c){return TOP+c.y*(BOT-TOP);}
-  return {
-    hint:'Corpo, cuore, mente. Si addormentano da soli: tienili svegli insieme.', dots:false,
-    enter:function(){ C.forEach(function(c){c.w=0;}); pres=0; },
-    update:function(dt){
-      var f=fingers(), all=Math.min(C[0].w,C[1].w,C[2].w);
-      pres+=((all>0.72?1:0)-pres)*(1-Math.exp(-dt/1.2));
-      C.forEach(function(c){
-        var held=f.some(function(q){return Math.hypot(q.x-cx(c),q.y-cy(c))<64;});
-        c.held=held;
-        c.w=Math.max(0,Math.min(1,c.w+(held?dt/7:-dt/(18+50*pres))));
-        c.layers.forEach(function(l){ setWant(BY[l[0]],c.w>l[1]?(MX[l[0]]+(1-MX[l[0]])*pres):0,true); });
-      });
-    },
-    draw:function(t){
-      var all=Math.min(C[0].w,C[1].w,C[2].w);
-      g.lineWidth=1; g.strokeStyle='rgba('+INK+','+(0.08+0.5*all)+')';
-      g.beginPath(); g.moveTo(cx(C[0]),cy(C[0])); g.lineTo(cx(C[1]),cy(C[1])); g.lineTo(cx(C[2]),cy(C[2])); g.closePath(); g.stroke();
-      if(pres>0.02){
-        var mx=(cx(C[0])+cx(C[1])+cx(C[2]))/3, my=(cy(C[0])+cy(C[1])+cy(C[2]))/3, R=Math.hypot(cx(C[0])-mx,cy(C[0])-my)+52;
-        g.strokeStyle='rgba('+INK+','+0.7*pres+')'; g.lineWidth=1.5; g.beginPath(); g.arc(mx,my,R,0,TAU); g.stroke();
-      }
-      g.font='500 15px '+FONT; g.textAlign='center'; g.textBaseline='middle';
-      C.forEach(function(c){
-        var x=cx(c), y=cy(c), e=0; c.layers.forEach(function(l){ e=Math.max(e,lvl(BY[l[0]])*BY[l[0]].gv); });
-        var r=30+6*c.w+10*e;
-        g.fillStyle='rgba('+INK+','+(0.06+0.86*c.w)+')'; g.beginPath(); g.arc(x,y,r,0,TAU); g.fill();
-        g.strokeStyle='rgba('+INK+','+(c.held?0.9:0.3)+')'; g.lineWidth=1.25; g.beginPath(); g.arc(x,y,r+7,0,TAU); g.stroke();
-        g.fillStyle='rgba(245,245,247,'+(0.5+0.4*c.w)+')'; g.fillText(c.name,x,y+r+26);
-      });
-    }
-  };
-})();
-
-/* 6. ricordarsi di sé: un dito resta su di te, l'altro esplora */
+/* 3. ricordarsi di sé: un dito fermo sei tu; con l'altro ti allontani, e il brano si apre quanto ti allarghi */
 MODES.se=(function(){
-  var v=0, anch=false;
-  function A(){ return {x:W/2,y:BOT-48}; }
+  var v=0, anc=null, oth=null;
+  function reach(){ return 0.72*Math.min(W,BOT-TOP); }
   return {
-    hint:'Un dito resta fermo su di te, l’altro esplora. Se ti dimentichi di te, tutto si riaddormenta.', dots:true,
-    enter:function(){ v=0; anch=false; },
-    down:function(q){ var a=A(); q.anchor=Math.hypot(q.x-a.x,q.y-a.y)<56; q.sx=q.x; q.sy=q.y; },
+    hint:'Appoggia un dito e tienilo fermo: sei tu. Con un altro allontanati: più ti allarghi senza perderti, più il brano si apre.', dots:true,
+    enter:function(){ v=0; anc=null; oth=null; },
+    down:function(q){ q.sx=q.x; q.sy=q.y; q.anchor=!fingers().some(function(f){return f!==q&&f.anchor&&!f.lost;}); },
     update:function(dt){
-      var other=false; anch=false;
-      fingers().forEach(function(q){ if(q.anchor&&Math.hypot(q.x-q.sx,q.y-q.sy)<42) anch=true; else if(!q.anchor) other=true; });
-      v=Math.max(0,Math.min(9.6,v+(anch&&other?dt/4:anch?-dt/40:-dt/1.4)));
+      anc=null; oth=null;
+      fingers().forEach(function(q){
+        if(q.anchor){ if(Math.hypot(q.x-q.sx,q.y-q.sy)>46) q.lost=true; if(!q.lost) anc=q; }
+        else if(!oth) oth=q;
+      });
+      if(anc&&oth){ var tv=Math.min(9.6,Math.hypot(oth.x-anc.x,oth.y-anc.y)/reach()*9.6); v+=(tv-v)*(1-Math.exp(-dt/0.7)); }
+      else if(anc) v=Math.max(0,v-dt/20);
+      else v+=(0-v)*(1-Math.exp(-dt/0.5));
       applyLadder(Math.floor(v+0.001));
     },
     draw:function(t){
-      var a=A(); g.lineCap='round';
-      fingers().forEach(function(q){ if(q.anchor) return;
-        g.strokeStyle='rgba('+INK+','+(anch?0.35:0.12)+')'; g.lineWidth=1; g.beginPath(); g.moveTo(a.x,a.y); g.lineTo(q.x,q.y); g.stroke();
-        g.strokeStyle='rgba('+INK+','+(anch?0.9:0.3)+')'; g.lineWidth=1.5; g.beginPath(); g.arc(q.x,q.y,24,0,TAU); g.stroke();
-      });
-      g.fillStyle='rgba('+INK+','+(anch?0.95:0.1)+')'; g.beginPath(); g.arc(a.x,a.y,26,0,TAU); g.fill();
-      g.strokeStyle='rgba('+INK+',.5)'; g.lineWidth=1.25; g.beginPath(); g.arc(a.x,a.y,33+(anch?0:3*Math.sin(t*2)),0,TAU); g.stroke();
-      g.font='600 15px '+FONT; g.textAlign='center'; g.textBaseline='middle'; g.fillStyle=anch?'#000':'rgba(245,245,247,.7)'; g.fillText('tu',a.x,a.y);
+      g.lineCap='round'; g.font='600 15px '+FONT; g.textAlign='center'; g.textBaseline='middle';
+      if(!anc){
+        var hx=W/2, hy=BOT-70, pr=30+3*Math.sin(t*2);
+        g.strokeStyle='rgba('+INK+',.5)'; g.lineWidth=1.25; g.beginPath(); g.arc(hx,hy,pr,0,TAU); g.stroke();
+        g.fillStyle='rgba(245,245,247,.7)'; g.fillText('tu',hx,hy); return;
+      }
+      var R=reach(), lv=Math.floor(v+0.001);
+      for(var i=1;i<=9;i++){ g.strokeStyle='rgba('+INK+','+(i<=lv?0.34:0.08)+')'; g.lineWidth=1; g.beginPath(); g.arc(anc.sx,anc.sy,R*i/9.6,0,TAU); g.stroke(); }
+      if(oth){
+        g.strokeStyle='rgba('+INK+',.5)'; g.lineWidth=1; g.beginPath(); g.moveTo(anc.sx,anc.sy); g.lineTo(oth.x,oth.y); g.stroke();
+        g.strokeStyle='rgba('+INK+',.95)'; g.lineWidth=1.5; g.beginPath(); g.arc(oth.x,oth.y,24,0,TAU); g.stroke();
+      }
+      g.fillStyle='rgba('+INK+',.96)'; g.beginPath(); g.arc(anc.sx,anc.sy,28,0,TAU); g.fill();
+      g.fillStyle='#000'; g.fillText('tu',anc.sx,anc.sy);
     }
   };
 })();
 
-/* 7. stop: quando arriva il segnale, resta immobile per una battuta */
-MODES.stop=(function(){
-  var v=0, nextBar=0, cue=null, flash=0;
+/* 4. tre centri: la musica sta nei legami tra le parti, e i legami vanno tenuti vivi */
+MODES.centri=(function(){
+  var C=[{name:'mente',x:.5,y:.17},{name:'cuore',x:.2,y:.74},{name:'corpo',x:.8,y:.74}];
+  var LINKS=[{a:0,b:1,s:0,layers:['piano','mel1','mel2']},{a:1,b:2,s:0,layers:['short1','basso','arm2']},{a:2,b:0,s:0,layers:['short2','short3','short4']}];
+  var TH=[0.08,0.4,0.72], pres=0;
+  function cx(c){return c.x*W;} function cy(c){return TOP+c.y*(BOT-TOP);}
+  function hit(q){ for(var i=0;i<3;i++){ if(Math.hypot(q.x-cx(C[i]),q.y-cy(C[i]))<50) return i; } return -1; }
+  function touch(q){
+    var h=hit(q); if(h<0) return;
+    if(q.last>=0&&q.last!==h){ LINKS.forEach(function(l){ if((l.a===q.last&&l.b===h)||(l.b===q.last&&l.a===h)) l.s=1; }); }
+    q.last=h;
+  }
   return {
-    hint:'Tieni il dito sullo schermo e muovilo. Quando suona la campanella e compare «stop», fermalo finché il cerchio si chiude.', dots:true,
-    enter:function(){ v=1; cue=null; flash=0; nextBar=0; },
-    move:function(q){ if(cue) cue.moved+=Math.hypot(q.x-q.px,q.y-q.py); },
-    up:function(){ if(cue) cue.lift=true; },
+    hint:'Tre parti. La musica sta nei legami: trascina da una all’altra per unirle. I legami si sciolgono: tienili vivi.', dots:false,
+    enter:function(){ LINKS.forEach(function(l){l.s=0;}); pres=0; },
+    down:function(q){ q.last=-1; touch(q); }, move:touch,
     update:function(dt){
-      var b=barNow();
-      if(!nextBar) nextBar=b+3;
-      if(!cue&&b>=nextBar){ cue={bar:b,moved:0,lift:false}; ping(); }
-      if(cue){
-        cue.t=(b-cue.bar)+barFrac();
-        if(cue.t*BEAT*4<0.8){ cue.moved=0; cue.lift=false; }      // il tempo di fermarsi
-        if(cue.t>=1){ var ok=fingers().length>0&&!cue.lift&&cue.moved<16; v=Math.max(0,Math.min(9,v+(ok?1:-1))); flash=ok?1:-1; cue=null; nextBar=b+2+Math.floor(Math.random()*3); }
-      }
-      flash*=Math.exp(-dt/0.9);
-      applyLadder(Math.floor(v));
+      var all=Math.min(LINKS[0].s,LINKS[1].s,LINKS[2].s);
+      pres+=((all>0.3?1:0)-pres)*(1-Math.exp(-dt/1.5));
+      setWant(BY.arm1,MX.arm1+(1-MX.arm1)*pres,true);
+      LINKS.forEach(function(l){
+        l.s=Math.max(0,l.s-dt/(14+8*pres));
+        l.layers.forEach(function(id,k){ setWant(BY[id],l.s>TH[k]?MX[id]+(1-MX[id])*pres:0,true); });
+      });
     },
     draw:function(t){
-      var cx=W/2, cy=(TOP+BOT)/2, R=Math.min(W*0.3,(BOT-TOP)*0.26);
-      g.strokeStyle='rgba('+INK+','+(0.14+0.6*Math.max(0,flash))+')'; g.lineWidth=1+2*Math.max(0,flash); g.beginPath(); g.arc(cx,cy,R,0,TAU); g.stroke();
-      if(cue){
-        g.strokeStyle='rgba('+INK+',.95)'; g.lineWidth=3; g.lineCap='round'; g.beginPath(); g.arc(cx,cy,R,-TAU/4,-TAU/4+TAU*Math.min(1,cue.t)); g.stroke();
-        g.font='700 40px '+FONT; g.textAlign='center'; g.textBaseline='middle'; g.fillStyle='#fff'; g.fillText('stop',cx,cy);
+      g.lineCap='round';
+      LINKS.forEach(function(l){
+        var a=C[l.a], b=C[l.b];
+        g.strokeStyle='rgba('+INK+','+(0.1+0.85*l.s)+')'; g.lineWidth=1+3.5*l.s;
+        g.beginPath(); g.moveTo(cx(a),cy(a)); g.lineTo(cx(b),cy(b)); g.stroke();
+      });
+      fingers().forEach(function(q){ if(q.last>=0){ g.strokeStyle='rgba('+INK+',.5)'; g.lineWidth=1.25; g.beginPath(); g.moveTo(cx(C[q.last]),cy(C[q.last])); g.lineTo(q.x,q.y); g.stroke(); } });
+      if(pres>0.02){
+        var mx=(cx(C[0])+cx(C[1])+cx(C[2]))/3, my=(cy(C[0])+cy(C[1])+cy(C[2]))/3, R=Math.hypot(cx(C[0])-mx,cy(C[0])-my)+54;
+        g.strokeStyle='rgba('+INK+','+0.7*pres+')'; g.lineWidth=1.5; g.beginPath(); g.arc(mx,my,R,0,TAU); g.stroke();
       }
-      fingers().forEach(function(q){ g.strokeStyle='rgba('+INK+',.6)'; g.lineWidth=1.5; g.beginPath(); g.arc(q.x,q.y,22,0,TAU); g.stroke(); });
+      g.font='500 15px '+FONT; g.textAlign='center'; g.textBaseline='middle';
+      C.forEach(function(c,i){
+        var x=cx(c), y=cy(c), s=0; LINKS.forEach(function(l){ if(l.a===i||l.b===i) s=Math.max(s,l.s); });
+        g.fillStyle='#000'; g.beginPath(); g.arc(x,y,31,0,TAU); g.fill();
+        g.fillStyle='rgba('+INK+','+(0.08+0.86*s)+')'; g.beginPath(); g.arc(x,y,31,0,TAU); g.fill();
+        g.strokeStyle='rgba('+INK+',.45)'; g.lineWidth=1.25; g.beginPath(); g.arc(x,y,38,0,TAU); g.stroke();
+        g.fillStyle='rgba(245,245,247,'+(0.55+0.4*s)+')'; g.fillText(c.name,x,y+(c.y<0.5?-58:58));
+      });
     }
   };
 })();
 
-/* 9. quattro parti: la carrozza va da sola, il cavallo è quanto, il cocchiere è dove, il padrone sei tu */
-MODES.parti=(function(){
-  var A=['piano','arm1','mel1','mel2','arm2','short1','basso','short2','short3','short4'];   // sospeso
-  var B=['piano','short1','basso','short2','arm1','short3','mel1','short4','mel2','arm2'];   // mosso
-  var v=0, col=.5, cap=3, top={x:0,y:0}, here=false, tt=0;
-  function ss(a,b,x){ x=Math.max(0,Math.min(1,(x-a)/(b-a))); return x*x*(3-2*x); }
-  return {
-    hint:'Senza di te il brano va da solo, a caso. Appoggia il dito e guidalo: in alto cresce, di lato cambia colore. Più resti, più si apre.', dots:true,
-    enter:function(){ v=0; col=.5; cap=3; here=false; tt=0; top={x:W/2,y:(TOP+BOT)/2}; },
-    update:function(dt){
-      tt+=dt; var f=fingers()[0], tv, tc, tx, ty;
-      here=!!f;
-      if(f){ cap=Math.min(9.6,cap+dt*6.6/40); tx=f.x; ty=f.y; tv=Math.max(0,Math.min(1,1-(f.y-TOP)/(BOT-TOP-70)))*cap; tc=f.x/W; }
-      else { cap=Math.max(3,cap-dt*0.3); tv=1.5+1.5*Math.sin(tt*0.13)+0.8*Math.sin(tt*0.31); tc=.5+.42*Math.sin(tt*0.07);
-             tx=W*tc; ty=BOT-70-(BOT-TOP-70)*Math.max(0,tv)/9.6; }
-      var k=1-Math.exp(-dt/(f?1.2:3)); v+=(tv-v)*k; col+=(tc-col)*k;
-      var kp=1-Math.exp(-dt/(f?0.08:1.2)); top.x+=(tx-top.x)*kp; top.y+=(ty-top.y)*kp;
-      var lv=Math.max(0,Math.floor(v+0.001)), w=ss(0.35,0.65,col);
-      S.forEach(function(s){
-        var on=(1-w)*(A.indexOf(s.id)<=lv?1:0)+w*(B.indexOf(s.id)<=lv?1:0);
-        setWant(s,(lv>=9?1:MX[s.id])*on,true);
-      });
-      for(var i=0;i<10;i++) dots[i].classList.toggle('on',i<=lv);
-    },
-    draw:function(t){
-      var y0=BOT-34, x0=24+(W-48)*(started?pos()/L:0), a=here?0.95:0.32; g.lineCap='round';
-      g.strokeStyle='rgba(255,255,255,.14)'; g.lineWidth=1; g.beginPath(); g.moveTo(24,y0); g.lineTo(W-24,y0); g.stroke();
-      var sag=here?0:26*Math.sin(t*0.9), mx=(x0+top.x)/2+sag, my=(y0+top.y)/2;
-      g.strokeStyle='rgba('+INK+','+a+')'; g.lineWidth=here?1.5:1; g.beginPath(); g.moveTo(x0,y0); g.quadraticCurveTo(mx,my,top.x,top.y); g.stroke();
-      function at(u){ var q=1-u; return {x:q*q*x0+2*q*u*mx+u*u*top.x, y:q*q*y0+2*q*u*my+u*u*top.y}; }
-      var horse=at(0.36), coach=at(0.7), nodes=[
-        ['carrozza',{x:x0,y:y0},7,0.9],
-        ['cavallo',horse,7+2.4*Math.max(0,v),0.25+0.65*Math.min(1,v/6)],
-        ['cocchiere',coach,10,a],
-        ['padrone',top,here?13:9,here?1:0.18]];
-      g.font='500 13px '+FONT; g.textBaseline='middle';
-      nodes.forEach(function(n){
-        var p=n[1]; g.fillStyle='rgba('+INK+','+n[3]+')'; g.beginPath(); g.arc(p.x,p.y,n[2],0,TAU); g.fill();
-        var right=p.x<W*0.62; g.textAlign=right?'left':'right'; g.fillStyle='rgba(152,152,159,'+(here?1:0.7)+')'; g.fillText(n[0],p.x+(right?1:-1)*(n[2]+10),p.y);
-      });
-      var dx=(col-0.5)*36; g.strokeStyle='rgba(0,0,0,.75)'; g.lineWidth=2; g.beginPath(); g.moveTo(coach.x-dx*0.2,coach.y); g.lineTo(coach.x+dx*0.2,coach.y); g.stroke();
-    }
-  };
-})();
-
-var walkBtn=document.getElementById('walk'), walking=false, h0=null, head=0, lastStep=0, grav=9.8, gotMotion=false, wake=null;
+var walkBtn=document.getElementById('walk'), calBtn=document.getElementById('cal'), walking=false, h0=null, head=0, lastStep=0, grav=9.8, gotMotion=false, wake=null;
+var CAL=null, calib=null, calData=null; try{ CAL=JSON.parse(localStorage.getItem('racconti-passo')||'null'); }catch(e){}
 function onMotion(e){
   var a=e.accelerationIncludingGravity; if(!a||a.x==null) return; gotMotion=true;
   var m=Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z); grav+=(m-grav)*0.05;
-  var now=performance.now();
-  if(m-grav>1.3&&now-lastStep>320){ lastStep=now; if(M.step) M.step(h0===null?0:head-h0); }
+  var now=performance.now(), hp=m-grav, thr=CAL&&CAL.thr||1.3;
+  if(calib) calib.samples.push([Math.round(now-calib.t0),Math.round(hp*100)/100]);
+  if(hp>thr&&now-lastStep>320){
+    lastStep=now;
+    if(calib){ calib.n++; calBtn.textContent='arrivo · '+calib.n+' passi'; }
+    if(M.step) M.step(CAL&&typeof CAL.head==='number'?head-CAL.head:(h0===null?0:head-h0), CAL&&CAL.steps?0.9/CAL.steps:0);
+  }
 }
+/* taratura: partenza, cammini fino in fondo alla stanza, arrivo. Da lì il passo e la direzione sono i tuoi */
+function median(a){ var s=a.slice().sort(function(x,y){return x-y;}); return s.length?s[Math.floor(s.length/2)]:0; }
+function countSteps(sm,th){ var n=0,last=-1e9; sm.forEach(function(p){ if(p[1]>th&&p[0]-last>320){ n++; last=p[0]; } }); return n; }
+calBtn.addEventListener('click',function(){
+  if(calData){ var txt=JSON.stringify(calData); calData=null; calBtn.textContent='tara di nuovo';
+    if(navigator.clipboard) navigator.clipboard.writeText(txt).then(function(){ calBtn.textContent='dati copiati · tara di nuovo'; }).catch(function(){});
+    return; }
+  if(!calib){ calib={n:0,samples:[],heads:[],t0:performance.now()}; calBtn.classList.add('on'); calBtn.textContent='arrivo · 0 passi'; return; }
+  var c=calib; calib=null; calBtn.classList.remove('on');
+  var peaks=[], run=0; c.samples.forEach(function(p){ if(p[1]>0.4) run=Math.max(run,p[1]); else if(p[1]<0.2&&run){ peaks.push(run); run=0; } });
+  var thr=Math.max(0.7,Math.min(2.5,0.5*median(peaks))), n=countSteps(c.samples,thr);
+  if(n<3){ calBtn.textContent='troppo pochi passi, riprova'; return; }
+  var sx=0, sy=0; c.heads.forEach(function(h){ sx+=Math.sin(h); sy+=Math.cos(h); });
+  CAL={steps:n,thr:Math.round(thr*100)/100}; if(c.heads.length) CAL.head=Math.atan2(sx,sy);
+  try{ localStorage.setItem('racconti-passo',JSON.stringify(CAL)); }catch(e){}
+  calData={passi:n,soglia:CAL.thr,direzione_gradi:typeof CAL.head==='number'?Math.round(CAL.head*180/Math.PI):null,durata_s:Math.round((performance.now()-c.t0)/100)/10,picchi:{numero:peaks.length,mediana:Math.round(median(peaks)*100)/100,min:peaks.length?Math.min.apply(null,peaks):0,max:peaks.length?Math.max.apply(null,peaks):0},campioni:c.samples.length,serie:c.samples.filter(function(_,i){return i%3===0;})};
+  calBtn.textContent=n+' passi · copia dati';
+});
 function onOrient(e){
   var h=typeof e.webkitCompassHeading==='number'?e.webkitCompassHeading:(e.alpha!=null?360-e.alpha:null);
-  if(h==null) return; head=h*Math.PI/180; if(h0===null) h0=head;
+  if(h==null) return; head=h*Math.PI/180; if(h0===null) h0=head; if(calib) calib.heads.push(head);
 }
 function stopWalk(){
   if(!walking) return; walking=false; window.removeEventListener('devicemotion',onMotion); window.removeEventListener('deviceorientation',onOrient);
-  walkBtn.classList.remove('on'); walkBtn.textContent='cammina'; if(wake){ try{wake.release();}catch(e){} wake=null; }
+  walkBtn.classList.remove('on'); walkBtn.textContent='cammina'; calBtn.hidden=true; calib=null; calBtn.classList.remove('on'); if(wake){ try{wake.release();}catch(e){} wake=null; }
 }
 walkBtn.addEventListener('click',function(){
   if(walking){ stopWalk(); return; }
@@ -695,12 +544,12 @@ walkBtn.addEventListener('click',function(){
     return (window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission==='function')?DeviceOrientationEvent.requestPermission():'granted';
   }).then(function(){
     h0=null; gotMotion=false; walking=true; window.addEventListener('devicemotion',onMotion); window.addEventListener('deviceorientation',onOrient);
-    walkBtn.classList.add('on'); walkBtn.textContent='cammina: attivo';
+    walkBtn.classList.add('on'); walkBtn.textContent='cammina: attivo'; calBtn.hidden=false; calData=null; calBtn.textContent=CAL?'tarato su '+CAL.steps+' passi · rifai':'tara';
     if(navigator.wakeLock) navigator.wakeLock.request('screen').then(function(w){wake=w;}).catch(function(){});
     setTimeout(function(){ if(walking&&!gotMotion){ stopWalk(); walkBtn.textContent='qui i sensori sono bloccati'; } },2500);
   }).catch(function(){ walkBtn.textContent='sensori non concessi'; });
 });
-var M=MODES.respiro, FONT=getComputedStyle(document.body).fontFamily;
+var M=MODES.stanza, FONT=getComputedStyle(document.body).fontFamily;
 function setMode(name){
   M=MODES[name]; M.enter();
   [].forEach.call(modesEl.children,function(b){ var on=b.getAttribute('data-m')===name; b.classList.toggle('on',on); b.setAttribute('aria-selected',on?'true':'false'); if(on&&b.scrollIntoView) b.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}); });
@@ -710,6 +559,16 @@ function setMode(name){
 }
 modesEl.addEventListener('click',function(e){ var b=e.target.closest('button'); if(b) setMode(b.getAttribute('data-m')); });
 
+var progEl=document.getElementById('prog');
+document.getElementById('again').addEventListener('click',function(){
+  if(!started) return;
+  var now=ctx.currentTime;
+  master.gain.cancelScheduledValues(now); master.gain.setTargetAtTime(0,now,0.02); master.gain.setTargetAtTime(2.0,now+0.12,0.4);
+  t0=now+0.1;
+  S.forEach(function(s){ try{s.src.stop(now+0.09);}catch(e){} var n=ctx.createBufferSource(); n.buffer=s.buf; n.loop=true; n.connect(s.g); n.start(t0); s.src=n; });
+  M.enter();
+  if(!wantPlay) pauseBtn.click();
+});
 pauseBtn.addEventListener('click',function(){
   if(!started) return;
   wantPlay=!wantPlay;
@@ -743,11 +602,12 @@ function frame(now){
       s.level+=(raw-s.level)*(raw>s.level?0.35:0.08);
     });
     M.update(dt);
+    progEl.style.transform='scaleX('+(p/L)+')';
   }
   g.setTransform(DPR,0,0,DPR,0,0); g.clearRect(0,0,W,H);
   M.draw(now/1000);
 }
-setMode('respiro');
+setMode('stanza');
 route();
 requestAnimationFrame(frame);
 })();
