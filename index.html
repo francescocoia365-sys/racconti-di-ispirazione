@@ -35,7 +35,7 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{position:fixed;inset:0;margin:0;overflow:hidden;overscroll-behavior:none;background:var(--bg);
-  -webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:pan-y;
+  -webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:pan-x pan-y;
   -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 body{color:var(--label);font-family:var(--font);font-size:17px;line-height:1.35;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
@@ -48,27 +48,27 @@ img{display:block;-webkit-user-drag:none;pointer-events:none}
 .press{transition:transform .25s var(--ease)}
 .press:active{transform:scale(.97)}
 
-/* ---------- Home: pannelli a tutto schermo che scorrono uno sopra l'altro, una parola grande per ciascuno ---------- */
-#home{overflow-y:auto;overflow-x:hidden;overscroll-behavior:none;-webkit-overflow-scrolling:touch;scroll-snap-type:y mandatory;scrollbar-width:none;-ms-overflow-style:none}
-#home::-webkit-scrollbar{display:none;width:0;height:0}
-.panel{position:sticky;top:0;height:100%;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;background:#000;overflow:hidden;color:var(--label)}
-.panel .ph{position:relative;flex:1;min-height:0;overflow:hidden}
-.panel .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.panel .band{flex:none;padding:26px 22px calc(34px + var(--sb));display:flex;flex-direction:column;gap:10px}
-.panel.r .band{align-items:flex-end;text-align:right}
+/* ---------- Home: porte scorrevoli. Si scorre di lato; la foto resta sullo sfondo, in trasparenza ---------- */
+#home{overflow:hidden}
+.doors{position:absolute;inset:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior:none;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;touch-action:pan-x}
+.doors::-webkit-scrollbar{display:none;width:0;height:0}
+.door{flex:0 0 100%;min-width:0;position:relative;scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden;background:#000;color:var(--label);border-left:1px solid rgba(255,255,255,.1)}
+.door .bg{position:absolute;top:0;bottom:0;left:-18%;width:136%;height:100%;object-fit:cover;opacity:.3;will-change:transform}
+.door.cover .bg{opacity:.85}
+.door::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,0) 30%,rgba(0,0,0,.25) 55%,#000 96%)}
+.door .in{position:absolute;z-index:1;left:24px;right:24px;bottom:calc(70px + var(--sb));display:flex;flex-direction:column;align-items:flex-start;gap:14px;will-change:transform,opacity}
+.brand{position:absolute;z-index:2;top:calc(20px + var(--st));left:24px;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#fff}
+.num{font-size:12px;font-weight:600;letter-spacing:.18em;color:var(--secondary);font-variant-numeric:tabular-nums}
 .word{font-family:"Unbounded",var(--font);font-weight:300;font-size:46px;line-height:1.02;letter-spacing:-.01em;text-transform:uppercase;margin:0;white-space:nowrap}
-.cap{font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--secondary);margin:0}
-.cap b{color:var(--label);font-weight:600}
-.cover .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.3) 0%,rgba(0,0,0,0) 30%,rgba(0,0,0,0) 62%,#000 100%)}
-.cover .band{padding-top:0;margin-top:-64px;position:relative;gap:14px}
 .cover .word{font-size:40px}
-.brand{position:absolute;z-index:2;top:calc(18px + var(--st));left:22px;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#fff}
-.down{display:flex;align-items:center;gap:10px}
-.down i{display:block;width:34px;height:1px;background:var(--secondary)}
-.count{position:absolute;z-index:2;top:calc(18px + var(--st));right:22px;font-size:12px;font-weight:600;letter-spacing:.16em;color:rgba(255,255,255,.8);font-variant-numeric:tabular-nums}
-.end .band{flex:1;justify-content:center;gap:22px}
-.end .word{font-size:26px;color:var(--secondary)}
-.upd{margin-top:8px;align-self:flex-start;height:42px;padding:0 18px;border-radius:999px;background:var(--surface);color:var(--label);font-size:14px;font-weight:600}
+.desc{margin:0;font-size:18px;line-height:1.35;font-weight:500;letter-spacing:-.01em;color:#cfcfd6;max-width:27ch}
+.act{font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--secondary)}
+.act.on{display:inline-flex;align-items:center;height:46px;padding:0 24px;border-radius:999px;background:#fff;color:#000;font-size:16px;letter-spacing:0;text-transform:none;margin-top:4px}
+.end .word{font-size:24px;color:var(--secondary)}
+.pager{position:absolute;z-index:2;left:24px;right:24px;bottom:calc(30px + var(--sb));display:flex;gap:6px;pointer-events:none}
+.pager i{flex:1;height:2px;border-radius:2px;background:rgba(255,255,255,.2);transition:background .3s}
+.pager i.on{background:#fff}
+.upd{margin-top:10px;height:42px;padding:0 18px;border-radius:999px;background:var(--surface);color:var(--label);font-size:14px;font-weight:600}
 .upd.new{background:#fff;color:#000}
 
 /* ---------- Laboratorio ---------- */
@@ -125,49 +125,44 @@ img{display:block;-webkit-user-drag:none;pointer-events:none}
 <div class="app">
 
 <section class="view on" id="home">
-  <header class="panel cover">
-    <span class="brand">Paolo Buonvino</span>
-    <div class="ph"><img src="img/p-cover.jpg" alt="Paolo Buonvino al pianoforte, solo sul palco, in un fascio di luce" style="object-position:50% 38%"></div>
-    <div class="band">
-      <h1 class="word">Racconti<br>di<br>ispirazione</h1>
-      <p class="cap down"><i></i>scorri</p>
-    </div>
-  </header>
-  <a class="panel press0 " href="#laboratorio" id="tolab">
-    <span class="count">01 / 05</span>
-    <div class="ph"><img src="img/p-lab.jpg" alt="Paolo ai sintetizzatori, in una luce blu" style="object-position:40% 30%"></div>
-    <div class="band"><h2 class="word">Laboratorio</h2><p class="cap"><b>Tocca la musica</b> · apri</p></div>
-  </a>
-  <section class="panel r">
-    <span class="count">02 / 05</span>
-    <div class="ph"><img src="img/p-musiche.jpg" alt="" style="object-position:50% 30%"></div>
-    <div class="band"><h2 class="word">Musiche</h2><p class="cap">Suoni che accendono idee · presto</p></div>
-  </section>
-  <section class="panel ">
-    <span class="count">03 / 05</span>
-    <div class="ph"><img src="img/p-respiro.jpg" alt="" style="object-position:40% 50%"></div>
-    <div class="band"><h2 class="word">Respiro</h2><p class="cap">Ritrovare l’essenziale · presto</p></div>
-  </section>
-  <section class="panel r">
-    <span class="count">04 / 05</span>
-    <div class="ph"><img src="img/p-taccuino.jpg" alt="" style="object-position:50% 40%"></div>
-    <div class="band"><h2 class="word">Taccuino</h2><p class="cap">Appunti, pensieri, intuizioni · presto</p></div>
-  </section>
-  <section class="panel ">
-    <span class="count">05 / 05</span>
-    <div class="ph"><img src="img/p-letture.jpg" alt="" style="object-position:30% 50%"></div>
-    <div class="band"><h2 class="word">Letture</h2><p class="cap">Parole che lasciano il segno · presto</p></div>
-  </section>
-  <section class="panel end">
-    <div class="band">
-      <p class="cap">E ancora, presto</p>
-      <p class="word">La musica<br>che nasce insieme</p>
-      <p class="word">Partiture</p>
-      <p class="word">Giardini</p>
-      <p class="word">Le vostre voci</p>
-      <button id="upd" class="upd press" type="button">Versione <span id="ver"></span> · Aggiorna</button>
-    </div>
-  </section>
+  <div class="doors" id="doors">
+    <header class="door cover">
+      <span class="brand">Paolo Buonvino</span>
+      <img class="bg" src="img/p-cover.jpg" alt="Paolo Buonvino al pianoforte, solo sul palco, in un fascio di luce" style="object-position:50% 38%">
+      <div class="in"><h1 class="word">Racconti<br>di<br>ispirazione</h1><p class="desc">L’ispirazione è ossigeno per l’anima.</p></div>
+    </header>
+    <a class="door" href="#laboratorio" id="tolab">
+      <img class="bg" src="img/p-lab.jpg" alt="" style="object-position:40% 30%">
+      <div class="in"><span class="num">01</span><h2 class="word">Laboratorio</h2><p class="desc">Suona un brano di Paolo, senza saper suonare.</p><span class="act on">Entra</span></div>
+    </a>
+    <section class="door">
+      <img class="bg" src="img/p-musiche.jpg" alt="" style="object-position:50% 30%">
+      <div class="in"><span class="num">02</span><h2 class="word">Musiche</h2><p class="desc">Quello che Paolo ascolta e che lo accende.</p><span class="act">Presto</span></div>
+    </section>
+    <section class="door">
+      <img class="bg" src="img/p-respiro.jpg" alt="" style="object-position:40% 50%">
+      <div class="in"><span class="num">03</span><h2 class="word">Respiro</h2><p class="desc">Musica per rallentare e ritrovare spazio.</p><span class="act">Presto</span></div>
+    </section>
+    <section class="door">
+      <img class="bg" src="img/p-taccuino.jpg" alt="" style="object-position:50% 40%">
+      <div class="in"><span class="num">04</span><h2 class="word">Taccuino</h2><p class="desc">Le sue pagine manoscritte, da sfogliare.</p><span class="act">Presto</span></div>
+    </section>
+    <section class="door">
+      <img class="bg" src="img/p-letture.jpg" alt="" style="object-position:30% 50%">
+      <div class="in"><span class="num">05</span><h2 class="word">Letture</h2><p class="desc">I libri che lo hanno segnato, con due righe sue.</p><span class="act">Presto</span></div>
+    </section>
+    <section class="door end">
+      <div class="in">
+        <span class="num">E ancora, presto</span>
+        <p class="word">La musica<br>che nasce insieme</p>
+        <p class="word">Partiture</p>
+        <p class="word">Giardini</p>
+        <p class="word">Le vostre voci</p>
+        <button id="upd" class="upd press" type="button">Versione <span id="ver"></span> · Aggiorna</button>
+      </div>
+    </section>
+  </div>
+  <div class="pager" id="pager" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
 </section>
 
 <section class="view" id="lab" aria-label="Laboratorio">
@@ -203,7 +198,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='9', updBtn=document.getElementById('upd');
+var BUILD='10', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -220,18 +215,37 @@ updBtn.addEventListener('click',function(){
 checkVersion();
 document.addEventListener('visibilitychange',function(){ if(!document.hidden) checkVersion(); });
 
+var vHome=document.getElementById('home'), vLab=document.getElementById('lab');
 /* ---- Le parole grandi stanno sempre in una riga ---- */
 function fitWords(){
   [].forEach.call(document.querySelectorAll('.word'),function(w){
-    w.style.fontSize=''; var max=w.parentNode.clientWidth-44, fs=parseFloat(getComputedStyle(w).fontSize), n=0;
+    w.style.fontSize=''; var max=w.parentNode.clientWidth, fs=parseFloat(getComputedStyle(w).fontSize), n=0;
     while(w.scrollWidth>max&&fs>14&&n<40){ fs-=1; w.style.fontSize=fs+'px'; n++; }
   });
 }
 window.addEventListener('resize',fitWords); window.addEventListener('load',fitWords);
 if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fitWords);
 
+/* ---- Porte scorrevoli: la foto scorre più piano, il testo più in fretta ---- */
+var doorsEl=document.getElementById('doors'), doorList=[].slice.call(doorsEl.children), pagerDots=document.getElementById('pager').children, doorRaf=0;
+function layDoors(){
+  doorRaf=0; var w=doorsEl.clientWidth||1, sl=doorsEl.scrollLeft;
+  doorList.forEach(function(d,i){
+    var off=(i*w-sl)/w; if(off<-1.2||off>1.2) return;
+    var bg=d.querySelector('.bg'), inn=d.querySelector('.in');
+    if(bg) bg.style.transform='translate3d('+(-off*14)+'%,0,0)';
+    if(inn){ inn.style.transform='translate3d('+(off*70)+'px,0,0)'; inn.style.opacity=Math.max(0,1-Math.abs(off)*1.4); }
+  });
+  var cur=Math.round(sl/w); for(var k=0;k<pagerDots.length;k++) pagerDots[k].classList.toggle('on',k===cur);
+}
+doorsEl.addEventListener('scroll',function(){ if(!doorRaf) doorRaf=requestAnimationFrame(layDoors); },{passive:true});
+window.addEventListener('resize',layDoors); layDoors();
+document.addEventListener('keydown',function(e){
+  if(!vHome.classList.contains('on')) return;
+  if(e.key==='ArrowRight'||e.key==='ArrowLeft'){ var w=doorsEl.clientWidth; doorsEl.scrollTo({left:(Math.round(doorsEl.scrollLeft/w)+(e.key==='ArrowRight'?1:-1))*w,behavior:'smooth'}); }
+});
+
 /* ---- Navigazione ---- */
-var vHome=document.getElementById('home'), vLab=document.getElementById('lab');
 function route(){
   var lab=location.hash==='#laboratorio';
   vLab.classList.toggle('on',lab); vHome.classList.toggle('on',!lab);
@@ -341,8 +355,8 @@ function setPan(s,p){ if(!started||!s.pn) return; if(Math.abs(p-s.pan)<0.03) ret
 function setRoom(s,mu){
   if(!started||!s.g) return; if(Math.abs(mu-s.mu)<0.02) return; s.mu=mu;
   var now=ctx.currentTime;
-  s.lp.frequency.setTargetAtTime(18000*Math.pow(4200/18000,mu),now,0.35);
-  s.send.gain.setTargetAtTime(0.5*mu,now,0.35);
+  s.lp.frequency.setTargetAtTime(18000*Math.pow(1400/18000,mu),now,0.5);
+  s.send.gain.setTargetAtTime(0.65*mu,now,0.5);
   s.dry.gain.setTargetAtTime(1-0.3*mu,now,0.35);
 }
 
@@ -415,58 +429,57 @@ MODES.risonanza=(function(){
   };
 })();
 
-/* 2. stanza: parti dall'inizio del brano, sugli archi ritmici; il resto fiorisce quando ti avvicini, una freccia ti dice dove */
+/* 2. stanza: all'inizio ci sono solo gli archi ritmici. Fermo, senti solo loro; il resto è un'eco lontana finché non ci vai */
 MODES.stanza=(function(){
   var POSN={short1:[.5,.86],arm1:[.24,.70],short2:[.76,.70],piano:[.14,.48],mel2:[.86,.48],mel1:[.26,.27],basso:[.74,.27],arm2:[.5,.13],short3:[.18,.09],short4:[.82,.09]};
-  var me={x:.5,y:.88}, tgt={x:.5,y:.88}, c=0, seen={}, aim=0, aimOn=0;
+  var me={x:.5,y:.86}, tgt={x:.5,y:.86}, c=0, seen={}, nseen=1, buds=[], aim=0, aimOn=0, moved=false, still=0;
   function clampT(){ tgt.x=Math.max(0.03,Math.min(0.97,tgt.x)); tgt.y=Math.max(0.02,Math.min(0.98,tgt.y)); }
-  function to(q){ tgt.x=q.x/W; tgt.y=(q.y-TOP)/(BOT-TOP); clampT(); }
+  function to(q){ tgt.x=q.x/W; tgt.y=(q.y-TOP)/(BOT-TOP); clampT(); moved=true; still=0; }
   return {
-    hint:'cammina. ciò che è vicino fiorisce.', walk:true, fromIntro:true,
-    enter:function(){ me={x:.5,y:.88}; tgt={x:.5,y:.88}; c=0; seen={short1:1}; aimOn=0; },
+    hint:'', walk:true, fromIntro:true,
+    enter:function(){ me={x:.5,y:.86}; tgt={x:.5,y:.86}; c=0; seen={short1:1}; nseen=1; buds=[]; aimOn=0; moved=false; still=0; },
     down:to, move:to,
-    step:function(dir,frac){ var hh=BOT-TOP, f=frac||0.055; tgt.x+=Math.sin(dir)*f*hh/W; tgt.y-=Math.cos(dir)*f; clampT(); },
+    step:function(dir,frac){ var hh=BOT-TOP, f=frac||0.055; tgt.x+=Math.sin(dir)*f*hh/W; tgt.y-=Math.cos(dir)*f; clampT(); moved=true; still=0; },
     update:function(dt){
-      var k=1-Math.exp(-dt/0.22); me.x+=(tgt.x-me.x)*k; me.y+=(tgt.y-me.y)*k;
-      c=1-ss(0.07,0.2,Math.hypot(me.x-.5,me.y-.5));
-      var best=null, bd=9;
+      var k=1-Math.exp(-dt/0.22); me.x+=(tgt.x-me.x)*k; me.y+=(tgt.y-me.y)*k; still+=dt;
+      var all=nseen>=S.length; c=all?1-ss(0.07,0.2,Math.hypot(me.x-.5,me.y-.5)):0;
+      var un=[];
       S.forEach(function(s){
         var p=POSN[s.id], d=Math.hypot(p[0]-me.x,p[1]-me.y);
-        var pres=Math.max(1-ss(0.12,0.42,d),0.06*(1-ss(0.4,0.9,d)),c), mx=MX[s.id];
-        if(s.id==='short1') pres=Math.max(pres,0.4);     // gli archi ritmici dell'inizio restano come fondo
+        var pres=Math.max(1-ss(0.10,0.30,d),0.05*(1-ss(0.3,0.95,d)),c), mx=MX[s.id];
         setWant(s,(mx+(1-mx)*c)*pres,false);
-        setRoom(s,ss(0.12,0.6,d)*(1-c));
+        setRoom(s,ss(0.10,0.5,d)*(1-c));
         setPan(s,Math.max(-1,Math.min(1,(p[0]-me.x)*2.4))*(1-0.5*c));
-        if(s.gv>0.6) seen[s.id]=1;
-        if(!seen[s.id]&&d<bd){ bd=d; best=p; }
+        if(!seen[s.id]&&s.gv>0.5){ seen[s.id]=1; nseen++; }
+        if(!seen[s.id]) un.push({p:p,d:d});
       });
-      if(!best) best=[.5,.5];                            // visto tutto: la freccia porta al centro
-      var hh=BOT-TOP, ax=(best[0]-me.x)*W, ay=(best[1]-me.y)*hh, far=Math.hypot(ax,ay);
+      un.sort(function(a,b){return a.d-b.d;}); buds=un.slice(0,2);
+      var best=buds.length?buds[0].p:[.5,.5], hh=BOT-TOP, ax=(best[0]-me.x)*W, ay=(best[1]-me.y)*hh;
       var want=Math.atan2(ay,ax), da=Math.atan2(Math.sin(want-aim),Math.cos(want-aim));
-      aim+=da*(1-Math.exp(-dt/0.3)); aimOn+=((far>46&&c<0.6?1:0)-aimOn)*(1-Math.exp(-dt/0.5));
+      aim+=da*(1-Math.exp(-dt/0.3)); aimOn+=((Math.hypot(ax,ay)>46&&c<0.6?1:0)-aimOn)*(1-Math.exp(-dt/0.5));
     },
     draw:function(t){
-      var hh=BOT-TOP, sc=Math.min(1.15,W/390);
+      var hh=BOT-TOP, sc=Math.min(1.15,W/390), mx=me.x*W, my=TOP+me.y*hh;
       S.forEach(function(s,i){
-        var p=POSN[s.id], x=p[0]*W, y=TOP+p[1]*hh, b=s.gv, n=5+(i%4);
-        if(b<0.04){                                      // un bocciolo: un punto che pulsa piano
-          var pu=0.5+0.5*Math.sin(t*1.3+i*1.7);
-          g.fillStyle='rgba('+INK+',.5)'; g.beginPath(); g.arc(x,y,2.6*sc,0,TAU); g.fill();
-          g.strokeStyle='rgba('+INK+','+(0.1+0.16*pu)+')'; g.lineWidth=1; g.beginPath(); g.arc(x,y,(8+5*pu)*sc,0,TAU); g.stroke();
-          return;
-        }
-        var open=(6+22*b)*(1+0.18*lvl(s))*sc, pr=(8+11*b)*sc, rot=t*0.08+i;
-        g.fillStyle='rgba('+INK+','+(0.09+0.2*b)+')';
-        for(var q=0;q<n;q++){ var a=rot+q*TAU/n; g.beginPath(); g.arc(x+Math.cos(a)*open,y+Math.sin(a)*open,pr,0,TAU); g.fill(); }
-        g.fillStyle='rgba('+INK+','+(0.25+0.6*b)+')'; g.beginPath(); g.arc(x,y,(4+5*b)*sc,0,TAU); g.fill();
+        if(!seen[s.id]&&s.gv<0.04) return;                // quello che non hai trovato non si vede
+        var p=POSN[s.id], x=p[0]*W, y=TOP+p[1]*hh, b=s.gv, r=(9+30*b)*(1+0.22*lvl(s))*sc;
+        g.fillStyle='rgba('+INK+','+(0.08+0.5*b)+')'; g.beginPath(); g.arc(x,y,r,0,TAU); g.fill();
+        g.fillStyle='rgba('+INK+','+(0.35+0.5*b)+')'; g.beginPath(); g.arc(x,y,2.6*sc,0,TAU); g.fill();
       });
-      g.strokeStyle='rgba('+INK+','+(0.2+0.65*c)+')'; g.lineWidth=1+c; g.beginPath(); g.arc(W/2,TOP+hh/2,W*0.12,0,TAU); g.stroke();
-      var mx=me.x*W, my=TOP+me.y*hh;
-      if(aimOn>0.03){                                    // la bussola: una freccia sottile verso ciò che non hai ancora sentito
-        var ca=Math.cos(aim), sa=Math.sin(aim), r1=22, r2=40, hx=mx+ca*r2, hy=my+sa*r2;
-        g.strokeStyle='rgba(255,255,255,'+0.85*aimOn+')'; g.lineWidth=1.5; g.lineCap='round'; g.lineJoin='round';
-        g.beginPath(); g.moveTo(mx+ca*r1,my+sa*r1); g.lineTo(hx,hy); g.stroke();
-        g.beginPath(); g.moveTo(hx-ca*8-sa*5,hy-sa*8+ca*5); g.lineTo(hx,hy); g.lineTo(hx-ca*8+sa*5,hy-sa*8-ca*5); g.stroke();
+      buds.forEach(function(u,i){                         // i due più vicini da scoprire: un punto che chiama
+        var x=u.p[0]*W, y=TOP+u.p[1]*hh, pu=(t*0.5+i*0.5)%1;
+        g.fillStyle='rgba('+INK+',.7)'; g.beginPath(); g.arc(x,y,2.6*sc,0,TAU); g.fill();
+        g.strokeStyle='rgba('+INK+','+0.45*(1-pu)+')'; g.lineWidth=1; g.beginPath(); g.arc(x,y,(5+26*pu)*sc,0,TAU); g.stroke();
+      });
+      if(nseen>=S.length){ g.strokeStyle='rgba('+INK+','+(0.3+0.6*c)+')'; g.lineWidth=1+c; g.beginPath(); g.arc(W/2,TOP+hh/2,W*0.12,0,TAU); g.stroke(); }
+      if(buds.length&&(!moved||still>6)){                 // se resti fermo, un'ombra di te parte verso il punto: così si capisce senza parole
+        var u=buds[0], ph=(t*0.4)%1, e=ph*ph*(3-2*ph), gx=mx+(u.p[0]*W-mx)*e, gy=my+(TOP+u.p[1]*hh-my)*e;
+        g.strokeStyle='rgba(255,255,255,'+0.6*Math.sin(Math.PI*ph)+')'; g.lineWidth=1.25; g.beginPath(); g.arc(gx,gy,9,0,TAU); g.stroke();
+      }
+      if(aimOn>0.03){
+        var ca=Math.cos(aim), sa=Math.sin(aim), hx=mx+ca*30, hy=my+sa*30;
+        g.strokeStyle='rgba(255,255,255,'+0.8*aimOn+')'; g.lineWidth=1.5; g.lineCap='round'; g.lineJoin='round';
+        g.beginPath(); g.moveTo(hx-ca*7-sa*5,hy-sa*7+ca*5); g.lineTo(hx,hy); g.lineTo(hx-ca*7+sa*5,hy-sa*7-ca*5); g.stroke();
       }
       g.fillStyle='#fff'; g.beginPath(); g.arc(mx,my,7,0,TAU); g.fill();
       g.strokeStyle='rgba(255,255,255,.5)'; g.lineWidth=1.25; g.beginPath(); g.arc(mx,my,14,0,TAU); g.stroke();
@@ -544,6 +557,7 @@ MODES.centri=(function(){
         g.strokeStyle='rgba('+INK+','+(0.1+0.85*l.s)+')'; g.lineWidth=1+3.5*l.s;
         g.beginPath(); g.moveTo(cx(a),cy(a)); g.lineTo(cx(b),cy(b)); g.stroke();
       });
+      if(!fingers().length&&LINKS[0].s+LINKS[1].s+LINKS[2].s<=0){ var ph=(t*0.4)%1, e=ph*ph*(3-2*ph), gx=cx(C[0])+(cx(C[1])-cx(C[0]))*e, gy=cy(C[0])+(cy(C[1])-cy(C[0]))*e; g.strokeStyle='rgba(255,255,255,'+0.6*Math.sin(Math.PI*ph)+')'; g.lineWidth=1.25; g.beginPath(); g.arc(gx,gy,11,0,TAU); g.stroke(); }
       fingers().forEach(function(q){ if(q.last>=0){ g.strokeStyle='rgba('+INK+',.5)'; g.lineWidth=1.25; g.beginPath(); g.moveTo(cx(C[q.last]),cy(C[q.last])); g.lineTo(q.x,q.y); g.stroke(); } });
       if(pres>0.02){
         var mx=(cx(C[0])+cx(C[1])+cx(C[2]))/3, my=(cy(C[0])+cy(C[1])+cy(C[2]))/3, R=Math.hypot(cx(C[0])-mx,cy(C[0])-my)+54;
@@ -625,7 +639,7 @@ function enterMode(name){
   startAudio();
   current=name; M=MODES[name]; M.enter();
   vLab.classList.remove('inmenu'); menuEl.classList.add('off');
-  hintEl.textContent=M.hint; hintEl.classList.add('show'); clearTimeout(hintTimer); hintTimer=setTimeout(function(){ hintEl.classList.remove('show'); },7000);
+  hintEl.textContent='';
   walkBtn.hidden=!M.walk; resize();
   whenReady.then(function(){ if(current===name){ S.forEach(function(s){ if(s.g) setPan(s,0); }); startPiece(M.fromIntro?0:INTRO); } });
 }
