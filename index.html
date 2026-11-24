@@ -62,6 +62,13 @@ body{height:100%;width:100%}
 .door .in{position:absolute;z-index:1;left:26px;right:26px;bottom:calc(40px + var(--sb));display:flex;flex-direction:column;align-items:flex-start;gap:14px;will-change:transform,opacity}
 .tiny{font-family:"Unbounded",var(--font);font-weight:300;font-size:11px;letter-spacing:.14em;text-transform:lowercase;color:rgba(255,255,255,.62)}
 .word{font-family:"Unbounded",var(--font);font-weight:300;font-size:44px;line-height:1.04;letter-spacing:.01em;text-transform:uppercase;margin:0;white-space:nowrap}
+.door.type .bg{opacity:.13;animation:drift 26s ease-in-out infinite alternate}
+@keyframes drift{from{scale:1.02;translate:-1.5% 0}to{scale:1.12;translate:1.5% -1%}}
+.door.type .in{bottom:auto;top:43%}
+.di{font-size:.27em;letter-spacing:.16em;text-transform:lowercase;color:rgba(255,255,255,.62);margin-left:.5em}
+.ch{display:inline-block;opacity:0;transform:translateY(.4em);transition:opacity .8s var(--ease),transform 1s var(--ease)}
+.door.live .ch{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.door.type .bg{animation:none}.ch{opacity:1;transform:none;transition:none}}
 .vword{position:absolute;z-index:1;left:50%;top:50%;margin:0;transform:translate(-50%,-50%) rotate(-90deg);font-family:"Unbounded",var(--font);font-weight:300;font-size:96px;line-height:1;letter-spacing:.01em;text-transform:uppercase;white-space:nowrap;will-change:transform}
 .type .n{position:absolute;z-index:1;top:calc(24px + var(--st));left:26px}
 .type .s{position:absolute;z-index:1;bottom:calc(34px + var(--sb));left:26px}
@@ -98,9 +105,13 @@ body{height:100%;width:100%}
 
 .prog{position:absolute;left:16px;right:16px;top:calc(66px + var(--st));height:2px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden}
 .prog i{display:block;height:100%;background:rgba(255,255,255,.6);transform-origin:left;transform:scaleX(0)}
-#menu{position:absolute;inset:0;z-index:3;display:grid;grid-template-columns:1fr 1fr;align-content:center;gap:44px 12px;padding:120px 26px calc(60px + var(--sb));background:#000;transition:opacity .5s var(--ease),visibility 0s .5s}
+#lab.inmenu .piece{display:none}
+#lab.inmenu .bartop .round{background:none;-webkit-backdrop-filter:none;backdrop-filter:none;color:rgba(255,255,255,.55)}
+.glyph:nth-child(odd){border-right:1px solid rgba(255,255,255,.1)}
+.glyph:nth-child(-n+2){border-bottom:1px solid rgba(255,255,255,.1)}
+#menu{position:absolute;inset:0;z-index:3;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:0;padding:0;background:#000;transition:opacity .5s var(--ease),visibility 0s .5s}
 #menu.off{opacity:0;visibility:hidden;pointer-events:none}
-.glyph{display:flex;flex-direction:column;align-items:center;gap:18px;color:var(--label);padding:10px 0}
+.glyph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;color:var(--label);padding:0}
 .glyph svg{width:92px;height:92px}
 .glyph span{font-family:"Unbounded",var(--font);font-weight:300;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--secondary)}
 .bartop{z-index:4;transition:opacity .5s}
@@ -140,22 +151,29 @@ body{height:100%;width:100%}
   <div class="doors" id="doors">
     <header class="door photo">
       <img class="bg" src="img/p-cover.jpg" alt="Paolo Buonvino al pianoforte, solo sul palco, in un fascio di luce" style="object-position:50% 38%">
-      <div class="in"><span class="tiny">paolo buonvino</span><h1 class="word">Racconti<br>di<br>ispirazione</h1></div>
+      <div class="in"><span class="tiny">paolo buonvino</span><h1 class="word">Racconti<span class="di">di</span><br>ispirazione</h1></div>
     </header>
     <a class="door type" href="#laboratorio" id="tolab" aria-label="Laboratorio: entra">
-      <span class="tiny n">01</span><h2 class="vword">Laboratorio</h2>
+      <img class="bg" src="img/p-lab.jpg" alt="" style="object-position:40% 30%">
+      <div class="in"><span class="tiny">01</span><h2 class="word">Laboratorio</h2></div>
       <span class="enter" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
     </a>
     <section class="door photo">
       <img class="bg" src="img/p-musiche.jpg" alt="" style="object-position:50% 30%">
       <div class="in"><span class="tiny">02</span><h2 class="word">Musiche</h2><span class="tiny">presto</span></div>
     </section>
-    <section class="door type"><span class="tiny n">03</span><h2 class="vword">Respiro</h2><span class="tiny s">presto</span></section>
+    <section class="door type">
+      <img class="bg" src="img/p-respiro.jpg" alt="" style="object-position:40% 50%">
+      <div class="in"><span class="tiny">03</span><h2 class="word">Respiro</h2><span class="tiny">presto</span></div>
+    </section>
     <section class="door photo">
       <img class="bg" src="img/p-taccuino.jpg" alt="" style="object-position:50% 40%">
       <div class="in"><span class="tiny">04</span><h2 class="word">Taccuino</h2><span class="tiny">presto</span></div>
     </section>
-    <section class="door type"><span class="tiny n">05</span><h2 class="vword">Letture</h2><span class="tiny s">presto</span></section>
+    <section class="door type">
+      <img class="bg" src="img/p-letture.jpg" alt="" style="object-position:30% 50%">
+      <div class="in"><span class="tiny">05</span><h2 class="word">Letture</h2><span class="tiny">presto</span></div>
+    </section>
     <section class="door type end">
       <div class="in">
         <span class="tiny">e ancora, presto</span>
@@ -185,7 +203,7 @@ body{height:100%;width:100%}
     <p id="hint"></p>
   </div>
   <div id="menu">
-    <button type="button" class="glyph press" data-m="stanza"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" aria-hidden="true"><circle cx="32" cy="32" r="22"/><circle cx="32" cy="32" r="9"/><circle cx="24" cy="46" r="3.2" fill="currentColor" stroke="none"/></svg><span>stanza</span></button>
+    <button type="button" class="glyph press" data-m="stanza"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" aria-hidden="true"><circle cx="32" cy="32" r="22"/><circle cx="32" cy="32" r="9"/><circle cx="24" cy="46" r="3.2" fill="currentColor" stroke="none"/></svg><span>palco</span></button>
     <button type="button" class="glyph press" data-m="centri"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" aria-hidden="true"><path d="M32 13L12 49h40z"/><circle cx="32" cy="13" r="5" fill="#000"/><circle cx="12" cy="49" r="5" fill="#000"/><circle cx="52" cy="49" r="5" fill="#000"/></svg><span>tre centri</span></button>
     <button type="button" class="glyph press" data-m="se"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" aria-hidden="true"><path d="M20 44L46 18"/><circle cx="18" cy="46" r="7" fill="currentColor" stroke="none"/><circle cx="48" cy="16" r="7" fill="#000"/></svg><span>ricordarsi di sé</span></button>
     <button type="button" class="glyph press" data-m="risonanza"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true"><path d="M12 10v44M22 10v44M52 10v44M42 10v44"/><path d="M32 10c7 14 7 30 0 44"/></svg><span>risonanza</span></button>
@@ -203,7 +221,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='11', updBtn=document.getElementById('upd');
+var BUILD='12', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -222,16 +240,19 @@ document.addEventListener('visibilitychange',function(){ if(!document.hidden) ch
 
 var vHome=document.getElementById('home'), vLab=document.getElementById('lab');
 /* ---- Le parole grandi si adattano allo schermo: quelle in orizzontale alla larghezza, quelle in verticale all'altezza ---- */
+function splitLetters(node){
+  [].slice.call(node.childNodes).forEach(function(n){
+    if(n.nodeType===3){ var f=document.createDocumentFragment(); n.textContent.split('').forEach(function(c){ if(c===' '){ f.appendChild(document.createTextNode(' ')); return; } var s=document.createElement('span'); s.className='ch'; s.textContent=c; f.appendChild(s); }); node.replaceChild(f,n); }
+    else if(n.nodeType===1&&n.tagName!=='BR') splitLetters(n);
+  });
+}
+[].forEach.call(document.querySelectorAll('.door:not(.end) .word'),function(w){ splitLetters(w); [].forEach.call(w.querySelectorAll('.ch'),function(c,i){ c.style.transitionDelay=(120+i*45)+'ms'; }); });
+function fitOne(w,start){ var max=w.parentNode.clientWidth, fs=start, n=0; w.style.fontSize=fs+'px'; while(w.scrollWidth>max&&fs>12&&n<80){ fs-=1; w.style.fontSize=fs+'px'; n++; } return fs; }
 function fitWords(){
-  [].forEach.call(document.querySelectorAll('.word'),function(w){
-    w.style.fontSize=''; var max=w.parentNode.clientWidth, fs=parseFloat(getComputedStyle(w).fontSize), n=0;
-    while(w.scrollWidth>max&&fs>12&&n<60){ fs-=1; w.style.fontSize=fs+'px'; n++; }
-  });
-  [].forEach.call(document.querySelectorAll('.vword'),function(w){
-    var max=w.parentNode.clientHeight-170, lim=w.parentNode.clientWidth*0.42, fs=120, n=0;
-    w.style.fontSize=fs+'px';
-    while((w.offsetWidth>max||w.offsetHeight>lim)&&fs>20&&n<110){ fs-=1; w.style.fontSize=fs+'px'; n++; }
-  });
+  var words=[].slice.call(document.querySelectorAll('.door:not(.end) .word')), min=64;
+  words.forEach(function(w){ min=Math.min(min,fitOne(w,64)); });     // una sola misura per tutte le porte: quella della parola più lunga
+  words.forEach(function(w){ w.style.fontSize=min+'px'; });
+  [].forEach.call(document.querySelectorAll('.end .word'),function(w){ fitOne(w,20); });
 }
 window.addEventListener('resize',fitWords); window.addEventListener('load',fitWords);
 if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fitWords);
@@ -245,7 +266,7 @@ function layDoors(){
     var bg=d.querySelector('.bg'), inn=d.querySelector('.in'), vw=d.querySelector('.vword');
     if(bg) bg.style.transform='translate3d('+(-off*9)+'%,0,0) scale('+(1+0.06*Math.abs(off))+')';
     if(inn&&!d.classList.contains('end')){ inn.style.transform='translate3d('+(Math.max(0,off)*90)+'px,0,0)'; inn.style.opacity=Math.max(0,1-Math.abs(off)*1.5); }
-    if(vw) vw.style.transform='translate(-50%,-50%) rotate(-90deg) translate3d('+(-Math.max(0,off)*140)+'px,0,0)';
+    d.classList.toggle('live',Math.abs(off)<0.45);
   });
 }
 doorsEl.addEventListener('scroll',function(){ if(!doorRaf) doorRaf=requestAnimationFrame(layDoors); },{passive:true});
@@ -358,6 +379,7 @@ function setWant(s,v,slow){
   if(!started||!playing) return;
   if(!s.g||Math.abs(v-s.want)<0.012) return;
   var up=v>s.want; s.want=v;
+  if(slow==='now'){ s.g.gain.cancelScheduledValues(ctx.currentTime); s.g.gain.setValueAtTime(v,ctx.currentTime+0.12); s.gv=v; return; }
   s.g.gain.setTargetAtTime(v,ctx.currentTime,slow===2?(up?4.2:6.5):slow?(up?1.5:2.4):(up?0.55:0.9));
 }
 function setPan(s,p){ if(!started||!s.pn) return; if(Math.abs(p-s.pan)<0.03) return; s.pan=p; s.pn.pan.setTargetAtTime(p,ctx.currentTime,0.12); }
@@ -440,55 +462,48 @@ MODES.risonanza=(function(){
   };
 })();
 
-/* 2. stanza: all'inizio ci sono solo gli archi ritmici. Fermo, senti solo loro; il resto è un'eco lontana finché non ci vai */
+/* 2. palco: parti al centro e senti il brano intero, com'è, senza dissolvenze. Ogni cosa che entra si accende nel punto da cui arriva.
+   Se ti sposti verso un punto lo senti da vicino, e il resto diventa un'eco */
 MODES.stanza=(function(){
-  var POSN={short1:[.5,.86],arm1:[.24,.70],short2:[.76,.70],piano:[.14,.48],mel2:[.86,.48],mel1:[.26,.27],basso:[.74,.27],arm2:[.5,.13],short3:[.18,.09],short4:[.82,.09]};
-  var me={x:.5,y:.86}, tgt={x:.5,y:.86}, c=0, seen={}, nseen=1, buds=[], aim=0, aimOn=0, moved=false, still=0;
+  var POSN={short1:[.5,.84],arm1:[.2,.68],short2:[.8,.68],piano:[.12,.44],mel2:[.88,.44],mel1:[.24,.24],basso:[.76,.24],arm2:[.5,.12],short3:[.16,.08],short4:[.84,.08]};
+  var me={x:.5,y:.5}, tgt={x:.5,y:.5}, c=1, born={}, fresh=true, moved=false, still=0, call=null;
   function clampT(){ tgt.x=Math.max(0.03,Math.min(0.97,tgt.x)); tgt.y=Math.max(0.02,Math.min(0.98,tgt.y)); }
   function to(q){ tgt.x=q.x/W; tgt.y=(q.y-TOP)/(BOT-TOP); clampT(); moved=true; still=0; }
   return {
     hint:'', walk:true, fromIntro:true,
-    enter:function(){ me={x:.5,y:.86}; tgt={x:.5,y:.86}; c=0; seen={short1:1}; nseen=1; buds=[]; aimOn=0; moved=false; still=0; },
+    enter:function(){ me={x:.5,y:.5}; tgt={x:.5,y:.5}; c=1; born={}; fresh=true; moved=false; still=0; call=null; },
     down:to, move:to,
     step:function(dir,frac){ var hh=BOT-TOP, f=frac||0.055; tgt.x+=Math.sin(dir)*f*hh/W; tgt.y-=Math.cos(dir)*f; clampT(); moved=true; still=0; },
     update:function(dt){
       var k=1-Math.exp(-dt/0.22); me.x+=(tgt.x-me.x)*k; me.y+=(tgt.y-me.y)*k; still+=dt;
-      var all=nseen>=S.length; c=all?1-ss(0.07,0.2,Math.hypot(me.x-.5,me.y-.5)):0;
-      var un=[];
+      c=1-ss(0.08,0.24,Math.hypot(me.x-.5,me.y-.5));
+      var tnow=performance.now()/1000, loud=null, lv=0;
       S.forEach(function(s){
         var p=POSN[s.id], d=Math.hypot(p[0]-me.x,p[1]-me.y);
-        var pres=Math.max(1-ss(0.10,0.30,d),0.05*(1-ss(0.3,0.95,d)),c), mx=MX[s.id];
-        setWant(s,(mx+(1-mx)*c)*pres,false);
+        var pres=Math.max(1-ss(0.10,0.32,d),0.05*(1-ss(0.3,0.95,d)),c), mx=MX[s.id];
+        setWant(s,(mx+(1-mx)*c)*pres,fresh&&s.g?'now':false);
         setRoom(s,ss(0.10,0.5,d)*(1-c));
-        setPan(s,Math.max(-1,Math.min(1,(p[0]-me.x)*2.4))*(1-0.5*c));
-        if(!seen[s.id]&&s.gv>0.5){ seen[s.id]=1; nseen++; }
-        if(!seen[s.id]) un.push({p:p,d:d});
+        setPan(s,Math.max(-1,Math.min(1,(p[0]-me.x)*2.2)));
+        if(s.level>0.12&&!born[s.id]) born[s.id]=tnow;      // la prima volta che suona: si accende dove sta
+        if(born[s.id]&&s.level>lv&&d>0.14){ lv=s.level; loud=p; }
       });
-      un.sort(function(a,b){return a.d-b.d;}); buds=un.slice(0,2);
-      var best=buds.length?buds[0].p:[.5,.5], hh=BOT-TOP, ax=(best[0]-me.x)*W, ay=(best[1]-me.y)*hh;
-      var want=Math.atan2(ay,ax), da=Math.atan2(Math.sin(want-aim),Math.cos(want-aim));
-      aim+=da*(1-Math.exp(-dt/0.3)); aimOn+=((Math.hypot(ax,ay)>46&&c<0.6?1:0)-aimOn)*(1-Math.exp(-dt/0.5));
+      if(fresh&&S.some(function(s){return s.g;})) fresh=false;
+      call=loud;
     },
     draw:function(t){
-      var hh=BOT-TOP, sc=Math.min(1.15,W/390), mx=me.x*W, my=TOP+me.y*hh;
+      var hh=BOT-TOP, sc=Math.min(1.15,W/390), mx=me.x*W, my=TOP+me.y*hh, tnow=performance.now()/1000;
       g.lineCap='round';
-      S.forEach(function(s,i){
-        if(!seen[s.id]&&s.gv<0.04) return;                // quello che non hai trovato non si vede
-        var p=POSN[s.id], x=p[0]*W, y=TOP+p[1]*hh, b=s.gv;
-        if(b>0.03){                                       // il filo: più lo senti, più è chiaro
-          g.strokeStyle='rgba('+INK+','+0.7*b+')'; g.lineWidth=0.75+0.9*b; g.beginPath(); g.moveTo(mx,my); g.lineTo(x,y); g.stroke();
-          g.strokeStyle='rgba('+INK+','+0.55*b+')'; g.lineWidth=1; g.beginPath(); g.arc(x,y,(7+22*lvl(s))*sc,0,TAU); g.stroke();
-        }
-        g.fillStyle='rgba('+INK+','+(0.3+0.7*b)+')'; g.beginPath(); g.arc(x,y,(2.4+2.2*b)*sc,0,TAU); g.fill();
+      S.forEach(function(s){
+        if(!born[s.id]) return;                               // chi non è ancora entrato non c'è
+        var p=POSN[s.id], x=p[0]*W, y=TOP+p[1]*hh, a=Math.max(0,Math.min(1,s.gv)), L=s.level, age=tnow-born[s.id];
+        g.strokeStyle='rgba('+INK+','+(0.1+0.6*a*Math.min(1,0.25+L))+')'; g.lineWidth=0.75+1.1*a*L; g.beginPath(); g.moveTo(mx,my); g.lineTo(x,y); g.stroke();
+        g.strokeStyle='rgba('+INK+','+(0.15+0.5*a)+')'; g.lineWidth=1; g.beginPath(); g.arc(x,y,(6+24*L)*sc,0,TAU); g.stroke();
+        if(age<2.4){ var q=age/2.4; g.strokeStyle='rgba('+INK+','+0.7*(1-q)+')'; g.beginPath(); g.arc(x,y,(6+70*q)*sc,0,TAU); g.stroke(); }   // l'onda di quando entra
+        g.fillStyle='rgba('+INK+','+(0.4+0.6*a)+')'; g.beginPath(); g.arc(x,y,(2.4+2.4*a)*sc,0,TAU); g.fill();
       });
-      buds.forEach(function(u,i){                         // i due più vicini da scoprire: un punto che chiama
-        var x=u.p[0]*W, y=TOP+u.p[1]*hh, pu=(t*0.5+i*0.5)%1;
-        g.fillStyle='rgba('+INK+',.6)'; g.beginPath(); g.arc(x,y,2.2*sc,0,TAU); g.fill();
-        g.strokeStyle='rgba('+INK+','+0.4*(1-pu)+')'; g.lineWidth=1; g.beginPath(); g.arc(x,y,(4+24*pu)*sc,0,TAU); g.stroke();
-      });
-      if(nseen>=S.length){ g.strokeStyle='rgba('+INK+','+(0.3+0.6*c)+')'; g.lineWidth=1+c; g.beginPath(); g.arc(W/2,TOP+hh/2,W*0.12,0,TAU); g.stroke(); }
-      if(buds.length&&(!moved||still>6)){                 // fermo: un'ombra di te parte verso il richiamo. Mostra il gesto senza dirlo
-        var u=buds[0], ph=(t*0.4)%1, e=ph*ph*(3-2*ph), gx=mx+(u.p[0]*W-mx)*e, gy=my+(TOP+u.p[1]*hh-my)*e;
+      g.strokeStyle='rgba('+INK+','+(0.1+0.18*c)+')'; g.lineWidth=1; g.beginPath(); g.arc(W/2,TOP+hh/2,W*0.13,0,TAU); g.stroke();
+      if(call&&(!moved||still>7)){                            // fermo: un'ombra di te parte verso chi sta suonando di più
+        var ph=(t*0.4)%1, e=ph*ph*(3-2*ph), gx=mx+(call[0]*W-mx)*e, gy=my+(TOP+call[1]*hh-my)*e;
         g.strokeStyle='rgba(255,255,255,'+0.6*Math.sin(Math.PI*ph)+')'; g.lineWidth=1.25; g.beginPath(); g.arc(gx,gy,10,0,TAU); g.stroke();
       }
       g.fillStyle='#fff'; g.beginPath(); g.arc(mx,my,9,0,TAU); g.fill();
