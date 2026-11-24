@@ -139,6 +139,22 @@ body{height:100%;width:100%}
 #gmsg{min-height:16px;margin:14px 0 4px}
 #glist{width:100%}
 .gcred{margin-top:26px;color:rgba(255,255,255,.3)}
+.emb{width:100%;border:0;border-radius:12px;background:#111;display:block}
+.emb.sp{height:352px}
+.yt{position:relative;width:100%;aspect-ratio:16/9}
+.yt .emb{position:absolute;inset:0;height:100%}
+.lnk{padding:10px 0 0}
+.bbox{width:100%;display:flex;flex-direction:column;align-items:center;gap:18px;margin:0 0 40px}
+.bstage{position:relative;width:74vw;max-width:340px;aspect-ratio:1;display:grid;place-items:center}
+.bring{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(255,255,255,.75);box-shadow:0 0 0 22px rgba(255,255,255,.035),0 0 0 44px rgba(255,255,255,.02);transform:scale(.5);opacity:.5;will-change:transform}
+.bbox .upd{margin:0}
+.bbox.run .upd{background:none;color:rgba(255,255,255,.5)}
+.bbox.run .bnote{visibility:hidden}
+#bquo{min-height:0;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+#bquo .lead{margin:0;max-width:24ch;text-align:center}
+.bbox.done .bstage{display:none}
+.bbox.done #bquo{padding:70px 0 30px;animation:qin 2.5s ease both}
+@keyframes qin{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.breath{animation:none}}
 
 /* ---------- Laboratorio ---------- */
@@ -320,7 +336,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='24', updBtn=document.getElementById('upd');
+var BUILD='25', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -400,8 +416,8 @@ var ART=(function(){
 })();
 var SEZ={
   invito:{n:'',t:'Un invito',lead:'L’ispirazione, ossigeno per l’anima.',p:['In queste pagine ho raccolto alcune delle cose che, nel tempo, hanno dato e continuano a dare ossigeno alla mia vita. Pensieri, incontri, parole, immagini, suoni ed emozioni che hanno acceso qualcosa dentro di me.','Ho scelto di condividerli perché credo che l’ispirazione, come il respiro, sia ancora più preziosa quando diventa un’esperienza comune.']},
-  musiche:{n:'02',t:'Musiche che mi ispirano',lead:'Suoni che accendono idee.',rows:[['spotify','Una playlist di ispirazioni'],['youtube','Immagini, voci, musica']]},
-  respiro:{n:'03',t:'Respirare',lead:'Un luogo per rallentare. Ascoltare. Ritrovare spazio.',rows:[['playlist meditativa','Una selezione da ascoltare senza fretta']]},
+  musiche:{n:'02',t:'Musiche che mi ispirano',lead:'Suoni che accendono idee.',music:true},
+  respiro:{n:'03',t:'Respirare',lead:'Un luogo per rallentare. Ascoltare. Ritrovare spazio.',breath:true},
   taccuino:{n:'04',t:'Pagine dal mio taccuino',lead:'Frammenti, pensieri, intuizioni. Un modo di custodire ciò che nasce.',rows:[['manoscritti','Pagine da sfogliare e ingrandire']]},
   letture:{n:'05',t:'Letture che mi hanno ispirato',lead:'Parole che lasciano un segno, aprono strade, ci cambiano un poco.',rows:[['letture','Libri, pagine e brevi commenti personali']]},
   giardini:{n:'06',t:'Giardini che ispirano',lead:'Un invito a cercare bellezza anche fuori dalle pagine.',garden:true},
@@ -409,6 +425,48 @@ var SEZ={
   partiture:{n:'08',t:'Partiture da scaricare',lead:'La musica è anche un gesto che passa di mano in mano.',p:['Qui troverai alcune mie partiture da leggere, studiare e suonare.'],rows:[['da «dio ride» · piano solo','Oltre le nostre vie']]},
   voci:{n:'09',t:'Le vostre voci',lead:'Un concerto non finisce con l’ultima nota.',p:['Se qualcosa ti ha emozionato, sorpreso o fatto riflettere, potrai raccontarlo qui: un pensiero, un racconto, un disegno.'],rows:[['lascia un pensiero','I vostri messaggi e le vostre ispirazioni']]}
 };
+/* respiro: una seduta guidata di tre minuti. Si inspira per 4 secondi e si espira per 6 (sei respiri al minuto):
+   il cerchio si apre e si chiude, e un suono lungo sale e scende insieme al respiro. Alla fine resta una frase */
+var QUOTES=[['L’uomo vero respira con i talloni.','zhuangzi'],['Raggiungi il vuoto estremo, custodisci la quiete.','laozi, tao te ching'],['Inspirando, calmo il mio corpo. Espirando, sorrido.','thich nhat hanh'],['L’ispirazione è ossigeno per l’anima.','paolo buonvino']];
+var breath=null;
+function breathStop(){
+  if(!breath) return; cancelAnimationFrame(breath.raf);
+  if(breath.g){ var n=ctx.currentTime; breath.g.gain.cancelScheduledValues(n); breath.g.gain.setTargetAtTime(0,n,0.4); var os=breath.os; setTimeout(function(){ os.forEach(function(o){ try{o.stop();}catch(e){} }); },2500); }
+  breath=null;
+}
+function breathInit(){
+  var box=document.getElementById('bbox'), ring=document.getElementById('bring'), lab=document.getElementById('blab'), btn=document.getElementById('bgo'), quo=document.getElementById('bquo');
+  var IN=4, OUT=6, TOTAL=180;
+  function sound(){
+    var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return null;
+    try{ if(!ctx){ ctx=new AC(); } if(ctx.state!=='running') ctx.resume(); }catch(e){ return null; }
+    var g=ctx.createGain(); g.gain.value=0; var lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=420; lp.Q.value=0.4;
+    var dl=ctx.createDelay(1), fb=ctx.createGain(), wet=ctx.createGain(); dl.delayTime.value=0.37; fb.gain.value=0.45; wet.gain.value=0.5;
+    g.connect(lp); lp.connect(ctx.destination); lp.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(wet); wet.connect(ctx.destination);
+    var os=[]; [[164.81,.5],[246.94,.22],[329.63,.4],[493.88,.1]].forEach(function(f){ [-3,3].forEach(function(c){ var o=ctx.createOscillator(), a=ctx.createGain(); o.frequency.value=f[0]; o.detune.value=c; a.gain.value=f[1]*0.5; o.connect(a); a.connect(g); o.start(); os.push(o); }); });
+    return {g:g,lp:lp,os:os};
+  }
+  function phase(isIn){              // il suono segue il respiro: sale inspirando, scende espirando
+    if(!breath||!breath.g) return; var n=ctx.currentTime;
+    breath.g.gain.cancelScheduledValues(n); breath.lp.frequency.cancelScheduledValues(n);
+    breath.g.gain.setTargetAtTime(isIn?0.11:0.02,n,isIn?IN/3:OUT/3); breath.lp.frequency.setTargetAtTime(isIn?1500:420,n,isIn?IN/3:OUT/3);
+  }
+  function tick(now){
+    if(!breath) return; var t=(now-breath.t0)/1000, c=t%(IN+OUT), isIn=c<IN, u=isIn?c/IN:1-(c-IN)/OUT, e=u*u*(3-2*u);
+    if(isIn!==breath.isIn){ breath.isIn=isIn; phase(isIn); lab.textContent=isIn?'inspira':'espira'; }
+    ring.style.transform='scale('+(0.5+0.5*e)+')'; ring.style.opacity=0.45+0.5*e;
+    if(t>=TOTAL&&!isIn&&c>IN+OUT-0.2){ finish(); return; }
+    breath.raf=requestAnimationFrame(tick);
+  }
+  function finish(){
+    breathStop(); box.classList.remove('run'); box.classList.add('done'); var q=QUOTES[Math.floor(Math.random()*QUOTES.length)];
+    quo.innerHTML='<p class="lead">'+esc(q[0])+'</p><span class="tiny">'+esc(q[1])+'</span>'; btn.textContent='ancora'; lab.textContent='';
+  }
+  btn.addEventListener('click',function(){
+    if(breath){ finish(); return; }
+    var s=sound()||{}; breath={t0:performance.now(),isIn:null,g:s.g,lp:s.lp,os:s.os}; box.classList.add('run'); box.classList.remove('done'); quo.innerHTML=''; btn.textContent='basta'; breath.raf=requestAnimationFrame(tick);
+  });
+}
 var vSez=document.getElementById('sez'), szEl=document.getElementById('sz');
 function esc(x){ return String(x).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 function showSez(id){
@@ -418,8 +476,11 @@ function showSez(id){
   (s.p||[]).forEach(function(x){ h+='<p class="par">'+esc(x)+'</p>'; });
   (s.rows||[]).forEach(function(r){ h+='<div class="rowi"><span class="tiny">'+esc(r[0])+'</span><b>'+esc(r[1])+'</b><span class="tiny soon">presto</span></div>'; });
   if(s.garden) h+='<div class="gar"><button type="button" class="upd press" id="gnear">vicino a me</button><form id="gform"><input id="gq" type="text" inputmode="search" enterkeyhint="search" autocomplete="off" placeholder="oppure una città" aria-label="Cerca una città"></form></div><p class="tiny" id="gmsg"></p><div id="glist"></div><p class="tiny gcred">dati © openstreetmap</p>';
-  szEl.innerHTML=h; vSez.scrollTop=0;
-  if(s.garden) gardenInit();
+  if(s.music) h+='<div class="rowi"><span class="tiny">spotify</span><iframe class="emb sp" title="Paolo Buonvino su Spotify" loading="lazy" allow="encrypted-media; clipboard-write; fullscreen; picture-in-picture" src="https://open.spotify.com/embed/artist/78IK4N7NFoD9w8YeniXFYE?theme=0"></iframe></div>'
+    +'<div class="rowi"><span class="tiny">youtube · i video più visti</span><div class="yt"><iframe class="emb" title="I video più visti del canale di Paolo Buonvino" loading="lazy" allowfullscreen allow="encrypted-media; picture-in-picture; fullscreen" src="https://www.youtube-nocookie.com/embed/videoseries?list=UULPQ0tBr09so4t1e8gzMhxS9Q"></iframe></div><a class="tiny lnk" target="_blank" rel="noopener" href="https://www.youtube.com/@paolobuonvino/videos">apri il canale →</a></div>';
+  if(s.breath) h='<div class="bbox" id="bbox"><div class="bstage"><div class="bring" id="bring"></div><span class="tiny" id="blab"></span></div><div id="bquo"></div><button type="button" class="upd press" id="bgo">inizia</button><span class="tiny bnote">tre minuti · inspira 4, espira 6</span></div>'+h.replace(/<div class="sart">[\s\S]*?<\/div>/,'');
+  breathStop(); szEl.innerHTML=h; vSez.scrollTop=0;
+  if(s.garden) gardenInit(); if(s.breath) breathInit();
 }
 /* giardini: parchi e giardini veri intorno a un punto, presi da OpenStreetMap. La posizione si chiede solo quando tocchi il tasto */
 function gardenInit(){
@@ -456,7 +517,7 @@ function gardenInit(){
 function route(){
   var hs=location.hash.slice(1), lab=hs==='laboratorio', sz=!lab&&!!SEZ[hs];
   vLab.classList.toggle('on',lab); vSez.classList.toggle('on',sz); vHome.classList.toggle('on',!lab&&!sz);
-  if(sz) showSez(hs);
+  if(sz) showSez(hs); else breathStop();
   if(lab){ resize(); prepare(); enterMode('legami'); }
   else { current=null; stopWalk(); if(ctx&&master){ playing=false; master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(0,ctx.currentTime,0.25); if(drone){ drone.v=0; drone.g.gain.setTargetAtTime(0,ctx.currentTime,0.3); } setTimeout(function(){ if(!current&&ctx) ctx.suspend(); },900); } }
 }
