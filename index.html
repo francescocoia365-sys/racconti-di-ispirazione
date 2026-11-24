@@ -395,7 +395,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='35', updBtn=document.getElementById('upd');
+var BUILD='36', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -1115,10 +1115,10 @@ MODES.legami=(function(){
     return out.map(function(p){ var x=p[0]-ax, y=p[1]-ay; return [(x*dx+y*dy)/m,(y*dx-x*dy)/m]; });
   }
   function braid(pts,lim,swf,al,ph,t,calm){
-    for(var j=0;j<3;j++){
-      g.strokeStyle='rgba('+INK+','+al+')'; g.lineWidth=0.9; g.beginPath();
+    for(var j=0;j<2;j++){
+      g.strokeStyle='rgba('+INK+','+al*0.85+')'; g.lineWidth=0.8; g.beginPath();
       for(var k=0;k<=lim;k++){ var u=k/(NP-1), a=pts[Math.max(0,k-1)], b=pts[Math.min(NP-1,k+1)], dl=Math.hypot(b[0]-a[0],b[1]-a[1])||1, qx=-(b[1]-a[1])/dl, qy=(b[0]-a[0])/dl;
-        var am=(1.4+6.5*(swf?swf(u):0))*Math.pow(Math.sin(Math.PI*u),0.7)*calm, off=am*Math.sin(k*0.41+j*2.094+t*0.7+ph), X=pts[k][0]+qx*off, Y=pts[k][1]+qy*off;
+        var am=(0.9+4.2*(swf?swf(u):0))*Math.pow(Math.sin(Math.PI*u),0.7)*calm, off=am*Math.sin(k*0.33+j*3.1416+t*0.6+ph), X=pts[k][0]+qx*off, Y=pts[k][1]+qy*off;
         if(!k) g.moveTo(X,Y); else g.quadraticCurveTo(lx,ly,(lx+X)/2,(ly+Y)/2); var lx=X, ly=Y; }
       g.lineTo(lx,ly);
       g.stroke();
@@ -1131,8 +1131,8 @@ MODES.legami=(function(){
   function sign(id,x,y,a){
     g.strokeStyle='rgba('+INK+','+a+')'; g.lineWidth=1; g.lineJoin='round'; g.beginPath();
     if(id==='drone'){ var rr=11+3*Math.sin(performance.now()/2300); g.arc(x,y,3.5,0,TAU); g.moveTo(x+rr,y); g.arc(x,y,rr,0,TAU); g.stroke(); return; }
-    var K=KNOT[id], s=BY[id], R0=12+7*s.level, ph=performance.now()/1000*0.22+K[1], N=120;
-    for(var k=0;k<=N;k++){ var th=k/N*TAU, X=x+R0*Math.sin(K[0]*th+ph), Y=y+R0*Math.sin(K[1]*th+(id==='basso'?1.5708:0)); if(k) g.lineTo(X,Y); else g.moveTo(X,Y); }
+    var s=BY[id], r=6+10*s.level; g.arc(x,y,r,0,TAU);                     // ogni voce è solo un cerchio sottile, che si apre col suo suono
+    g.stroke(); g.strokeStyle='rgba('+INK+','+a*0.35+')'; g.beginPath(); g.arc(x,y,r+5+6*s.level,0,TAU);
     g.stroke();
   }
   return {
