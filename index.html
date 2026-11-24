@@ -69,24 +69,15 @@ body{height:100%;width:100%}
 .door.photo .amb{opacity:.6}
 @keyframes amb{0%{transform:translate3d(-7%,-4%,0) rotate(0deg)}50%{transform:translate3d(6%,4%,0) rotate(9deg)}100%{transform:translate3d(-3%,7%,0) rotate(-7deg)}}
 /* laboratorio: la parola riempie la pagina, due lettere per riga. Le lettere sono finestre: dentro si vedono due fotografie che si scambiano piano */
-.knock .under{position:absolute;inset:0;background:#4a433c;overflow:hidden}
-.knock .under .bg{mix-blend-mode:screen;filter:brightness(1.7) contrast(1.05)}
-.knock .under .b2{animation:dx 22s ease-in-out infinite alternate}
+.knock .under{position:absolute;inset:0;background:#000;overflow:hidden}
 .knock .under .bg{top:-6%;height:112%}
-.knock .under .b1{animation:slow1 40s ease-in-out infinite alternate}
-@keyframes slow1{from{margin-top:-3%}to{margin-top:3%}}
-.veil{position:absolute;inset:0;background:#efe6da;opacity:1}
-.knock.live .veil{opacity:0;transition:opacity 12s ease-in-out 2s}
-.knock.live .mask{animation:invbg 60s ease-in-out 22s infinite alternate}
-.knock.live .rows svg{animation:invfg 60s ease-in-out 22s infinite alternate}
-@keyframes invbg{0%,18%{background-color:#0a0a0a}62%,100%{background-color:#fff}}
-@keyframes invfg{0%,18%{fill:#fff}62%,100%{fill:#070707}}
-@media (prefers-reduced-motion:reduce){.knock.live .mask,.knock.live .rows svg{animation:none}}
-@keyframes dx{from{opacity:0}to{opacity:.85}}
-.knock .mask{position:absolute;inset:0;background:#0a0a0a;mix-blend-mode:multiply;display:flex;align-items:center}
-.knock .mask{display:block}
-.rows{position:absolute;left:10px;right:10px;top:calc(58px + var(--st));bottom:calc(14px + var(--sb));display:flex;flex-direction:column;gap:7px}
-.rows svg{width:100%;height:100%;display:block;fill:#fff;overflow:visible}
+.knock .under .b1{opacity:.2;animation:dx1 34s ease-in-out infinite alternate}
+.knock .under .b2{opacity:0;animation:dx2 34s ease-in-out infinite alternate}
+@keyframes dx1{from{opacity:.24}to{opacity:.05}}
+@keyframes dx2{from{opacity:0}to{opacity:.22}}
+.word.big{font-size:21vw;line-height:.98;letter-spacing:.02em}
+@media (min-width:500px){.word.big{font-size:105px}}
+@media (prefers-reduced-motion:reduce){.amb,.knock .under .bg{animation:none}}
 .knock .enter{top:calc(12px + var(--st));bottom:auto;right:14px;border:0;color:rgba(255,255,255,.62)}
 .knock .n{position:absolute;z-index:1;top:calc(24px + var(--st));left:26px}
 @media (prefers-reduced-motion:reduce){.amb,.knock .under .b2{animation:none}}
@@ -177,9 +168,8 @@ body{height:100%;width:100%}
       <div class="in"><span class="tiny">paolo buonvino</span><h1 class="word">Racconti<span class="di">di</span><br>ispirazione</h1></div>
     </header>
     <a class="door knock" href="#laboratorio" id="tolab" aria-label="Laboratorio: entra">
-      <div class="under"><img class="bg b1" src="img/p-musiche.jpg" alt="" style="object-position:50% 30%"><img class="bg b2" src="img/p-cover.jpg" alt="" style="object-position:50% 38%"><div class="amb"></div><div class="veil"></div></div>
-      <div class="mask"><div class="rows" id="rows"><svg id="logo" aria-hidden="true"><path/><path/><path/><path/><path/><path/><path/><path/><path/><path/><path/></svg></div></div>
-      <span class="tiny n">01</span>
+      <div class="under"><img class="bg b1" src="img/p-musiche.jpg" alt="" style="object-position:50% 30%"><img class="bg b2" src="img/p-cover.jpg" alt="" style="object-position:50% 38%"><div class="amb"></div></div>
+      <div class="in"><span class="tiny">01</span><h2 class="word big">Labo<br>rato<br>rio</h2></div>
       <span class="enter" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
     </a>
     <section class="door photo">
@@ -257,7 +247,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='20', updBtn=document.getElementById('upd');
+var BUILD='21', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -284,43 +274,11 @@ function splitLetters(node){
 }
 function fitOne(w,start){ var max=w.parentNode.getBoundingClientRect().width-4, fs=start, n=0; if(max<50) return start; w.style.fontSize=fs+'px'; while(Math.max(w.scrollWidth,w.getBoundingClientRect().width)>max&&fs>12&&n<80){ fs-=1; w.style.fontSize=fs+'px'; n++; } return fs; }
 function fitWords(){
-  var words=[].slice.call(document.querySelectorAll('.door:not(.end) .word')), min=64;
+  var words=[].slice.call(document.querySelectorAll('.door:not(.end) .word:not(.big)')), min=64;
   words.forEach(function(w){ min=Math.min(min,fitOne(w,64)); });     // una sola misura per tutte le porte: quella della parola più lunga
   words.forEach(function(w){ w.style.fontSize=min+'px'; });
   [].forEach.call(document.querySelectorAll('.end .word'),function(w){ fitOne(w,20); });
 }
-/* ---- Laboratorio: un logogramma. Undici lettere incastrate in un blocco solo; ognuna cambia forma per riempire il suo posto,
-   e i posti si spostano piano: le lettere si allargano e si stringono l'una contro l'altra, senza mai lasciare vuoti ---- */
-var GL={"L":{"c":"MLLLLLZ","a":[0.0,1.0,1.0,1.0,1.0,0.8353,0.7084,0.8353,0.7084,0.0,0.0,0.0],"b":[0.0,1.0,1.0,1.0,1.0,0.7624,0.3499,0.7624,0.3499,0.0,0.0,0.0],"r":[0.323,1.058]},"A":{"c":"MLLLLLLLZMLLLZ","a":[0.0,1.0,0.4671,1.0,0.4786,0.7567,0.5227,0.7567,0.5327,1.0,1.0,1.0,0.8637,0.0,0.1308,0.0,0.4773,0.5896,0.4957,0.1659,0.5042,0.1659,0.5241,0.5896],"b":[0.0,1.0,0.2417,1.0,0.3122,0.7893,0.6887,0.7893,0.7583,1.0,1.0,1.0,0.6517,0.0,0.3492,0.0,0.373,0.5652,0.5004,0.1833,0.5013,0.1833,0.6288,0.5652],"r":[0.491,1.596]},"B":{"c":"MLQQQQQQQQLZMLLQQQQZMLLQQQQZ","a":[0.0,1.0,0.6694,1.0,0.9986,1.0,0.9979,0.9025,0.9971,0.8049,0.9971,0.6981,0.9971,0.621,0.9971,0.5364,0.9971,0.4517,0.7991,0.446,1.0,0.4441,1.0,0.3675,1.0,0.2908,1.0,0.2361,1.0,0.1882,0.9992,0.0941,0.9984,0.0,0.6988,0.0,0.0,0.0,0.4781,0.8327,0.4781,0.5304,0.4924,0.5304,0.5246,0.5304,0.5232,0.5701,0.5217,0.6099,0.5217,0.6871,0.5217,0.7665,0.5232,0.7996,0.5246,0.8327,0.4949,0.8327,0.4781,0.3644,0.4781,0.1647,0.4947,0.1647,0.5217,0.1647,0.5232,0.1874,0.5246,0.2101,0.5246,0.2568,0.5246,0.3063,0.5246,0.3353,0.5246,0.3644,0.4924,0.3644],"b":[0.0,1.0,0.6826,1.0,0.8654,1.0,0.9327,0.9292,1.0,0.8585,1.0,0.7256,1.0,0.5958,0.9266,0.5434,0.8533,0.491,0.7855,0.4866,0.8529,0.4821,0.9086,0.4212,0.9644,0.3603,0.9644,0.2445,0.9644,0.1238,0.8947,0.0619,0.825,0.0,0.6373,0.0,0.0,0.0,0.2696,0.7624,0.2696,0.5898,0.6228,0.5898,0.6898,0.5898,0.71,0.6087,0.7303,0.6276,0.7303,0.6735,0.7303,0.7196,0.7118,0.741,0.6933,0.7624,0.6318,0.7624,0.2696,0.3965,0.2696,0.2376,0.6007,0.2376,0.653,0.2376,0.6719,0.2561,0.6909,0.2745,0.6909,0.3122,0.6909,0.3519,0.6708,0.3742,0.6508,0.3965,0.5944,0.3965],"r":[0.478,1.374]},"O":{"c":"MQQQQQQQQZMQQQQQQQQZ","a":[0.4985,1.0,0.9971,1.0,0.9985,0.8676,1.0,0.7352,1.0,0.5013,1.0,0.2664,0.9985,0.1332,0.9971,0.0,0.4985,0.0,0.0,0.0,0.0,0.1324,0.0,0.2648,0.0,0.5013,0.0,0.7352,0.0015,0.8676,0.0029,1.0,0.4985,1.0,0.4985,0.8353,0.4782,0.8353,0.4768,0.8088,0.4753,0.7822,0.4753,0.5013,0.4753,0.2128,0.4768,0.1888,0.4782,0.1647,0.4985,0.1647,0.5218,0.1647,0.5232,0.1888,0.5247,0.2128,0.5247,0.5013,0.5247,0.7822,0.5232,0.8088,0.5218,0.8353,0.4985,0.8353],"b":[0.4995,1.0,0.7194,1.0,0.8597,0.8729,1.0,0.7458,1.0,0.5002,1.0,0.2531,0.8597,0.1265,0.7194,0.0,0.4995,0.0,0.2797,0.0,0.1398,0.1259,0.0,0.2518,0.0,0.5002,0.0,0.7458,0.1403,0.8729,0.2806,1.0,0.4995,1.0,0.4995,0.7674,0.3866,0.7674,0.3145,0.7,0.2425,0.6326,0.2425,0.5002,0.2425,0.3663,0.3145,0.2994,0.3866,0.2326,0.4995,0.2326,0.6134,0.2326,0.6855,0.2994,0.7575,0.3663,0.7575,0.5002,0.7575,0.6326,0.6855,0.7,0.6134,0.7674,0.4995,0.7674],"r":[0.468,1.496]},"R":{"c":"MLLLQQQQLZMLLLZMLLQQQQZ","a":[0.0,1.0,0.4672,1.0,0.4672,0.5643,0.6719,0.5643,0.9804,0.5643,0.979,0.4716,0.9775,0.3789,0.9775,0.2966,0.9775,0.2117,0.979,0.1058,0.9804,0.0,0.6692,0.0,0.0,0.0,0.5328,1.0,1.0,1.0,0.9227,0.5214,0.4846,0.5429,0.4672,0.423,0.4672,0.1673,0.4786,0.1673,0.5103,0.1673,0.5103,0.2005,0.5103,0.2337,0.5103,0.2966,0.5103,0.3567,0.5117,0.3899,0.5131,0.423,0.4786,0.423],"b":[0.0,1.0,0.2702,1.0,0.2702,0.6645,0.64,0.6645,0.7952,0.6645,0.8855,0.5845,0.9758,0.5046,0.9758,0.3322,0.9758,0.1584,0.8902,0.0792,0.8046,0.0,0.659,0.0,0.0,0.0,0.6942,1.0,1.0,1.0,0.6681,0.5295,0.3927,0.5295,0.2702,0.4412,0.2702,0.2376,0.5819,0.2376,0.6465,0.2376,0.6759,0.2622,0.7054,0.2867,0.7054,0.34,0.7054,0.3917,0.6765,0.4165,0.6475,0.4412,0.5819,0.4412],"r":[0.492,1.371]},"T":{"c":"MLLLLLLLZ","a":[0.213,1.0,0.7866,1.0,0.7866,0.1673,1.0,0.1673,1.0,0.0,0.0,0.0,0.0,0.1673,0.213,0.1673],"b":[0.3658,1.0,0.6354,1.0,0.6354,0.2376,1.0,0.2376,1.0,0.0,0.0,0.0,0.0,0.2376,0.3658,0.2376],"r":[0.398,1.374]},"I":{"c":"MLLLZ","a":[0.0,1.0,1.0,1.0,1.0,0.0,0.0,0.0],"b":[0.0,1.0,1.0,1.0,1.0,0.0,0.0,0.0],"r":[0.23,0.366]}}, rowsEl=document.getElementById('rows'), logoEl=document.getElementById('logo'), logoPaths=[].slice.call(logoEl.querySelectorAll('path')), WORD='LABORATORIO';
-function glyphD(ch,x,y,w,h){
-  var G=GL[ch], t=Math.max(0,Math.min(1,(w/h-G.r[0])/(G.r[1]-G.r[0]))), a=G.a, b=G.b, c=G.c, k=0, d='', i, j, n;
-  for(i=0;i<c.length;i++){ if(c[i]==='Z'){ d+='Z'; continue; } n=c[i]==='Q'?2:1; d+=c[i];
-    for(j=0;j<n;j++){ d+=(x+(a[k]+(b[k]-a[k])*t)*w).toFixed(1)+' '+(y+(a[k+1]+(b[k+1]-a[k+1])*t)*h).toFixed(1)+' '; k+=2; } }
-  return d;
-}
-function layLogo(tm){
-  var W0=rowsEl.clientWidth, H0=rowsEl.clientHeight; if(!W0||!H0) return;
-  logoEl.setAttribute('viewBox','0 0 '+W0+' '+H0);
-  function o(base,amp,per,ph){ return base+amp*Math.sin(tm*6.2832/per+ph); }
-  var xs=[0,o(.25,.055,102,0),o(.5,.06,138,1.3),o(.75,.055,78,2.1),1];
-  var ya=[o(.3,.06,114,.4),o(.26,.07,66,2.6),o(.33,.06,174,4.1),o(.28,.07,90,5.2)];
-  var yb=o(.61,.045,126,1), us=[0,o(.43,.06,96,3.3),o(.57,.05,150,.7),1], cells=[], c, g=3;
-  for(c=0;c<4;c++) cells.push([xs[c],0,xs[c+1],ya[c]]);
-  for(c=0;c<4;c++) cells.push([xs[c],ya[c],xs[c+1],yb]);
-  for(c=0;c<3;c++) cells.push([us[c],yb,us[c+1],1]);
-  cells.forEach(function(r,i){
-    var x0=r[0]*W0+(r[0]>0?g:0), y0=r[1]*H0+(r[1]>0?g:0), x1=r[2]*W0-(r[2]<1?g:0), y1=r[3]*H0-(r[3]<1?g:0);
-    logoPaths[i].setAttribute('d',glyphD(WORD[i],x0,y0,x1-x0,y1-y0));
-  });
-}
-var still=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches, logoN=0;
-function logoTick(now){
-  requestAnimationFrame(logoTick);
-  if(still||(logoN++)%4||!vHome.classList.contains('on')) return;
-  var w=doorsEl.clientWidth||1, off=doorsEl.scrollLeft/w; if(off<0.05||off>1.95) return;
-  layLogo(now/1000);
-}
-window.addEventListener('resize',function(){ layLogo(performance.now()/1000); }); window.addEventListener('load',function(){ layLogo(0); requestAnimationFrame(logoTick); });
 window.addEventListener('resize',fitWords); window.addEventListener('load',fitWords);
 if(document.fonts&&document.fonts.load) document.fonts.load('300 40px Unbounded').then(fitWords,function(){});
 [300,1000,2500,5000].forEach(function(ms){ setTimeout(fitWords,ms); });
