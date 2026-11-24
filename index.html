@@ -84,7 +84,6 @@ body{height:100%;width:100%}
 .knock .enter{top:calc(12px + var(--st));bottom:auto;right:14px;border:0;color:rgba(255,255,255,.62)}
 .knock .n{position:absolute;z-index:1;top:calc(24px + var(--st));left:26px}
 @media (prefers-reduced-motion:reduce){.amb,.knock .under .b2{animation:none}}
-.door.type .in{bottom:auto;top:43%}
 .di{font-size:.27em;letter-spacing:.16em;text-transform:lowercase;color:rgba(255,255,255,.62);margin-left:.5em}
 .ch{display:inline-block}
 .vword{position:absolute;z-index:1;left:50%;top:50%;margin:0;transform:translate(-50%,-50%) rotate(-90deg);font-family:"Unbounded",var(--font);font-weight:300;font-size:96px;line-height:1;letter-spacing:.01em;text-transform:uppercase;white-space:nowrap;will-change:transform}
@@ -96,6 +95,36 @@ body{height:100%;width:100%}
 .end .word{font-size:20px;color:var(--secondary)}
 .upd{margin-top:14px;height:40px;padding:0 16px;border-radius:999px;background:var(--surface);color:var(--label);font-family:"Unbounded",var(--font);font-weight:300;font-size:11px;letter-spacing:.1em;text-transform:lowercase}
 .upd.new{background:#fff;color:#000}
+
+/* ---------- Sezioni: ogni porta ha il suo disegno a filo; la pagina lo riprende in testa ---------- */
+.art{position:absolute;left:50%;top:38%;width:62vw;max-width:310px;transform:translate(-50%,-50%);color:rgba(255,255,255,.6);pointer-events:none}
+.art svg,.sart svg{display:block;width:100%;height:auto;overflow:visible}
+.art svg *,.sart svg *{vector-effect:non-scaling-stroke}
+.door.photo.dim .bg{opacity:.34}
+.breath{transform-origin:100px 100px;animation:breath 11s ease-in-out infinite alternate}
+@keyframes breath{from{transform:scale(.8)}to{transform:scale(1.08)}}
+.inv{margin-top:6px;padding:6px 0;pointer-events:auto}
+#sez{background:#000;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-y;z-index:5;transform:translateY(24px)}
+#sez::-webkit-scrollbar{display:none;width:0}
+#sez .sback{position:fixed;z-index:2;top:calc(12px + var(--st));left:14px;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;color:rgba(255,255,255,.62)}
+.sz{padding:calc(70px + var(--st)) 26px calc(70px + var(--sb));display:flex;flex-direction:column;align-items:flex-start;-webkit-user-select:text;user-select:text}
+.sart{width:46vw;max-width:230px;color:rgba(255,255,255,.55);margin:0 0 34px}
+.sz .word{white-space:normal;font-size:30px;line-height:1.1;margin:12px 0 26px;text-wrap:balance}
+.lead{margin:0 0 16px;font-size:20px;line-height:1.4;color:var(--label);max-width:30ch;text-wrap:pretty}
+.par{margin:0 0 16px;font-size:16px;line-height:1.55;color:var(--secondary);max-width:38ch;text-wrap:pretty}
+.rowi{width:100%;display:flex;flex-direction:column;gap:8px;padding:20px 0;border-top:1px solid var(--separator);margin-top:8px}
+.rowi+.rowi{margin-top:0}
+.rowi b{font-family:"Unbounded",var(--font);font-weight:300;font-size:15px;line-height:1.3;letter-spacing:.02em;text-transform:uppercase}
+.rowi .soon{color:rgba(255,255,255,.38)}
+.gar{display:flex;gap:10px;align-items:center;width:100%;margin:16px 0 4px}
+.gar .upd{margin:0;flex:none;background:#fff;color:#000}
+#gform{flex:1;min-width:0}
+#gq{width:100%;height:40px;border:0;border-bottom:1px solid var(--separator);border-radius:0;background:none;color:var(--label);font-family:"Unbounded",var(--font);font-weight:300;font-size:16px;letter-spacing:.02em;text-transform:lowercase;outline:none;padding:0 2px}
+#gq::placeholder{color:rgba(255,255,255,.38);font-size:11px;letter-spacing:.1em}
+#gmsg{min-height:16px;margin:14px 0 4px}
+#glist{width:100%}
+.gcred{margin-top:26px;color:rgba(255,255,255,.3)}
+@media (prefers-reduced-motion:reduce){.breath{animation:none}}
 
 /* ---------- Laboratorio ---------- */
 #lab{background:#000;touch-action:none;transform:translateY(24px);z-index:5}
@@ -168,44 +197,70 @@ body{height:100%;width:100%}
     <header class="door photo">
       <img class="bg" src="img/p-cover.jpg" alt="Paolo Buonvino al pianoforte, solo sul palco, in un fascio di luce" style="object-position:50% 38%">
       <div class="amb"></div>
-      <div class="in"><span class="tiny">paolo buonvino</span><h1 class="word">Racconti<span class="di">di</span><br>ispirazione</h1></div>
+      <div class="in"><span class="tiny">paolo buonvino</span><h1 class="word">Racconti<span class="di">di</span><br>ispirazione</h1><a class="tiny inv" href="#invito">un invito →</a></div>
     </header>
     <a class="door knock" href="#laboratorio" id="tolab" aria-label="Laboratorio: entra">
       <div class="under"><img class="bg b1" src="img/p-musiche.jpg" alt="" style="object-position:50% 30%"><img class="bg b2" src="img/p-cover.jpg" alt="" style="object-position:50% 38%"><div class="amb"></div></div>
       <div class="in"><span class="tiny">01</span><h2 class="word big" aria-label="Laboratorio"><span class="r"><i>L</i><i>A</i><i>B</i><i>O</i></span><span class="r"><i>R</i><i>A</i><i>T</i><i>O</i></span><span class="r"><i>R</i><i>I</i><i>O</i></span></h2></div>
       <span class="enter" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
     </a>
-    <section class="door photo">
+    <a class="door photo dim" href="#musiche">
       <img class="bg" src="img/p-musiche.jpg" alt="" style="object-position:50% 30%">
       <div class="amb"></div>
-      <div class="in"><span class="tiny">02</span><h2 class="word">Musiche</h2><span class="tiny">presto</span></div>
-    </section>
-    <section class="door type">
+      <div class="art" data-art="musiche"></div>
+      <div class="in"><span class="tiny">02</span><h2 class="word">Musiche</h2></div>
+    </a>
+    <a class="door type" href="#respiro">
       <img class="bg" src="img/p-respiro.jpg" alt="" style="object-position:40% 50%">
       <div class="amb"></div>
-      <div class="in"><span class="tiny">03</span><h2 class="word">Respiro</h2><span class="tiny">presto</span></div>
-    </section>
-    <section class="door photo">
+      <div class="art" data-art="respiro"></div>
+      <div class="in"><span class="tiny">03</span><h2 class="word">Respiro</h2></div>
+    </a>
+    <a class="door photo dim" href="#taccuino">
       <img class="bg" src="img/p-taccuino.jpg" alt="" style="object-position:50% 40%">
       <div class="amb"></div>
-      <div class="in"><span class="tiny">04</span><h2 class="word">Taccuino</h2><span class="tiny">presto</span></div>
-    </section>
-    <section class="door type">
+      <div class="art" data-art="taccuino"></div>
+      <div class="in"><span class="tiny">04</span><h2 class="word">Taccuino</h2></div>
+    </a>
+    <a class="door type" href="#letture">
       <img class="bg" src="img/p-letture.jpg" alt="" style="object-position:30% 50%">
       <div class="amb"></div>
-      <div class="in"><span class="tiny">05</span><h2 class="word">Letture</h2><span class="tiny">presto</span></div>
-    </section>
+      <div class="art" data-art="letture"></div>
+      <div class="in"><span class="tiny">05</span><h2 class="word">Letture</h2></div>
+    </a>
+    <a class="door type" href="#giardini">
+      <div class="amb"></div>
+      <div class="art" data-art="giardini"></div>
+      <div class="in"><span class="tiny">06</span><h2 class="word">Giardini</h2></div>
+    </a>
+    <a class="door type" href="#insieme">
+      <div class="amb"></div>
+      <div class="art" data-art="insieme"></div>
+      <div class="in"><span class="tiny">07</span><h2 class="word">Insieme</h2></div>
+    </a>
+    <a class="door type" href="#partiture">
+      <div class="amb"></div>
+      <div class="art" data-art="partiture"></div>
+      <div class="in"><span class="tiny">08</span><h2 class="word">Partiture</h2></div>
+    </a>
+    <a class="door type" href="#voci">
+      <div class="amb"></div>
+      <div class="art" data-art="voci"></div>
+      <div class="in"><span class="tiny">09</span><h2 class="word">Voci</h2></div>
+    </a>
     <section class="door type end">
       <div class="in">
-        <span class="tiny">e ancora, presto</span>
-        <p class="word">La musica<br>che nasce insieme</p>
-        <p class="word">Partiture</p>
-        <p class="word">Giardini</p>
-        <p class="word">Le vostre voci</p>
+        <span class="tiny">il racconto continua</span>
+        <p class="word">Ogni incontro può aprire<br>una nuova pagina</p>
         <button id="upd" class="upd press" type="button">versione <span id="ver"></span> · aggiorna</button>
       </div>
     </section>
   </div>
+</section>
+
+<section class="view" id="sez">
+  <a class="round press sback" href="#home" aria-label="Indietro"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4L6 9l5 5"/></svg></a>
+  <div class="sz" id="sz"></div>
 </section>
 
 <section class="view" id="lab" aria-label="Laboratorio">
@@ -250,7 +305,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='22', updBtn=document.getElementById('upd');
+var BUILD='23', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -305,10 +360,88 @@ document.addEventListener('keydown',function(e){
   if(e.key==='ArrowRight'||e.key==='ArrowLeft'){ var w=doorsEl.clientWidth; doorsEl.scrollTo({left:(Math.round(doorsEl.scrollLeft/w)+(e.key==='ArrowRight'?1:-1))*w,behavior:'smooth'}); }
 });
 
+/* ---- Le sezioni: ognuna ha il suo disegno, usato sulla porta e in testa alla pagina. I testi sono quelli di Paolo ---- */
+var ART=(function(){
+  var i, s, A={};
+  function wrap(b){ return '<svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" aria-hidden="true">'+b+'</svg>'; }
+  s=''; for(i=0;i<27;i++){ var x=9+i*7, u=i/26, h=8+78*Math.pow(Math.sin(Math.PI*u),1.5)*(0.45+0.55*Math.abs(Math.sin(u*9.2+0.6))); s+='<path d="M'+x+' '+(100-h).toFixed(1)+'V'+(100+h).toFixed(1)+'"/>'; }
+  A.musiche=wrap(s);                                                       // un'onda di suono
+  A.respiro=wrap('<g class="breath"><circle cx="100" cy="100" r="34"/><circle cx="100" cy="100" r="58" opacity=".6"/><circle cx="100" cy="100" r="82" opacity=".3"/></g>');   // un respiro
+  s='<path d="M44 18V182" opacity=".5"/>'; for(i=0;i<8;i++) s+='<path d="M14 '+(34+i*19)+'H186" opacity=".35"/>';
+  s+='<path d="M54 66c8-12 14 8 22-2s10-10 16-2 12 6 18-2 12-6 20 2"/><path d="M54 104c10-10 16 8 26 0s14-8 22 0"/>';
+  A.taccuino=wrap(s);                                                      // una pagina a righe, con due righe scritte
+  s='<path d="M100 22V178" opacity=".5"/>'; var L=[62,70,54,68,60,72,48,66,58,30], R=[70,58,66,72,50,68,62,56,70,40];
+  for(i=0;i<10;i++){ s+='<path d="M'+(88-L[i])+' '+(34+i*14.5)+'H88" opacity=".7"/><path d="M112 '+(34+i*14.5)+'H'+(112+R[i])+'" opacity=".7"/>'; }
+  A.letture=wrap(s);                                                       // due pagine aperte
+  s=''; [[62,70,34],[128,56,24],[150,112,30],[84,134,26],[36,128,16],[118,160,14],[176,62,12],[104,96,10],[30,58,10]].forEach(function(c){ s+='<circle cx="'+c[0]+'" cy="'+c[1]+'" r="'+c[2]+'"/><circle cx="'+c[0]+'" cy="'+c[1]+'" r="1.2" fill="currentColor"/>'; });
+  A.giardini=wrap(s);                                                      // un giardino visto dall'alto
+  A.insieme=wrap('<circle cx="76" cy="100" r="58"/><circle cx="124" cy="100" r="58"/><path d="M100 47.2a58 58 0 0 1 0 105.6a58 58 0 0 1 0-105.6z" fill="currentColor" fill-opacity=".14" stroke="none"/>');   // due persone, e ciò che nasce in mezzo
+  s=''; for(i=0;i<5;i++) s+='<path d="M10 '+(72+i*14)+'H190" opacity=".55"/>'; s+='<path d="M10 72V128M190 72V128M104 72V128" opacity=".55"/>';
+  [[30,121],[50,107],[70,114],[88,93],[122,100],[142,86],[162,107],[178,93]].forEach(function(n){ s+='<ellipse cx="'+n[0]+'" cy="'+n[1]+'" rx="5" ry="3.6" fill="currentColor" stroke="none" transform="rotate(-20 '+n[0]+' '+n[1]+')"/><path d="M'+(n[0]+4.4)+' '+(n[1]-1)+'V'+(n[1]-34)+'"/>'; });
+  A.partiture=wrap(s);                                                     // un rigo
+  s=''; [[14,36,96,0],[14,50,64,0],[186,82,112,1],[186,96,78,1],[186,110,50,1],[14,142,84,0],[14,156,104,0],[14,170,40,0]].forEach(function(l){ s+='<path d="M'+l[0]+' '+l[1]+'H'+(l[3]?l[0]-l[2]:l[0]+l[2])+'"/>'; });
+  A.voci=wrap(s);                                                          // voci che si rispondono
+  return A;
+})();
+var SEZ={
+  invito:{n:'',t:'Un invito',lead:'L’ispirazione, ossigeno per l’anima.',p:['In queste pagine ho raccolto alcune delle cose che, nel tempo, hanno dato e continuano a dare ossigeno alla mia vita. Pensieri, incontri, parole, immagini, suoni ed emozioni che hanno acceso qualcosa dentro di me.','Ho scelto di condividerli perché credo che l’ispirazione, come il respiro, sia ancora più preziosa quando diventa un’esperienza comune.']},
+  musiche:{n:'02',t:'Musiche che mi ispirano',lead:'Suoni che accendono idee.',rows:[['spotify','Una playlist di ispirazioni'],['youtube','Immagini, voci, musica']]},
+  respiro:{n:'03',t:'Respirare',lead:'Un luogo per rallentare. Ascoltare. Ritrovare spazio.',rows:[['playlist meditativa','Una selezione da ascoltare senza fretta']]},
+  taccuino:{n:'04',t:'Pagine dal mio taccuino',lead:'Frammenti, pensieri, intuizioni. Un modo di custodire ciò che nasce.',rows:[['manoscritti','Pagine da sfogliare e ingrandire']]},
+  letture:{n:'05',t:'Letture che mi hanno ispirato',lead:'Parole che lasciano un segno, aprono strade, ci cambiano un poco.',rows:[['letture','Libri, pagine e brevi commenti personali']]},
+  giardini:{n:'06',t:'Giardini che ispirano',lead:'Un invito a cercare bellezza anche fuori dalle pagine.',garden:true},
+  insieme:{n:'07',t:'La musica che nasce insieme',lead:'Durante i miei concerti invito una persona del pubblico a improvvisare.',p:['Ogni incontro dà vita a una composizione unica, che non esisteva prima di quel momento.'],rows:[['le improvvisazioni','Un archivio che cresce dopo ogni concerto']]},
+  partiture:{n:'08',t:'Partiture da scaricare',lead:'La musica è anche un gesto che passa di mano in mano.',p:['Qui troverai alcune mie partiture da leggere, studiare e suonare.'],rows:[['da «dio ride» · piano solo','Oltre le nostre vie']]},
+  voci:{n:'09',t:'Le vostre voci',lead:'Un concerto non finisce con l’ultima nota.',p:['Se qualcosa ti ha emozionato, sorpreso o fatto riflettere, potrai raccontarlo qui: un pensiero, un racconto, un disegno.'],rows:[['lascia un pensiero','I vostri messaggi e le vostre ispirazioni']]}
+};
+var vSez=document.getElementById('sez'), szEl=document.getElementById('sz');
+function esc(x){ return String(x).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function showSez(id){
+  var s=SEZ[id], h='';
+  if(ART[id]) h+='<div class="sart">'+ART[id]+'</div>';
+  h+='<span class="tiny">'+s.n+'</span><h2 class="word">'+esc(s.t)+'</h2><p class="lead">'+esc(s.lead)+'</p>';
+  (s.p||[]).forEach(function(x){ h+='<p class="par">'+esc(x)+'</p>'; });
+  (s.rows||[]).forEach(function(r){ h+='<div class="rowi"><span class="tiny">'+esc(r[0])+'</span><b>'+esc(r[1])+'</b><span class="tiny soon">presto</span></div>'; });
+  if(s.garden) h+='<div class="gar"><button type="button" class="upd press" id="gnear">vicino a me</button><form id="gform"><input id="gq" type="text" inputmode="search" enterkeyhint="search" autocomplete="off" placeholder="oppure una città" aria-label="Cerca una città"></form></div><p class="tiny" id="gmsg"></p><div id="glist"></div><p class="tiny gcred">dati © openstreetmap</p>';
+  szEl.innerHTML=h; vSez.scrollTop=0;
+  if(s.garden) gardenInit();
+}
+/* giardini: parchi e giardini veri intorno a un punto, presi da OpenStreetMap. La posizione si chiede solo quando tocchi il tasto */
+function gardenInit(){
+  var msg=document.getElementById('gmsg'), list=document.getElementById('glist');
+  function km(a,b,c,d){ var R=6371, x=(d-b)*Math.PI/180*Math.cos((a+c)*Math.PI/360), y=(c-a)*Math.PI/180; return R*Math.sqrt(x*x+y*y); }
+  function find(lat,lon,label){
+    msg.textContent='cerco intorno a '+label+'…'; list.innerHTML='';
+    var q='[out:json][timeout:20];(nwr["leisure"~"^(park|garden|nature_reserve)$"]["name"](around:5000,'+lat+','+lon+'););out center 80;';
+    fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){
+      var seen={}, it=[];
+      (j.elements||[]).forEach(function(e){ var la=e.lat||(e.center&&e.center.lat), lo=e.lon||(e.center&&e.center.lon), n=e.tags&&e.tags.name; if(!n||la==null||seen[n]) return; seen[n]=1;
+        it.push({n:n,la:la,lo:lo,d:km(lat,lon,la,lo),k:e.tags.leisure==='garden'?'giardino':e.tags.leisure==='nature_reserve'?'riserva':'parco'}); });
+      it.sort(function(a,b){ return a.d-b.d; }); it=it.slice(0,24);
+      if(!it.length){ msg.textContent='qui intorno non ho trovato giardini'; return; }
+      msg.textContent=it.length+' luoghi intorno a '+label;
+      list.innerHTML=it.map(function(x){ return '<a class="rowi" target="_blank" rel="noopener" href="https://maps.apple.com/?ll='+x.la+','+x.lo+'&q='+encodeURIComponent(x.n)+'"><span class="tiny">'+x.k+' · '+(x.d<1?Math.round(x.d*1000)+' m':x.d.toFixed(1).replace('.',',')+' km')+'</span><b>'+esc(x.n)+'</b></a>'; }).join('');
+    }).catch(function(){ msg.textContent='non riesco a cercare adesso. riprova tra poco'; });
+  }
+  document.getElementById('gnear').addEventListener('click',function(){
+    if(!navigator.geolocation){ msg.textContent='questo dispositivo non dà la posizione. cerca una città'; return; }
+    msg.textContent='chiedo la posizione…';
+    navigator.geolocation.getCurrentPosition(function(p){ find(p.coords.latitude,p.coords.longitude,'te'); },function(){ msg.textContent='posizione non concessa. puoi cercare una città'; },{timeout:15000,maximumAge:600000});
+  });
+  document.getElementById('gform').addEventListener('submit',function(e){
+    e.preventDefault(); var v=document.getElementById('gq').value.trim(); if(!v) return; document.getElementById('gq').blur(); msg.textContent='cerco '+v+'…';
+    fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(v)).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){
+      if(!j.length){ msg.textContent='non trovo «'+v+'»'; return; } find(parseFloat(j[0].lat),parseFloat(j[0].lon),v);
+    }).catch(function(){ msg.textContent='non riesco a cercare adesso. riprova tra poco'; });
+  });
+}
+[].forEach.call(document.querySelectorAll('[data-art]'),function(el){ el.innerHTML=ART[el.getAttribute('data-art')]||''; });
+
 /* ---- Navigazione ---- */
 function route(){
-  var lab=location.hash==='#laboratorio';
-  vLab.classList.toggle('on',lab); vHome.classList.toggle('on',!lab);
+  var hs=location.hash.slice(1), lab=hs==='laboratorio', sz=!lab&&!!SEZ[hs];
+  vLab.classList.toggle('on',lab); vSez.classList.toggle('on',sz); vHome.classList.toggle('on',!lab&&!sz);
+  if(sz) showSez(hs);
   if(lab){ resize(); prepare(); enterMode('legami'); }
   else { current=null; stopWalk(); if(ctx&&master){ playing=false; master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(0,ctx.currentTime,0.25); if(drone){ drone.v=0; drone.g.gain.setTargetAtTime(0,ctx.currentTime,0.3); } setTimeout(function(){ if(!current&&ctx) ctx.suspend(); },900); } }
 }
