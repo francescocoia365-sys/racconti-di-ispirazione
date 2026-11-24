@@ -157,6 +157,16 @@ body{height:100%;width:100%}
 .bbox.done .bstage{display:none}
 .bbox.done #bquo{padding:70px 0 30px;animation:qin 2.5s ease both}
 @keyframes qin{from{opacity:0}to{opacity:1}}
+.tac{display:flex;gap:14px;width:calc(100% + 52px);margin:22px -26px 14px;padding:0 26px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y}
+.tac::-webkit-scrollbar{display:none}
+.tpage{flex:0 0 86%;scroll-snap-align:center;height:62vh;max-height:560px;background:#0d0d0d;border-radius:3px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.6);transform:rotate(-.6deg)}
+.tpage:nth-child(even){transform:rotate(.5deg)}
+.tpage img{width:100%;height:100%;object-fit:cover;pointer-events:none}
+#zoom{position:fixed;inset:0;z-index:9;background:#000;overflow:hidden;touch-action:none;opacity:0;visibility:hidden;transition:opacity .35s,visibility 0s .35s}
+#zoom.on{opacity:1;visibility:visible;transition:opacity .35s}
+#zimg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transform-origin:0 0;will-change:transform;-webkit-user-drag:none}
+#zclose{position:absolute;top:calc(12px + var(--st));right:14px;background:rgba(0,0,0,.5)}
+#zclose svg{pointer-events:none}
 @media (prefers-reduced-motion:reduce){.breath{animation:none}}
 
 /* ---------- Laboratorio ---------- */
@@ -294,6 +304,7 @@ body{height:100%;width:100%}
 <section class="view" id="sez">
   <a class="round press sback" href="#home" aria-label="Indietro"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4L6 9l5 5"/></svg></a>
   <div class="sz" id="sz"></div>
+  <div id="zoom"><img id="zimg" alt=""><button type="button" class="round press" id="zclose" aria-label="Chiudi"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9"/></svg></button></div>
 </section>
 
 <section class="view" id="lab" aria-label="Laboratorio">
@@ -338,7 +349,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='28', updBtn=document.getElementById('upd');
+var BUILD='29', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -420,7 +431,7 @@ var SEZ={
   invito:{n:'',t:'Un invito',lead:'L’ispirazione, ossigeno per l’anima.',p:['In queste pagine ho raccolto alcune delle cose che, nel tempo, hanno dato e continuano a dare ossigeno alla mia vita. Pensieri, incontri, parole, immagini, suoni ed emozioni che hanno acceso qualcosa dentro di me.','Ho scelto di condividerli perché credo che l’ispirazione, come il respiro, sia ancora più preziosa quando diventa un’esperienza comune.']},
   musiche:{n:'02',t:'Musiche che mi ispirano',lead:'Suoni che accendono idee.',music:true},
   respiro:{n:'03',t:'Respirare',lead:'Un luogo per rallentare. Ascoltare. Ritrovare spazio.',breath:true},
-  taccuino:{n:'04',t:'Pagine dal mio taccuino',lead:'Frammenti, pensieri, intuizioni. Un modo di custodire ciò che nasce.',rows:[['manoscritti','Pagine da sfogliare e ingrandire']]},
+  taccuino:{n:'04',t:'Pagine dal mio taccuino',lead:'Frammenti, pensieri, intuizioni. Un modo di custodire ciò che nasce.',tac:true},
   letture:{n:'05',t:'Letture che mi hanno ispirato',lead:'Parole che lasciano un segno, aprono strade, ci cambiano un poco.',rows:[['letture','Libri, pagine e brevi commenti personali']]},
   giardini:{n:'06',t:'Giardini che ispirano',lead:'Un invito a cercare bellezza anche fuori dalle pagine.',garden:true},
   insieme:{n:'07',t:'La musica che nasce insieme',lead:'Durante i miei concerti invito una persona del pubblico a improvvisare.',p:['Ogni incontro dà vita a una composizione unica, che non esisteva prima di quel momento.'],rows:[['le improvvisazioni','Un archivio che cresce dopo ogni concerto']]},
@@ -469,6 +480,25 @@ function breathInit(){
     var s=sound()||{}; breath={t0:performance.now(),isIn:null,g:s.g,lp:s.lp,os:s.os}; box.classList.add('run'); box.classList.remove('done'); quo.innerHTML=''; btn.textContent='basta'; breath.raf=requestAnimationFrame(tick);
   });
 }
+/* taccuino: le pagine scritte a mano si sfogliano di lato come un diario; un tocco apre la pagina, che si ingrandisce con due dita o due tocchi e si esplora trascinando */
+var TAC=['tac-1.jpg','tac-2.jpg','tac-4.jpg','tac-3.jpg','tac-5.jpg','tac-6.jpg'];
+function tacInit(){
+  var strip=document.getElementById('tac'), cnt=document.getElementById('tcnt'), zo=document.getElementById('zoom'), zi=document.getElementById('zimg');
+  function count(){ cnt.textContent=(Math.round(strip.scrollLeft/(strip.clientWidth*0.86))+1)+' / '+TAC.length; }
+  strip.addEventListener('scroll',count,{passive:true}); count();
+  var s=1, tx=0, ty=0, pts={}, start=null, lastTap=0, moved=false;
+  function apply(){ var w=zo.clientWidth, h=zo.clientHeight; s=Math.max(1,Math.min(6,s)); tx=Math.min(0,Math.max(w-w*s,tx)); ty=Math.min(0,Math.max(h-h*s,ty)); zi.style.transform='translate('+tx+'px,'+ty+'px) scale('+s+')'; }
+  function zoomAt(x,y,ns){ ns=Math.max(1,Math.min(6,ns)); tx=x-(x-tx)*ns/s; ty=y-(y-ty)*ns/s; s=ns; apply(); }
+  strip.addEventListener('click',function(e){ var im=e.target.closest('.tpage'); if(!im) return; zi.src=im.querySelector('img').src; s=1; tx=0; ty=0; zi.style.transition='none'; apply(); zo.classList.add('on'); });
+  document.getElementById('zclose').onclick=function(){ zo.classList.remove('on'); };
+  zo.onpointerdown=function(e){ if(e.target.id==='zclose') return; try{ zo.setPointerCapture(e.pointerId); }catch(_){ } pts[e.pointerId]={x:e.clientX,y:e.clientY}; moved=false; var k=Object.keys(pts); zi.style.transition='none';
+    if(k.length===2){ var a=pts[k[0]], b=pts[k[1]]; start={d:Math.hypot(a.x-b.x,a.y-b.y),s:s}; } };
+  zo.onpointermove=function(e){ var q=pts[e.pointerId]; if(!q) return; var r=zo.getBoundingClientRect(), k=Object.keys(pts);
+    if(k.length===1){ if(Math.hypot(e.clientX-q.x,e.clientY-q.y)>3) moved=true; tx+=e.clientX-q.x; ty+=e.clientY-q.y; q.x=e.clientX; q.y=e.clientY; apply(); }
+    else if(k.length===2&&start){ q.x=e.clientX; q.y=e.clientY; var a=pts[k[0]], b=pts[k[1]]; moved=true; zoomAt((a.x+b.x)/2-r.left,(a.y+b.y)/2-r.top,start.s*Math.hypot(a.x-b.x,a.y-b.y)/start.d); } };
+  zo.onpointerup=zo.onpointercancel=function(e){ if(!pts[e.pointerId]) return; delete pts[e.pointerId]; start=null; var now=performance.now(), r=zo.getBoundingClientRect();
+    if(!moved&&!Object.keys(pts).length){ if(now-lastTap<320){ zi.style.transition='transform .35s cubic-bezier(.2,.8,.2,1)'; zoomAt(e.clientX-r.left,e.clientY-r.top,s>1.2?1:2.8); lastTap=0; } else lastTap=now; } };
+}
 var vSez=document.getElementById('sez'), szEl=document.getElementById('sz');
 function esc(x){ return String(x).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 function showSez(id){
@@ -481,7 +511,8 @@ function showSez(id){
   if(s.music) h+='<div class="rowi"><span class="tiny">spotify</span><iframe class="emb sp" title="This Is Paolo Buonvino, su Spotify" loading="lazy" allow="encrypted-media; clipboard-write; fullscreen; picture-in-picture" src="https://open.spotify.com/embed/playlist/37i9dQZF1DZ06evO4dUBlR?theme=0"></iframe></div>'
     +'<div class="rowi"><span class="tiny">youtube · i video più visti</span><div class="yt"><iframe class="emb" title="I video più visti del canale di Paolo Buonvino" loading="lazy" allowfullscreen allow="encrypted-media; picture-in-picture; fullscreen" src="https://www.youtube-nocookie.com/embed/videoseries?list=UULPQ0tBr09so4t1e8gzMhxS9Q"></iframe></div><a class="tiny lnk" target="_blank" rel="noopener" href="https://www.youtube.com/@paolobuonvino/videos">apri il canale →</a></div>';
   if(s.breath) h='<div class="bbox" id="bbox"><div class="bstage"><div class="bring" id="bring"></div><span class="tiny" id="blab"></span></div><div id="bquo"></div><button type="button" class="upd press" id="bgo">inizia</button><span class="tiny bnote">tre minuti · inspira 4, espira 6</span></div>'+h.replace(/<div class="sart">[\s\S]*?<\/div>/,'');
-  breathStop(); szEl.innerHTML=h; vSez.scrollTop=0;
+  if(s.tac) h+='<div class="tac" id="tac">'+TAC.map(function(f,i){ return '<button type="button" class="tpage" aria-label="Pagina '+(i+1)+': apri"><img src="img/'+f+'" alt="" loading="lazy"></button>'; }).join('')+'</div><span class="tiny" id="tcnt"></span>';
+  breathStop(); szEl.innerHTML=h; vSez.scrollTop=0; if(s.tac) tacInit();
   if(s.garden) gardenInit(); if(s.breath) breathInit();
 }
 /* giardini: parchi e giardini veri intorno a un punto, presi da OpenStreetMap. La posizione si chiede solo quando tocchi il tasto */
@@ -519,6 +550,7 @@ function gardenInit(){
 function route(){
   var hs=location.hash.slice(1), lab=hs==='laboratorio', sz=!lab&&!!SEZ[hs];
   vLab.classList.toggle('on',lab); vSez.classList.toggle('on',sz); vHome.classList.toggle('on',!lab&&!sz);
+  document.getElementById('zoom').classList.remove('on');
   if(sz) showSez(hs); else breathStop();
   if(lab){ resize(); prepare(); enterMode('legami'); }
   else { current=null; stopWalk(); if(ctx&&master){ playing=false; master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(0,ctx.currentTime,0.25); if(drone){ drone.v=0; drone.g.gain.setTargetAtTime(0,ctx.currentTime,0.3); } setTimeout(function(){ if(!current&&ctx) ctx.suspend(); },900); } }
