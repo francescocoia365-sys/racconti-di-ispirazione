@@ -16,8 +16,9 @@
 <title>Racconti di ispirazione</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Unbounded:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+@font-face{font-family:"Unbounded";src:url(fonts/unbounded.woff2) format("woff2");font-weight:200 900;font-style:normal;font-display:swap}
 /* Nero pieno, un solo carattere (San Francisco sui dispositivi Apple), fotografie grandi,
    niente bordi. Lo schermo non si muove mai: scorre solo il contenuto della home. */
 :root{
@@ -62,13 +63,27 @@ body{height:100%;width:100%}
 .door .in{position:absolute;z-index:1;left:26px;right:26px;bottom:calc(40px + var(--sb));display:flex;flex-direction:column;align-items:flex-start;gap:14px;will-change:transform,opacity}
 .tiny{font-family:"Unbounded",var(--font);font-weight:300;font-size:11px;letter-spacing:.14em;text-transform:lowercase;color:rgba(255,255,255,.62)}
 .word{font-family:"Unbounded",var(--font);font-weight:300;font-size:44px;line-height:1.04;letter-spacing:.01em;text-transform:uppercase;margin:0;white-space:nowrap}
-.door.type .bg{opacity:.13;animation:drift 26s ease-in-out infinite alternate}
-@keyframes drift{from{scale:1.02;translate:-1.5% 0}to{scale:1.12;translate:1.5% -1%}}
+.door{isolation:isolate}
+.door.type .bg{opacity:.13}
+.amb{position:absolute;inset:-25%;pointer-events:none;mix-blend-mode:screen;background:radial-gradient(36% 28% at 30% 36%,rgba(255,200,130,.17),transparent 72%),radial-gradient(32% 26% at 72% 66%,rgba(150,175,255,.08),transparent 72%);animation:amb 44s ease-in-out infinite alternate;will-change:transform}
+.door.photo .amb{opacity:.6}
+@keyframes amb{0%{transform:translate3d(-7%,-4%,0) rotate(0deg)}50%{transform:translate3d(6%,4%,0) rotate(9deg)}100%{transform:translate3d(-3%,7%,0) rotate(-7deg)}}
+/* laboratorio: la parola riempie la pagina, due lettere per riga. Le lettere sono finestre: dentro si vedono due fotografie che si scambiano piano */
+.knock .under{position:absolute;inset:0;background:#4a433c;overflow:hidden}
+.knock .under .bg{mix-blend-mode:screen;filter:brightness(1.7) contrast(1.05)}
+.knock .under .b2{animation:dx 26s ease-in-out infinite alternate}
+@keyframes dx{from{opacity:0}to{opacity:.85}}
+.knock .mask{position:absolute;inset:0;background:#0a0a0a;mix-blend-mode:multiply;display:flex;align-items:center}
+.rows{width:100%;padding:0 22px;font-family:"Unbounded",var(--font);font-weight:700;text-transform:uppercase;line-height:.88;color:#fff;font-size:150px}
+.rows div{display:flex;justify-content:space-between;white-space:nowrap}
+.knock .enter{top:calc(12px + var(--st));bottom:auto;right:16px;border:0;color:rgba(255,255,255,.62)}
+.knock .n{position:absolute;z-index:1;top:calc(24px + var(--st));left:26px}
+@media (prefers-reduced-motion:reduce){.amb,.knock .under .b2{animation:none}}
 .door.type .in{bottom:auto;top:43%}
 .di{font-size:.27em;letter-spacing:.16em;text-transform:lowercase;color:rgba(255,255,255,.62);margin-left:.5em}
 .ch{display:inline-block;opacity:0;transform:translateY(.4em);transition:opacity .8s var(--ease),transform 1s var(--ease)}
 .door.live .ch{opacity:1;transform:none}
-@media (prefers-reduced-motion:reduce){.door.type .bg{animation:none}.ch{opacity:1;transform:none;transition:none}}
+@media (prefers-reduced-motion:reduce){.ch{opacity:1;transform:none;transition:none}}
 .vword{position:absolute;z-index:1;left:50%;top:50%;margin:0;transform:translate(-50%,-50%) rotate(-90deg);font-family:"Unbounded",var(--font);font-weight:300;font-size:96px;line-height:1;letter-spacing:.01em;text-transform:uppercase;white-space:nowrap;will-change:transform}
 .type .n{position:absolute;z-index:1;top:calc(24px + var(--st));left:26px}
 .type .s{position:absolute;z-index:1;bottom:calc(34px + var(--sb));left:26px}
@@ -107,13 +122,11 @@ body{height:100%;width:100%}
 .prog i{display:block;height:100%;background:rgba(255,255,255,.6);transform-origin:left;transform:scaleX(0)}
 #lab.inmenu .piece{display:none}
 #lab.inmenu .bartop .round{background:none;-webkit-backdrop-filter:none;backdrop-filter:none;color:rgba(255,255,255,.55)}
-.glyph:nth-child(odd){border-right:1px solid rgba(255,255,255,.1)}
-.glyph:nth-child(-n+2){border-bottom:1px solid rgba(255,255,255,.1)}
-#menu{position:absolute;inset:0;z-index:3;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:0;padding:0;background:#000;transition:opacity .5s var(--ease),visibility 0s .5s}
+#menu{position:absolute;inset:0;z-index:3;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:0;padding:calc(54px + var(--st)) 6px calc(14px + var(--sb));background:#000;transition:opacity .5s var(--ease),visibility 0s .5s}
 #menu.off{opacity:0;visibility:hidden;pointer-events:none}
-.glyph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;color:var(--label);padding:0}
-.glyph svg{width:92px;height:92px}
-.glyph span{font-family:"Unbounded",var(--font);font-weight:300;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--secondary)}
+.glyph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:var(--label);padding:0}
+.glyph svg{width:54px;height:54px}
+.glyph span{font-family:"Unbounded",var(--font);font-weight:300;font-size:9px;letter-spacing:.14em;text-transform:lowercase;color:var(--secondary)}
 .bartop{z-index:4;transition:opacity .5s}
 .ctl{transition:opacity .5s}
 #lab.inmenu .ctl{opacity:0;pointer-events:none}
@@ -151,27 +164,33 @@ body{height:100%;width:100%}
   <div class="doors" id="doors">
     <header class="door photo">
       <img class="bg" src="img/p-cover.jpg" alt="Paolo Buonvino al pianoforte, solo sul palco, in un fascio di luce" style="object-position:50% 38%">
+      <div class="amb"></div>
       <div class="in"><span class="tiny">paolo buonvino</span><h1 class="word">Racconti<span class="di">di</span><br>ispirazione</h1></div>
     </header>
-    <a class="door type" href="#laboratorio" id="tolab" aria-label="Laboratorio: entra">
-      <img class="bg" src="img/p-lab.jpg" alt="" style="object-position:40% 30%">
-      <div class="in"><span class="tiny">01</span><h2 class="word">Laboratorio</h2></div>
+    <a class="door knock" href="#laboratorio" id="tolab" aria-label="Laboratorio: entra">
+      <div class="under"><img class="bg" src="img/p-musiche.jpg" alt="" style="object-position:50% 30%"><img class="bg b2" src="img/p-cover.jpg" alt="" style="object-position:50% 38%"><div class="amb"></div></div>
+      <div class="mask"><div class="rows" id="rows" aria-hidden="true"><div>LA</div><div>BO</div><div>RA</div><div>TO</div><div>RIO</div></div></div>
+      <span class="tiny n">01</span>
       <span class="enter" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
     </a>
     <section class="door photo">
       <img class="bg" src="img/p-musiche.jpg" alt="" style="object-position:50% 30%">
+      <div class="amb"></div>
       <div class="in"><span class="tiny">02</span><h2 class="word">Musiche</h2><span class="tiny">presto</span></div>
     </section>
     <section class="door type">
       <img class="bg" src="img/p-respiro.jpg" alt="" style="object-position:40% 50%">
+      <div class="amb"></div>
       <div class="in"><span class="tiny">03</span><h2 class="word">Respiro</h2><span class="tiny">presto</span></div>
     </section>
     <section class="door photo">
       <img class="bg" src="img/p-taccuino.jpg" alt="" style="object-position:50% 40%">
+      <div class="amb"></div>
       <div class="in"><span class="tiny">04</span><h2 class="word">Taccuino</h2><span class="tiny">presto</span></div>
     </section>
     <section class="door type">
       <img class="bg" src="img/p-letture.jpg" alt="" style="object-position:30% 50%">
+      <div class="amb"></div>
       <div class="in"><span class="tiny">05</span><h2 class="word">Letture</h2><span class="tiny">presto</span></div>
     </section>
     <section class="door type end">
@@ -204,9 +223,16 @@ body{height:100%;width:100%}
   </div>
   <div id="menu">
     <button type="button" class="glyph press" data-m="stanza"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" aria-hidden="true"><circle cx="32" cy="32" r="22"/><circle cx="32" cy="32" r="9"/><circle cx="24" cy="46" r="3.2" fill="currentColor" stroke="none"/></svg><span>palco</span></button>
-    <button type="button" class="glyph press" data-m="centri"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" aria-hidden="true"><path d="M32 13L12 49h40z"/><circle cx="32" cy="13" r="5" fill="#000"/><circle cx="12" cy="49" r="5" fill="#000"/><circle cx="52" cy="49" r="5" fill="#000"/></svg><span>tre centri</span></button>
+    <button type="button" class="glyph press" data-m="centri"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true"><circle cx="32" cy="32" r="21"/><circle cx="32" cy="11" r="3.4" fill="currentColor" stroke="none"/><circle cx="13.8" cy="42.5" r="3.4" fill="currentColor" stroke="none"/><circle cx="50.2" cy="42.5" r="3.4" fill="currentColor" stroke="none"/></svg><span>centri · cerchio</span></button>
+    <button type="button" class="glyph press" data-m="centri2"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true"><path d="M32 11L13.8 42.5h36.4z"/><path d="M32 22.5l10 17.2H22z" opacity=".55"/><path d="M32 29.5l4.6 8H27.4z" opacity=".3"/></svg><span>centri · triangolo</span></button>
+    <button type="button" class="glyph press" data-m="centri3"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true"><circle cx="32" cy="24" r="13"/><circle cx="23" cy="39" r="13"/><circle cx="41" cy="39" r="13"/></svg><span>centri · anelli</span></button>
     <button type="button" class="glyph press" data-m="se"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" aria-hidden="true"><path d="M20 44L46 18"/><circle cx="18" cy="46" r="7" fill="currentColor" stroke="none"/><circle cx="48" cy="16" r="7" fill="#000"/></svg><span>ricordarsi di sé</span></button>
     <button type="button" class="glyph press" data-m="risonanza"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true"><path d="M12 10v44M22 10v44M52 10v44M42 10v44"/><path d="M32 10c7 14 7 30 0 44"/></svg><span>risonanza</span></button>
+    <button type="button" class="glyph press" data-m="esagramma"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true"><path d="M14 9h36M14 18h14M36 18h14M14 27h36M14 36h14M36 36h14M14 45h36M14 54h36"/></svg><span>esagramma</span></button>
+    <button type="button" class="glyph press" data-m="perle"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true"><path d="M16 10v44M32 10v44M48 10v44"/><circle cx="16" cy="40" r="5" fill="#000"/><circle cx="32" cy="20" r="5" fill="currentColor"/><circle cx="48" cy="32" r="5" fill="#000"/></svg><span>perle</span></button>
+    <button type="button" class="glyph press" data-m="go"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true"><path d="M12 22h40M12 32h40M12 42h40M22 12v40M32 12v40M42 12v40" opacity=".5"/><circle cx="32" cy="32" r="5" fill="currentColor" stroke="none"/><circle cx="42" cy="22" r="5" fill="#000"/></svg><span>go</span></button>
+    <button type="button" class="glyph press" data-m="giardino"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true"><circle cx="26" cy="36" r="3" fill="currentColor" stroke="none"/><circle cx="26" cy="36" r="9"/><circle cx="26" cy="36" r="15" opacity=".6"/><path d="M10 14h44M10 20h44" opacity=".4"/><path d="M48 30v24M54 30v24" opacity=".4"/></svg><span>giardino</span></button>
+    <button type="button" class="glyph press" data-m="enso"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true"><path d="M44 14.5A21 21 0 1 0 52.5 27" stroke-width="3.2"/></svg><span>ensō</span></button>
   </div>
 </section>
 
@@ -221,7 +247,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='12', updBtn=document.getElementById('upd');
+var BUILD='13', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -254,6 +280,15 @@ function fitWords(){
   words.forEach(function(w){ w.style.fontSize=min+'px'; });
   [].forEach.call(document.querySelectorAll('.end .word'),function(w){ fitOne(w,20); });
 }
+var rowsEl=document.getElementById('rows');
+[].forEach.call(rowsEl.children,function(r){ splitLetters(r); });
+[].forEach.call(rowsEl.querySelectorAll('.ch'),function(c,i){ c.style.transitionDelay=(150+i*80)+'ms'; });
+function fitRows(){
+  var d=rowsEl.parentNode, fs=Math.floor((d.clientHeight-150)/(5*0.88)), n=0;
+  rowsEl.style.fontSize=fs+'px';
+  while(n<120&&[].some.call(rowsEl.children,function(r){ return r.scrollWidth>r.clientWidth+1; })){ fs-=2; rowsEl.style.fontSize=fs+'px'; n++; }
+}
+window.addEventListener('resize',fitRows); window.addEventListener('load',fitRows); if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fitRows);
 window.addEventListener('resize',fitWords); window.addEventListener('load',fitWords);
 if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fitWords);
 
@@ -369,7 +404,7 @@ function startPiece(offset){
   var now=ctx.currentTime, ts=now+0.1;
   master.gain.cancelScheduledValues(now); master.gain.setTargetAtTime(0,now,0.02); master.gain.setTargetAtTime(2.0,ts,0.9);
   t0=ts-offset; playing=true;
-  S.forEach(function(s){ if(s.g){ s.g.gain.cancelScheduledValues(now); s.g.gain.setTargetAtTime(0,now,0.02); s.want=-1; newSource(s,ts,offset); } });
+  S.forEach(function(s){ if(s.g){ s.g.gain.cancelScheduledValues(now); s.g.gain.setTargetAtTime(0,now,0.02); s.want=-1; s.mu=-1; setRoom(s,0); newSource(s,ts,offset); } });
   if(ctx.state!=='running') ctx.resume();
   wantPlay=true; pauseBtn.setAttribute('aria-label','Pausa'); pauseIcon.setAttribute('d','M4.5 3h3v12h-3zM10.5 3h3v12h-3z');
 }
@@ -385,7 +420,7 @@ function setWant(s,v,slow){
 function setPan(s,p){ if(!started||!s.pn) return; if(Math.abs(p-s.pan)<0.03) return; s.pan=p; s.pn.pan.setTargetAtTime(p,ctx.currentTime,0.12); }
 /* mu = quanto muro c'è in mezzo: 0 nella stessa stanza, 1 dall'altra parte */
 function setRoom(s,mu){
-  if(!started||!s.g) return; if(Math.abs(mu-s.mu)<0.02) return; s.mu=mu;
+  if(!ctx||!s.g) return; if(Math.abs(mu-s.mu)<0.02) return; s.mu=mu;
   var now=ctx.currentTime;
   s.lp.frequency.setTargetAtTime(18000*Math.pow(1400/18000,mu),now,0.5);
   s.send.gain.setTargetAtTime(0.65*mu,now,0.5);
@@ -549,55 +584,270 @@ MODES.se=(function(){
   };
 })();
 
-/* 4. tre centri: la musica sta nei legami tra le parti, e i legami vanno tenuti vivi */
-MODES.centri=(function(){
-  var C=[{name:'mente',x:.5,y:.17},{name:'cuore',x:.2,y:.74},{name:'corpo',x:.8,y:.74}];
-  var LINKS=[{a:0,b:1,s:0,layers:['piano','mel1','mel2']},{a:1,b:2,s:0,layers:['short1','basso','arm2']},{a:2,b:0,s:0,layers:['short2','short3','short4']}];
-  var TH=[0.08,0.4,0.72], pres=0;
-  function cx(c){return c.x*W;} function cy(c){return TOP+c.y*(BOT-TOP);}
-  function hit(q){ for(var i=0;i<3;i++){ if(Math.hypot(q.x-cx(C[i]),q.y-cy(C[i]))<50) return i; } return -1; }
+/* 4. tre centri: la musica sta nei legami tra le parti, e i legami vanno tenuti vivi.
+   Si parte dal solo tappeto degli archi, lontano e velato. Ogni legame apre qualcosa; quando i tre legami vivono insieme, la figura cresce.
+   Tre prove della stessa idea: cerchio, triangolo, anelli. */
+var CL=[['piano','mel1','mel2'],['short1','basso','arm2'],['short2','short3','short4']], CTH=[0.1,0.42,0.72], CNAME=['mente','cuore','corpo'];
+function centriAudio(s,syn){
+  var tot=(s[0]+s[1]+s[2])/3;
+  setWant(BY.arm1,MX.arm1*(0.55+0.45*Math.min(1,tot*2))+(1-MX.arm1)*syn,true);
+  setRoom(BY.arm1,0.85*(1-Math.min(1,tot*2.2)));
+  for(var i=0;i<3;i++) CL[i].forEach(function(id,k){
+    setWant(BY[id],ss(CTH[k],CTH[k]+0.18,s[i])*(MX[id]+(1-MX[id])*syn),true);
+    setRoom(BY[id],0.6*(1-ss(CTH[k],CTH[k]+0.45,s[i]))*(1-syn));
+  });
+}
+function synStep(syn,s,dt){ return Math.max(0,Math.min(1,syn+(Math.min(s[0],s[1],s[2])>0.3?dt/22:-dt/7))); }
+function tinyLabel(txt,x,y,a){ if(a<=0.01) return; g.font='300 10px Unbounded, '+FONT; g.textAlign='center'; g.textBaseline='middle'; g.fillStyle='rgba(245,245,247,'+a+')'; g.fillText(txt,x,y); }
+function ghost(x,y,ph){ g.strokeStyle='rgba(255,255,255,'+0.55*Math.sin(Math.PI*ph)+')'; g.lineWidth=1.25; g.beginPath(); g.arc(x,y,11,0,TAU); g.stroke(); }
+function centriMode(kind){
+  var s=[0,0,0], syn=0, rot=0, used=false, A0=-Math.PI/2;
+  function R(){ return Math.min(W*0.37,(BOT-TOP)*0.3); }
+  function cx(){ return W/2; } function cy(){ return (TOP+BOT)/2+(kind==='tri'?R()*0.12:0); }
+  function ang(i){ return A0+i*TAU/3; }
+  function nd(i){ return {x:cx()+R()*Math.cos(ang(i)),y:cy()+R()*Math.sin(ang(i))}; }
   function touch(q){
-    var h=hit(q); if(h<0) return;
-    if(q.last>=0&&q.last!==h){ LINKS.forEach(function(l){ if((l.a===q.last&&l.b===h)||(l.b===q.last&&l.a===h)) l.s=1; }); }
+    var h=-1; for(var i=0;i<3;i++){ var n=nd(i); if(Math.hypot(q.x-n.x,q.y-n.y)<54) h=i; }
+    if(h<0) return;
+    if(q.last>=0&&q.last!==h){ s[(q.last+1)%3===h?q.last:h]=1; used=true; }
     q.last=h;
   }
+  function tri(r,a,al,lw){ if(al<=0.004) return; g.strokeStyle='rgba('+INK+','+al+')'; g.lineWidth=lw||1; g.beginPath(); for(var i=0;i<3;i++){ var x=cx()+r*Math.cos(a+i*TAU/3), y=cy()+r*Math.sin(a+i*TAU/3); if(i) g.lineTo(x,y); else g.moveTo(x,y); } g.closePath(); g.stroke(); }
   return {
-    hint:'la musica vive nei legami. uniscili, tienili vivi.',
-    enter:function(){ LINKS.forEach(function(l){l.s=0;}); pres=0; },
+    hint:'',
+    enter:function(){ s=[0,0,0]; syn=0; rot=0; used=false; },
     down:function(q){ q.last=-1; touch(q); }, move:touch,
     update:function(dt){
-      var all=Math.min(LINKS[0].s,LINKS[1].s,LINKS[2].s);
-      pres+=((all>0.3?1:0)-pres)*(1-Math.exp(-dt/1.5));
-      setWant(BY.arm1,MX.arm1+(1-MX.arm1)*pres,true);
-      LINKS.forEach(function(l){
-        l.s=Math.max(0,l.s-dt/(14+8*pres));
-        l.layers.forEach(function(id,k){ setWant(BY[id],l.s>TH[k]?MX[id]+(1-MX[id])*pres:0,true); });
-      });
+      for(var i=0;i<3;i++) s[i]=Math.max(0,s[i]-dt/(15+12*syn));
+      syn=synStep(syn,s,dt); rot+=dt*0.07*syn;
+      centriAudio(s,syn);
     },
     draw:function(t){
-      g.lineCap='round';
-      LINKS.forEach(function(l){
-        var a=C[l.a], b=C[l.b];
-        g.strokeStyle='rgba('+INK+','+(0.1+0.85*l.s)+')'; g.lineWidth=1+3.5*l.s;
-        g.beginPath(); g.moveTo(cx(a),cy(a)); g.lineTo(cx(b),cy(b)); g.stroke();
-      });
-      if(!fingers().length&&LINKS[0].s+LINKS[1].s+LINKS[2].s<=0){ var ph=(t*0.4)%1, e=ph*ph*(3-2*ph), gx=cx(C[0])+(cx(C[1])-cx(C[0]))*e, gy=cy(C[0])+(cy(C[1])-cy(C[0]))*e; g.strokeStyle='rgba(255,255,255,'+0.6*Math.sin(Math.PI*ph)+')'; g.lineWidth=1.25; g.beginPath(); g.arc(gx,gy,11,0,TAU); g.stroke(); }
-      fingers().forEach(function(q){ if(q.last>=0){ g.strokeStyle='rgba('+INK+',.5)'; g.lineWidth=1.25; g.beginPath(); g.moveTo(cx(C[q.last]),cy(C[q.last])); g.lineTo(q.x,q.y); g.stroke(); } });
-      if(pres>0.02){
-        var mx=(cx(C[0])+cx(C[1])+cx(C[2]))/3, my=(cy(C[0])+cy(C[1])+cy(C[2]))/3, R=Math.hypot(cx(C[0])-mx,cy(C[0])-my)+54;
-        g.strokeStyle='rgba('+INK+','+0.7*pres+')'; g.lineWidth=1.5; g.beginPath(); g.arc(mx,my,R,0,TAU); g.stroke();
+      var r=R(), x0=cx(), y0=cy(), i, n, a, b, br=1+0.05*BY.arm1.level, live=Math.min(s[0],s[1],s[2]);
+      g.lineCap='round'; g.lineJoin='round';
+      if(kind==='cerchio'){
+        g.strokeStyle='rgba('+INK+',.13)'; g.lineWidth=1; g.beginPath(); g.arc(x0,y0,r,0,TAU); g.stroke();
+        for(i=0;i<3;i++){ if(s[i]>0.004){ g.strokeStyle='rgba('+INK+','+(0.9*s[i])+')'; g.lineWidth=1+2.2*s[i]; g.beginPath(); g.arc(x0,y0,r,ang(i),ang(i+1)); g.stroke(); } }
+        for(i=0;i<3;i++){ a=nd(i); b=nd((i+1)%3); if(s[i]>0.004){ g.strokeStyle='rgba('+INK+','+0.45*s[i]+')'; g.lineWidth=1; g.beginPath(); g.moveTo(a.x,a.y); g.lineTo(b.x,b.y); g.stroke(); } }   // il cerchio, unito dal triangolo
+        n=Math.floor(syn*9);                                   // insieme: il triangolo si moltiplica dentro il cerchio e gira
+        for(i=1;i<=n;i++) tri(r*br,A0+rot+i*(TAU/3)/(n+1),0.5*Math.min(1,syn*9-i+1)*(0.45+0.55*live),1);
+        if(syn>0.03){ g.strokeStyle='rgba('+INK+','+0.5*syn+')'; g.lineWidth=1; g.beginPath(); g.arc(x0,y0,r*(1.16+0.03*Math.sin(t*0.9)),0,TAU); g.stroke(); }
+      } else {
+        for(i=0;i<3;i++){ a=nd(i); b=nd((i+1)%3); g.strokeStyle='rgba('+INK+','+(0.13+0.8*s[i])+')'; g.lineWidth=1+2.2*s[i]; g.beginPath(); g.moveTo(a.x,a.y); g.lineTo(b.x,b.y); g.stroke(); }
+        n=Math.floor(syn*18); var th=0.16+0.07*Math.sin(t*0.13), f=1/(Math.cos(th)+Math.sin(th)*1.732);    // insieme: triangoli uno dentro l'altro, a spirale
+        for(i=1;i<=n;i++) tri(r*br*Math.pow(f,i),A0+rot+i*th,0.75*Math.min(1,syn*18-i+1)*Math.pow(0.9,i)*(0.4+0.6*live),1);
+        if(syn>0.5){ g.strokeStyle='rgba('+INK+','+0.5*(syn-0.5)*2+')'; g.lineWidth=1; g.beginPath(); g.arc(x0,y0,r,0,TAU); g.stroke(); }
       }
-      g.font='300 11px Unbounded, '+FONT; g.textAlign='center'; g.textBaseline='middle';
-      C.forEach(function(c,i){
-        var x=cx(c), y=cy(c), s=0; LINKS.forEach(function(l){ if(l.a===i||l.b===i) s=Math.max(s,l.s); });
-        g.fillStyle='#000'; g.beginPath(); g.arc(x,y,31,0,TAU); g.fill();
-        g.fillStyle='rgba('+INK+','+(0.08+0.86*s)+')'; g.beginPath(); g.arc(x,y,31,0,TAU); g.fill();
-        g.strokeStyle='rgba('+INK+',.45)'; g.lineWidth=1.25; g.beginPath(); g.arc(x,y,38,0,TAU); g.stroke();
-        g.fillStyle='rgba(245,245,247,'+(0.4+0.45*s)+')'; g.fillText(c.name,x,y+(c.y<0.5?-56:56));
-      });
+      for(i=0;i<3;i++){
+        var p=nd(i), e=Math.max(s[i],s[(i+2)%3]);
+        g.strokeStyle='rgba('+INK+','+(0.3+0.5*e)+')'; g.lineWidth=1; g.beginPath(); g.arc(p.x,p.y,9+9*e,0,TAU); g.stroke();
+        g.fillStyle='#000'; g.beginPath(); g.arc(p.x,p.y,4.5,0,TAU); g.fill();
+        g.fillStyle='rgba('+INK+','+(0.45+0.55*e)+')'; g.beginPath(); g.arc(p.x,p.y,3+1.5*e,0,TAU); g.fill();
+        tinyLabel(CNAME[i],x0+(r+40)*Math.cos(ang(i)),y0+(r+40)*Math.sin(ang(i)),0.5*(1-syn));
+      }
+      fingers().forEach(function(q){ if(q.last>=0){ var p=nd(q.last); g.strokeStyle='rgba('+INK+',.4)'; g.lineWidth=1; g.beginPath(); g.moveTo(p.x,p.y); g.lineTo(q.x,q.y); g.stroke(); } });
+      if(!used&&!fingers().length){
+        var ph=(t*0.35)%1, k=ph*ph*(3-2*ph);
+        if(kind==='cerchio') ghost(x0+r*Math.cos(ang(0)+k*TAU/3),y0+r*Math.sin(ang(0)+k*TAU/3),ph);
+        else { a=nd(0); b=nd(1); ghost(a.x+(b.x-a.x)*k,a.y+(b.y-a.y)*k,ph); }
+      }
+    }
+  };
+}
+MODES.centri=centriMode('cerchio');
+MODES.centri2=centriMode('tri');
+
+/* tre anelli: ognuno tende ad andarsene per conto suo. Avvicinali: dove si sovrappongono nasce la musica. Lasciati soli, si separano di nuovo */
+MODES.centri3=(function(){
+  var c=[], s=[0,0,0], syn=0, used=false, HOME=1.3;
+  function r(){ return Math.min(W*0.22,(BOT-TOP)*0.17); }
+  function x0(){ return W/2; } function y0(){ return (TOP+BOT)/2; }
+  function hx(i){ return HOME*Math.cos(-Math.PI/2+i*TAU/3); } function hy(i){ return HOME*Math.sin(-Math.PI/2+i*TAU/3); }
+  function px(i){ return x0()+c[i].x*r(); } function py(i){ return y0()+c[i].y*r(); }
+  return {
+    hint:'',
+    enter:function(){ c=[0,1,2].map(function(i){ return {x:hx(i),y:hy(i),held:0}; }); s=[0,0,0]; syn=0; used=false; },
+    down:function(q){ var best=-1,bd=1e9; for(var i=0;i<3;i++){ var d=Math.hypot(q.x-px(i),q.y-py(i)); if(d<r()*1.15&&d<bd&&!c[i].held){ bd=d; best=i; } } q.c=best; if(best>=0){ c[best].held++; q.ox=q.x-px(best); q.oy=q.y-py(best); used=true; } },
+    move:function(q){ if(q.c>=0){ c[q.c].x=(q.x-q.ox-x0())/r(); c[q.c].y=(q.y-q.oy-y0())/r(); } },
+    up:function(q){ if(q.c>=0) c[q.c].held=Math.max(0,c[q.c].held-1); },
+    update:function(dt){
+      var k=1-Math.exp(-dt/16), i;
+      for(i=0;i<3;i++) if(!c[i].held){ c[i].x+=(hx(i)-c[i].x)*k; c[i].y+=(hy(i)-c[i].y)*k; }
+      for(i=0;i<3;i++){ var j=(i+1)%3, d=Math.hypot(c[i].x-c[j].x,c[i].y-c[j].y); s[i]+=(ss(2.05,0.8,d)-s[i])*(1-Math.exp(-dt/0.5)); }
+      syn=synStep(syn,s,dt); centriAudio(s,syn);
+    },
+    draw:function(t){
+      var rr=r(), i, j, br=1+0.04*BY.arm1.level;
+      for(i=0;i<3;i++){ j=(i+1)%3; if(s[i]>0.01){ g.save(); g.beginPath(); g.arc(px(i),py(i),rr,0,TAU); g.clip(); g.fillStyle='rgba('+INK+','+(0.05+0.2*s[i])+')'; g.beginPath(); g.arc(px(j),py(j),rr,0,TAU); g.fill(); g.restore(); } }
+      if(syn>0.02){ var mx=(px(0)+px(1)+px(2))/3, my=(py(0)+py(1)+py(2))/3;      // insieme: dal centro partono onde
+        for(i=0;i<5;i++){ var u=((t*0.07+i/5)%1); g.strokeStyle='rgba('+INK+','+0.55*syn*(1-u)*Math.min(1,u*6)+')'; g.lineWidth=1; g.beginPath(); g.arc(mx,my,rr*(0.2+2.6*u),0,TAU); g.stroke(); } }
+      for(i=0;i<3;i++){
+        var e=Math.max(s[i],s[(i+2)%3]);
+        g.strokeStyle='rgba('+INK+','+(0.32+0.6*e)+')'; g.lineWidth=1+0.8*e; g.beginPath(); g.arc(px(i),py(i),rr*br,0,TAU); g.stroke();
+        tinyLabel(CNAME[i],px(i),py(i),0.5*(1-ss(0,0.4,e)));
+      }
+      if(!used){ var ph=(t*0.35)%1, k=ph*ph*(3-2*ph)*0.6; g.strokeStyle='rgba(255,255,255,'+0.4*Math.sin(Math.PI*ph)+')'; g.lineWidth=1; g.beginPath(); g.arc(px(0)+(x0()-px(0))*k,py(0)+(y0()-py(0))*k,rr,0,TAU); g.stroke(); }
     }
   };
 })();
+
+/* ================= Oriente ================= */
+var REST=['piano','mel1','mel2','short1','basso','arm2','short2','short3','short4'];
+function padOn(full){ setWant(BY.arm1,MX.arm1*0.8+(1-MX.arm1*0.8)*full,true); }
+function vol(id,a,full){ setWant(BY[id],a*(MX[id]+(1-MX[id])*full),true); }
+
+/* esagramma: sei linee. Spezzata tace, intera suona. Tutte intere: il cielo, e arriva anche il resto */
+MODES.esagramma=(function(){
+  var ST=['piano','mel1','mel2','short1','basso','arm2'], on=[], a=[], tf=0, used=false;
+  function h(){ return Math.min(58,(BOT-TOP)*0.095); } function yy(i){ return (TOP+BOT)/2+(2.5-i)*h(); }
+  return {
+    hint:'',
+    enter:function(){ on=[0,0,0,0,0,0]; a=[0,0,0,0,0,0]; tf=0; used=false; },
+    down:function(q){ var i=Math.round(2.5-(q.y-(TOP+BOT)/2)/h()); if(i>=0&&i<6){ on[i]=on[i]?0:1; used=true; } },
+    update:function(dt){
+      var all=on.every(function(v){return v;}); tf=all?tf+dt:Math.max(0,tf-dt*4);
+      var full=ss(22,34,tf); padOn(full);
+      ST.forEach(function(id,i){ a[i]+=(on[i]-a[i])*(1-Math.exp(-dt/0.18)); vol(id,on[i],full); });
+      vol('short2',tf>3?1:0,full); vol('short3',tf>10?1:0,full); vol('short4',tf>17?1:0,full);
+    },
+    draw:function(t){
+      var wb=W*0.58, xa=(W-wb)/2, i;
+      for(i=0;i<6;i++){
+        var y=yy(i), L=BY[ST[i]].level, th=7+7*L*a[i], gap=wb*0.15*(1-a[i]), al=0.2+0.75*a[i];
+        if(!used&&i===0) al+=0.25*(0.5+0.5*Math.sin(t*2.2));
+        g.fillStyle='rgba('+INK+','+al+')';
+        g.fillRect(xa,y-th/2,wb/2-gap/2,th); g.fillRect(xa+wb/2+gap/2,y-th/2,wb/2-gap/2,th);
+      }
+      ['short2','short3','short4'].forEach(function(id,k){ var v=BY[id].gv; if(v>0.01){ g.strokeStyle='rgba('+INK+','+0.5*v+')'; g.lineWidth=1; g.beginPath(); g.arc(W/2,(TOP+BOT)/2,h()*(4.1+0.55*k)+6*BY[id].level,0,TAU); g.stroke(); } });
+    }
+  };
+})();
+
+/* perle: nove fili, una perla per filo. Spingila in alto e il suo suono si apre */
+MODES.perle=(function(){
+  var v=[], tg=[], used=false;
+  function xx(i){ return W*0.1+i*W*0.8/8; } function ya(){ return TOP+(BOT-TOP)*0.14; } function yb(){ return BOT-(BOT-TOP)*0.14; }
+  function set(q){ if(q.i<0) return; tg[q.i]=Math.max(0,Math.min(1,(yb()-q.y)/(yb()-ya()))); }
+  return {
+    hint:'',
+    enter:function(){ v=REST.map(function(){return 0;}); tg=v.slice(); used=false; },
+    down:function(q){ var i=Math.round((q.x-W*0.1)/(W*0.8/8)); q.i=(i>=0&&i<9&&q.y>ya()-40&&q.y<yb()+40)?i:-1; if(q.i>=0) used=true; set(q); },
+    move:set,
+    update:function(dt){
+      var full=1; REST.forEach(function(id,i){ v[i]+=(tg[i]-v[i])*(1-Math.exp(-dt/0.12)); if(v[i]<0.9) full=0; });
+      padOn(full); REST.forEach(function(id,i){ vol(id,ss(0.06,0.94,v[i]),full); });
+    },
+    draw:function(t){
+      var rad=Math.min(15,W*0.8/8*0.4), i;
+      g.strokeStyle='rgba('+INK+',.22)'; g.lineWidth=1; g.beginPath(); g.moveTo(xx(0)-rad,ya()-rad-10); g.lineTo(xx(8)+rad,ya()-rad-10); g.stroke();
+      for(i=0;i<9;i++){
+        var x=xx(i), y=yb()-(yb()-ya())*v[i], L=BY[REST[i]].level;
+        g.strokeStyle='rgba('+INK+',.13)'; g.lineWidth=1; g.beginPath(); g.moveTo(x,ya()-rad-10); g.lineTo(x,yb()+rad); g.stroke();
+        if(v[i]>0.04){ g.strokeStyle='rgba('+INK+','+0.5*v[i]+')'; g.beginPath(); g.arc(x,y,rad+3+10*L*v[i],0,TAU); g.stroke(); }
+        g.fillStyle='#000'; g.beginPath(); g.arc(x,y,rad,0,TAU); g.fill();
+        g.fillStyle='rgba('+INK+','+(0.16+0.8*v[i])+')'; g.beginPath(); g.arc(x,y,rad,0,TAU); g.fill();
+        g.strokeStyle='rgba('+INK+',.5)'; g.lineWidth=1; g.beginPath(); g.arc(x,y,rad,0,TAU); g.stroke();
+      }
+      if(!used){ var ph=(t*0.35)%1, k=ph*ph*(3-2*ph); ghost(xx(4),yb()-(yb()-ya())*0.7*k,ph); }
+    }
+  };
+})();
+
+/* go: posa una pietra. Ogni pietra apre ciò che ha intorno; col tempo le pietre svaniscono, e il gioco continua */
+MODES.go=(function(){
+  var N=9, stones={}, turn=0, used=false, STAR=[[4,4,'piano'],[2,6,'mel1'],[6,6,'mel2'],[4,6,'short1'],[4,2,'basso'],[2,4,'arm2'],[6,4,'short2'],[2,2,'short3'],[6,2,'short4']];
+  function cell(){ return Math.min(W*0.86,(BOT-TOP)*0.82)/(N-1); }
+  function gx(i){ return W/2+(i-4)*cell(); } function gy(j){ return (TOP+BOT)/2+(j-4)*cell(); }
+  function F(d){ return d<0.1?1:d<1.1?0.55:d<1.5?0.34:d<2.1?0.15:0; }
+  return {
+    hint:'',
+    enter:function(){ stones={}; turn=0; used=false; },
+    down:function(q){ var i=Math.round((q.x-W/2)/cell())+4, j=Math.round((q.y-(TOP+BOT)/2)/cell())+4; if(i<0||j<0||i>=N||j>=N) return; var k=i+','+j; used=true; if(stones[k]) delete stones[k]; else stones[k]={i:i,j:j,life:1,born:performance.now()/1000,w:(turn++)%2}; },
+    update:function(dt){
+      var k, st, inf={}, full=1;
+      for(k in stones){ st=stones[k]; st.life-=dt/55; if(st.life<=0) delete stones[k]; }
+      STAR.forEach(function(sp){ var v=0; for(k in stones){ st=stones[k]; v+=Math.min(1,st.life*4)*F(Math.hypot(st.i-sp[0],st.j-sp[1])); } v=Math.min(1,v); inf[sp[2]]=v; if(v<0.6) full=0; });
+      padOn(full); STAR.forEach(function(sp){ vol(sp[2],inf[sp[2]],full); });
+    },
+    draw:function(t){
+      var c=cell(), i, k, tn=performance.now()/1000;
+      g.strokeStyle='rgba('+INK+',.1)'; g.lineWidth=1; g.beginPath();
+      for(i=0;i<N;i++){ g.moveTo(gx(i),gy(0)); g.lineTo(gx(i),gy(N-1)); g.moveTo(gx(0),gy(i)); g.lineTo(gx(N-1),gy(i)); } g.stroke();
+      STAR.forEach(function(sp){ var s=BY[sp[2]], x=gx(sp[0]), y=gy(sp[1]);
+        g.fillStyle='rgba('+INK+','+(0.3+0.5*s.gv)+')'; g.beginPath(); g.arc(x,y,2,0,TAU); g.fill();
+        if(s.gv>0.03){ g.strokeStyle='rgba('+INK+','+0.4*s.gv+')'; g.beginPath(); g.arc(x,y,c*(0.62+0.5*s.level),0,TAU); g.stroke(); } });
+      for(k in stones){ var st=stones[k], a=Math.min(1,st.life*4), x=gx(st.i), y=gy(st.j), age=tn-st.born, rr=c*0.42*(age<0.25?0.6+1.6*age:1);
+        g.fillStyle='#000'; g.beginPath(); g.arc(x,y,rr,0,TAU); g.fill();
+        if(st.w){ g.fillStyle='rgba('+INK+','+0.92*a+')'; g.beginPath(); g.arc(x,y,rr,0,TAU); g.fill(); }
+        else { g.strokeStyle='rgba('+INK+','+0.8*a+')'; g.lineWidth=1.25; g.beginPath(); g.arc(x,y,rr-0.6,0,TAU); g.stroke(); } }
+      if(!used){ var ph=(t*0.35)%1; ghost(gx(4),gy(4),ph); }
+    }
+  };
+})();
+
+/* giardino: passa il rastrello nella sabbia. Le pietre attorno a cui passi si svegliano; poi la sabbia torna liscia */
+MODES.giardino=(function(){
+  var ROCK=[[.5,.5,'piano'],[.24,.3,'mel1'],[.76,.34,'mel2'],[.3,.7,'short1'],[.72,.74,'basso'],[.5,.14,'arm2'],[.12,.52,'short2'],[.88,.56,'short3'],[.5,.9,'short4']];
+  var e=[], pts=[], used=false, LIFE=38;
+  function rx(k){ return ROCK[k][0]*W; } function ry(k){ return TOP+ROCK[k][1]*(BOT-TOP); }
+  function rake(q){
+    var tn=performance.now()/1000, l=pts[pts.length-1], d=l&&!l.brk?Math.hypot(q.x-l.x,q.y-l.y):1e9;
+    if(d<7) return; var nx=0, ny=0; if(d<1e8){ nx=-(q.y-l.y)/d; ny=(q.x-l.x)/d; if(l.nx===0&&l.ny===0){ l.nx=nx; l.ny=ny; } }
+    pts.push({x:q.x,y:q.y,t:tn,nx:nx,ny:ny,first:d>1e8}); if(pts.length>1400) pts.shift();
+    if(d<1e8) for(var k=0;k<9;k++){ var dd=Math.hypot(q.x-rx(k),q.y-ry(k)); e[k]=Math.min(1,e[k]+d/520*(1-ss(W*0.06,W*0.3,dd))); }
+    used=true;
+  }
+  return {
+    hint:'',
+    enter:function(){ e=ROCK.map(function(){return 0;}); pts=[]; used=false; },
+    down:rake, move:rake, up:function(){ if(pts.length) pts[pts.length-1].brk=true; },
+    update:function(dt){
+      var full=1; for(var k=0;k<9;k++){ e[k]=Math.max(0,e[k]-dt/32); if(e[k]<0.55) full=0; }
+      padOn(full); ROCK.forEach(function(r,k){ vol(r[2],ss(0.05,0.7,e[k]),full); });
+      var tn=performance.now()/1000; while(pts.length&&tn-pts[0].t>LIFE) pts.shift();
+    },
+    draw:function(t){
+      var tn=performance.now()/1000, o, i, k;
+      g.lineCap='round'; g.lineJoin='round'; g.lineWidth=1;
+      for(o=-2;o<=2;o++){                                        // cinque denti
+        for(i=1;i<pts.length;i++){ var a=pts[i-1], b=pts[i]; if(b.first||a.brk) continue;
+          g.strokeStyle='rgba('+INK+','+0.42*Math.pow(1-(tn-b.t)/LIFE,1.5)+')'; g.beginPath(); g.moveTo(a.x+a.nx*o*7,a.y+a.ny*o*7); g.lineTo(b.x+b.nx*o*7,b.y+b.ny*o*7); g.stroke(); }
+      }
+      for(k=0;k<9;k++){ var x=rx(k), y=ry(k), s=BY[ROCK[k][2]], n=1+Math.floor(e[k]*4.99);
+        for(i=1;i<=n;i++){ g.strokeStyle='rgba('+INK+','+(i===1?0.2+0.5*e[k]:0.45*e[k]*(1-i/7))+')'; g.beginPath(); g.arc(x,y,5+i*8+(i>1?4*s.level:0),0,TAU); g.stroke(); }
+        g.fillStyle='rgba('+INK+','+(0.35+0.65*e[k])+')'; g.beginPath(); g.arc(x,y,4,0,TAU); g.fill(); }
+      if(!used){ var ph=(t*0.3)%1, an=ph*TAU; ghost(rx(0)+34*Math.cos(an),ry(0)+34*Math.sin(an),Math.min(1,ph*1.2)); }
+    }
+  };
+})();
+
+/* ensō: un solo gesto. Quanto chiudi il cerchio, tanto si apre il brano; poi l'inchiostro asciuga, e si ricomincia */
+MODES.enso=(function(){
+  var pts=[], acc=0, ink=0, drawing=null, v=0, used=false;
+  function ax(q){ return Math.atan2(q.y-(TOP+BOT)/2,q.x-W/2); }
+  return {
+    hint:'',
+    enter:function(){ pts=[]; acc=0; ink=0; drawing=null; v=0; used=false; },
+    down:function(q){ if(drawing) return; drawing=q; pts=[{x:q.x,y:q.y,w:5}]; acc=0; ink=1; q.a=ax(q); used=true; },
+    move:function(q){ if(q!==drawing) return; var l=pts[pts.length-1], d=Math.hypot(q.x-l.x,q.y-l.y); if(d<4) return;
+      var a=ax(q), da=a-q.a; if(da>Math.PI) da-=TAU; if(da<-Math.PI) da+=TAU; acc+=da; q.a=a;
+      var w=Math.max(4,Math.min(24,26-d*0.9)); pts.push({x:q.x,y:q.y,w:l.w+(w-l.w)*0.25}); },
+    up:function(q){ if(q===drawing) drawing=null; },
+    update:function(dt){
+      if(!drawing) ink=Math.max(0,ink-dt/48);
+      var tv=Math.min(1,Math.abs(acc)/(TAU*0.97))*Math.min(1,ink*1.6); v+=(tv-v)*(1-Math.exp(-dt/0.6));
+      applyLadder(Math.floor(v*9.3+0.001),true);
+    },
+    draw:function(t){
+      g.lineCap='round';
+      g.strokeStyle='rgba('+INK+','+(used?0.05:0.1+0.06*Math.sin(t*1.6))+')'; g.lineWidth=1; g.beginPath(); g.arc(W/2,(TOP+BOT)/2,Math.min(W*0.34,(BOT-TOP)*0.3),0,TAU); g.stroke();
+      var al=0.92*Math.min(1,ink*1.6);
+      for(var i=1;i<pts.length;i++){ g.strokeStyle='rgba('+INK+','+al+')'; g.lineWidth=pts[i].w; g.beginPath(); g.moveTo(pts[i-1].x,pts[i-1].y); g.lineTo(pts[i].x,pts[i].y); g.stroke(); }
+      if(!used){ var ph=(t*0.2)%1, R=Math.min(W*0.34,(BOT-TOP)*0.3), an=-2.2+ph*TAU; ghost(W/2+R*Math.cos(an),(TOP+BOT)/2+R*Math.sin(an),Math.min(1,ph*1.1)); }
+    }
+  };
+})();
+
 
 var walkBtn=document.getElementById('walk'), calBtn=document.getElementById('cal'), walking=false, h0=null, head=0, lastStep=0, grav=9.8, gotMotion=false, wake=null;
 var CAL=null, calib=null, calData=null; try{ CAL=JSON.parse(localStorage.getItem('racconti-passo')||'null'); }catch(e){}
