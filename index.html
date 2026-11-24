@@ -75,8 +75,13 @@ body{height:100%;width:100%}
 .knock .under .bg{top:-6%;height:112%}
 .knock .under .b1{animation:slow1 40s ease-in-out infinite alternate}
 @keyframes slow1{from{margin-top:-3%}to{margin-top:3%}}
-.veil{position:absolute;left:0;right:0;top:-40%;height:140%;background:linear-gradient(180deg,rgba(0,0,0,.86) 0%,rgba(0,0,0,.86) 70%,rgba(0,0,0,0) 100%);transform:translate3d(0,0,0);transition:transform 0s}
-.knock.live .veil{transform:translate3d(0,-101%,0);transition:transform 7s cubic-bezier(.3,.1,.2,1) .3s}
+.veil{position:absolute;inset:0;background:#efe6da;opacity:1}
+.knock.live .veil{opacity:0;transition:opacity 12s ease-in-out 2s}
+.knock.live .mask{animation:invbg 60s ease-in-out 22s infinite alternate}
+.knock.live .rows svg{animation:invfg 60s ease-in-out 22s infinite alternate}
+@keyframes invbg{0%,18%{background-color:#0a0a0a}62%,100%{background-color:#fff}}
+@keyframes invfg{0%,18%{fill:#fff}62%,100%{fill:#070707}}
+@media (prefers-reduced-motion:reduce){.knock.live .mask,.knock.live .rows svg{animation:none}}
 @keyframes dx{from{opacity:0}to{opacity:.85}}
 .knock .mask{position:absolute;inset:0;background:#0a0a0a;mix-blend-mode:multiply;display:flex;align-items:center}
 .knock .mask{display:block}
@@ -251,7 +256,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='17', updBtn=document.getElementById('upd');
+var BUILD='18', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -296,9 +301,9 @@ function layLogo(tm){
   var W0=rowsEl.clientWidth, H0=rowsEl.clientHeight; if(!W0||!H0) return;
   logoEl.setAttribute('viewBox','0 0 '+W0+' '+H0);
   function o(base,amp,per,ph){ return base+amp*Math.sin(tm*6.2832/per+ph); }
-  var xs=[0,o(.25,.055,17,0),o(.5,.06,23,1.3),o(.75,.055,13,2.1),1];
-  var ya=[o(.3,.06,19,.4),o(.26,.07,11,2.6),o(.33,.06,29,4.1),o(.28,.07,15,5.2)];
-  var yb=o(.61,.045,21,1), us=[0,o(.43,.06,16,3.3),o(.57,.05,25,.7),1], cells=[], c, g=3;
+  var xs=[0,o(.25,.055,102,0),o(.5,.06,138,1.3),o(.75,.055,78,2.1),1];
+  var ya=[o(.3,.06,114,.4),o(.26,.07,66,2.6),o(.33,.06,174,4.1),o(.28,.07,90,5.2)];
+  var yb=o(.61,.045,126,1), us=[0,o(.43,.06,96,3.3),o(.57,.05,150,.7),1], cells=[], c, g=3;
   for(c=0;c<4;c++) cells.push([xs[c],0,xs[c+1],ya[c]]);
   for(c=0;c<4;c++) cells.push([xs[c],ya[c],xs[c+1],yb]);
   for(c=0;c<3;c++) cells.push([us[c],yb,us[c+1],1]);
@@ -310,7 +315,7 @@ function layLogo(tm){
 var still=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches, logoN=0;
 function logoTick(now){
   requestAnimationFrame(logoTick);
-  if(still||(logoN++)%2||!vHome.classList.contains('on')) return;
+  if(still||(logoN++)%4||!vHome.classList.contains('on')) return;
   var w=doorsEl.clientWidth||1, off=doorsEl.scrollLeft/w; if(off<0.05||off>1.95) return;
   layLogo(now/1000);
 }
