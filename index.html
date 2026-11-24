@@ -85,6 +85,8 @@ h2{font-size:26px;font-weight:700;letter-spacing:-.025em;margin:0 6px 14px}
 .list li:first-child{border-top:0}
 .list span{color:var(--secondary);font-size:15px;flex:none}
 footer{color:var(--secondary);font-size:13px;margin:0 6px;line-height:1.5}
+.upd{margin-top:14px;height:40px;padding:0 16px;border-radius:999px;background:var(--surface);color:var(--label);font-size:14px;font-weight:600}
+.upd.new{background:#fff;color:#000}
 
 /* ---------- Laboratorio ---------- */
 #lab{background:#000;touch-action:none;transform:translateY(24px)}
@@ -163,7 +165,7 @@ footer{color:var(--secondary);font-size:13px;margin:0 6px;line-height:1.5}
       </ul>
     </section>
 
-    <footer>Prototipo di lavoro, novembre 2026.<br>Fotografie dalla bozza di Paolo.</footer>
+    <footer>Prototipo di lavoro, novembre 2026.<br>Fotografie dalla bozza di Paolo.<br><button id="upd" class="upd press" type="button">Versione <span id="ver"></span> · Aggiorna</button></footer>
   </main>
 </section>
 
@@ -205,6 +207,24 @@ footer{color:var(--secondary);font-size:13px;margin:0 6px;line-height:1.5}
 document.addEventListener('touchmove',function(e){if(e.touches.length>1) e.preventDefault();},{passive:false});
 document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:false});
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
+
+/* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
+var BUILD='8', updBtn=document.getElementById('upd');
+document.getElementById('ver').textContent=BUILD;
+function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
+function checkVersion(){
+  fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
+    if(j&&j.build&&j.build!==BUILD){ updBtn.classList.add('new'); updBtn.textContent='C’è la versione '+j.build+' · Aggiorna'; }
+  }).catch(function(){});
+}
+updBtn.addEventListener('click',function(){
+  updBtn.textContent='Controllo…';
+  fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
+    if(j&&j.build&&j.build!==BUILD) fresh(); else updBtn.textContent='Versione '+BUILD+' · è l’ultima';
+  }).catch(function(){ fresh(); });
+});
+checkVersion();
+document.addEventListener('visibilitychange',function(){ if(!document.hidden) checkVersion(); });
 
 /* ---- Navigazione ---- */
 var vHome=document.getElementById('home'), vLab=document.getElementById('lab');
