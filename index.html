@@ -110,6 +110,8 @@ body{height:100%;width:100%}
 .art svg *,.sart svg *{vector-effect:non-scaling-stroke}
 /* ogni copertina è diversa: due sono fotografie piene, due sono solo un disegno con il nome piccolo dentro, le altre cambiano peso e posto */
 .d-musiche .art,.d-taccuino .art{display:none}
+.d-taccuino .bg{display:none}
+.sheets img{position:absolute;width:46%;height:auto;box-shadow:0 12px 30px rgba(0,0,0,.6);border-radius:2px}
 .d-taccuino .in{bottom:auto;top:calc(64px + var(--st))}
 .d-respiro .bg,.d-letture .bg{display:none}
 .d-respiro .art{width:84vw;max-width:420px;top:47%}
@@ -161,6 +163,11 @@ body{height:100%;width:100%}
 .bbox.run .bnote{visibility:hidden}
 #bquo{min-height:0;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
 #bquo .lead{margin:0;max-width:24ch;text-align:center}
+#sez.breathing{overflow:hidden}
+#sez.breathing .sback{opacity:0;pointer-events:none}
+#sez.breathing .bbox{position:fixed;inset:0;z-index:6;margin:0;justify-content:center;gap:34px;background:radial-gradient(90% 60% at 50% 45%,#0b1b3a 0%,#050b1c 55%,#01030a 100%);animation:qin 1.6s ease both}
+#sez.breathing .bring{border-color:rgba(150,190,255,.85);box-shadow:0 0 0 26px rgba(90,140,255,.07),0 0 0 54px rgba(90,140,255,.04),0 0 90px rgba(70,120,255,.25)}
+#sez.breathing #blab{color:rgba(190,215,255,.8)}
 .bbox.done .bstage{display:none}
 .bbox.done #bquo{padding:70px 0 30px;animation:qin 2.5s ease both}
 @keyframes qin{from{opacity:0}to{opacity:1}}
@@ -175,6 +182,10 @@ body{height:100%;width:100%}
 .rp.has b{display:none}
 .rt{font-family:"Unbounded",var(--font);font-weight:300;font-size:14px;letter-spacing:.02em;text-transform:uppercase}
 .rn{color:rgba(255,220,170,.8)}
+.mapv{width:100%;margin:10px 0 0;overflow:hidden;color:rgba(255,255,255,.75);touch-action:pan-y}
+#mp{display:block;width:100%;height:auto;transition:transform .9s cubic-bezier(.5,0,.15,1)}
+.pin{cursor:pointer}
+.pin.on circle:nth-child(2){stroke:#fff;fill:rgba(255,255,255,.25)}
 .full{overflow:hidden!important}
 #sez.full .sback{background:rgba(0,0,0,.55);color:#fff}
 .full .sz{padding:0;display:block;position:absolute;inset:0;-webkit-user-select:none;user-select:none}
@@ -270,7 +281,7 @@ body{height:100%;width:100%}
       <div class="in"><span class="tiny">paolo buonvino</span><h1 class="word">Racconti<span class="di">di</span><br>ispirazione</h1><a class="tiny inv" href="#invito">un invito →</a></div>
     </header>
     <a class="door knock" href="#laboratorio" id="tolab" aria-label="Laboratorio: entra">
-      <div class="under"><img class="bg b1" src="img/p-musiche.jpg" alt="" style="object-position:50% 30%"><img class="bg b2" src="img/p-cover.jpg" alt="" style="object-position:50% 38%"><div class="amb"></div></div>
+      <div class="under"><img class="bg b1" src="img/p-letture.jpg" alt="" style="object-position:30% 50%"><img class="bg b2" src="img/p-respiro.jpg" alt="" style="object-position:40% 50%"><div class="amb"></div></div>
       <div class="in"><span class="tiny">01</span><h2 class="word big" aria-label="Laboratorio"><span class="r"><i>L</i><i>A</i><i>B</i><i>O</i></span><span class="r"><i>R</i><i>A</i><i>T</i><i>O</i></span><span class="r"><i>R</i><i>I</i><i>O</i></span></h2></div>
       <span class="enter" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
     </a>
@@ -289,6 +300,7 @@ body{height:100%;width:100%}
     <a class="door d-taccuino photo" href="#taccuino">
       <img class="bg" src="img/p-taccuino.jpg" alt="" style="object-position:50% 40%">
       <div class="amb"></div>
+      <div class="sheets"><img src="img/tac-1.jpg" alt="" style="left:-6%;top:30%;transform:rotate(-8deg)"><img src="img/tac-2.jpg" alt="" style="left:40%;top:20%;transform:rotate(6deg)"><img src="img/tac-4.jpg" alt="" style="left:58%;top:50%;transform:rotate(-4deg)"><img src="img/tac-5.jpg" alt="" style="left:10%;top:58%;transform:rotate(5deg)"></div>
       <div class="art" data-art="taccuino"></div>
       <div class="in"><span class="tiny">04</span><h2 class="word">Taccuino</h2></div>
     </a>
@@ -381,7 +393,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='32', updBtn=document.getElementById('upd');
+var BUILD='33', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -430,6 +442,7 @@ function layDoors(){
     var bg=d.querySelector('.bg'), inn=d.querySelector('.in'), vw=d.querySelector('.vword');
     if(bg) bg.style.transform='translate3d('+(-off*9)+'%,0,0) scale('+(1+0.06*Math.abs(off))+')';
     d.classList.toggle('live',Math.abs(off)<0.45);
+    if(d.id==='tolab'){ var o=Math.max(0,Math.min(1,Math.abs(off))), e=o*o; [].forEach.call(d.querySelectorAll('.word.big i'),function(el,k){ var a=k*2.4+1; el.style.transform='translate3d('+(Math.cos(a)*e*190+off*60*(k%3))+'px,'+(Math.sin(a)*e*260)+'px,0) scale('+(1-0.5*e)+') rotate('+(Math.sin(a*1.7)*e*40)+'deg)'; el.style.opacity=1-o*0.9; }); }
   });
 }
 doorsEl.addEventListener('scroll',function(){ if(!doorRaf) doorRaf=requestAnimationFrame(layDoors); },{passive:true});
@@ -471,7 +484,7 @@ var SEZ={
   taccuino:{n:'04',t:'Pagine dal mio taccuino',lead:'Frammenti, pensieri, intuizioni. Un modo di custodire ciò che nasce.',tac:true},
   letture:{n:'05',t:'Letture che mi hanno ispirato',lead:'Parole che lasciano un segno, aprono strade, ci cambiano un poco.',rows:[['letture','Libri, pagine e brevi commenti personali']]},
   giardini:{n:'06',t:'Giardini che ispirano',lead:'Un invito a cercare bellezza anche fuori dalle pagine.',garden:true},
-  insieme:{n:'07',t:'La musica che nasce insieme',lead:'Durante i miei concerti invito una persona del pubblico a improvvisare.',p:['Ogni incontro dà vita a una composizione unica, che non esisteva prima di quel momento.'],rows:[['le improvvisazioni','Un archivio che cresce dopo ogni concerto']]},
+  insieme:{n:'07',t:'La musica che nasce insieme',lead:'Durante i miei concerti invito una persona del pubblico a improvvisare.',p:['Ogni incontro dà vita a una composizione unica, che non esisteva prima di quel momento.'],map:true},
   partiture:{n:'08',t:'Partiture da scaricare',lead:'La musica è anche un gesto che passa di mano in mano.',p:['Qui troverai alcune mie partiture da leggere, studiare e suonare.'],rows:[['da «dio ride» · piano solo','Oltre le nostre vie']]},
   anni:{n:'10',t:'Negli anni',lead:'Film, serie, dischi, palcoscenici: quasi trent’anni di musica.',anni:true},
   voci:{n:'09',t:'Le vostre voci',lead:'Un concerto non finisce con l’ultima nota.',p:['Se qualcosa ti ha emozionato, sorpreso o fatto riflettere, potrai raccontarlo qui: un pensiero, un racconto, un disegno.'],rows:[['lascia un pensiero','I vostri messaggi e le vostre ispirazioni']]}
@@ -510,12 +523,12 @@ function breathInit(){
     breath.raf=requestAnimationFrame(tick);
   }
   function finish(){
-    breathStop(); box.classList.remove('run'); box.classList.add('done'); var q=QUOTES[Math.floor(Math.random()*QUOTES.length)];
+    breathStop(); box.classList.remove('run'); box.classList.add('done'); vSez.classList.remove('breathing'); var q=QUOTES[Math.floor(Math.random()*QUOTES.length)];
     quo.innerHTML='<p class="lead">'+esc(q[0])+'</p><span class="tiny">'+esc(q[1])+'</span>'; btn.textContent='ancora'; lab.textContent='';
   }
   btn.addEventListener('click',function(){
     if(breath){ finish(); return; }
-    var s=sound()||{}; breath={t0:performance.now(),isIn:null,g:s.g,lp:s.lp,os:s.os}; box.classList.add('run'); box.classList.remove('done'); quo.innerHTML=''; btn.textContent='basta'; breath.raf=requestAnimationFrame(tick);
+    var s=sound()||{}; breath={t0:performance.now(),isIn:null,g:s.g,lp:s.lp,os:s.os}; box.classList.add('run'); box.classList.remove('done'); vSez.classList.add('breathing'); vSez.scrollTop=0; quo.innerHTML=''; btn.textContent='basta'; breath.raf=requestAnimationFrame(tick);
   });
 }
 /* taccuino: una scrivania. I fogli stanno sparsi, storti, uno sopra l'altro; trascini per spostarti, due dita o due tocchi per avvicinarti a un foglio */
@@ -526,7 +539,7 @@ function tacInit(){
   function apply(anim){ var w=v.clientWidth, h=v.clientHeight; s=Math.max(fit*0.85,Math.min(3,s)); var m=90; tx=Math.min(w-m,Math.max(m-DW*s,tx)); ty=Math.min(h-m,Math.max(m-DH*s,ty)); d.style.transition=anim?'transform .5s cubic-bezier(.2,.8,.2,1)':'none'; d.style.transform='translate('+tx+'px,'+ty+'px) scale('+s+')'; }
   function zoomAt(x,y,ns,anim){ ns=Math.max(fit*0.85,Math.min(3,ns)); tx=x-(x-tx)*ns/s; ty=y-(y-ty)*ns/s; s=ns; apply(anim); }
   function home(anim){ var w=v.clientWidth, h=v.clientHeight; fit=Math.min(w/DW,h/DH)*1.55; s=fit; tx=(w-DW*s)/2; ty=70; apply(anim); }
-  home(false);
+  home(false); var s0=s, x0=tx, y0=ty; s=Math.max(1,fit*3.4); tx=v.clientWidth/2-380*s; ty=v.clientHeight/2-430*s; apply(false); setTimeout(function(){ if(Object.keys(pts).length) return; s=s0; tx=x0; ty=y0; d.style.transition='transform 2.4s cubic-bezier(.5,0,.15,1)'; d.style.transform='translate('+tx+'px,'+ty+'px) scale('+s+')'; },500);
   v.onpointerdown=function(e){ try{ v.setPointerCapture(e.pointerId); }catch(_){ } pts[e.pointerId]={x:e.clientX,y:e.clientY}; moved=false; head.classList.add('away'); var k=Object.keys(pts); if(k.length===2){ var a=pts[k[0]], b=pts[k[1]]; start={d:Math.hypot(a.x-b.x,a.y-b.y)||1,s:s}; } };
   v.onpointermove=function(e){ var q=pts[e.pointerId]; if(!q) return; var r=v.getBoundingClientRect(), k=Object.keys(pts);
     if(k.length===1){ if(Math.hypot(e.clientX-q.x,e.clientY-q.y)>3) moved=true; tx+=e.clientX-q.x; ty+=e.clientY-q.y; q.x=e.clientX; q.y=e.clientY; apply(false); }
@@ -545,9 +558,28 @@ function anniInit(){
     if(best&&yr.textContent!==best.getAttribute('data-y')) yr.textContent=best.getAttribute('data-y'); }
   vSez.onscroll=function(){ if(!raf) raf=requestAnimationFrame(lay); }; lay();
   ANNI.forEach(function(a,i){ if(!a[3]) return;
-    fetch('https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrlimit=1&prop=pageimages&piprop=thumbnail&pithumbsize=500&gsrsearch='+encodeURIComponent(a[3])).then(function(r){ return r.json(); }).then(function(j){
+    fetch('https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrlimit=1&prop=pageimages&piprop=thumbnail&pilicense=any&pithumbsize=500&gsrsearch='+encodeURIComponent(a[3])).then(function(r){ return r.json(); }).then(function(j){
       var pg=j&&j.query&&j.query.pages, k=pg&&Object.keys(pg)[0], src=k&&pg[k].thumbnail&&pg[k].thumbnail.source; if(!src||!cards[i]) return;
       var im=new Image(); im.onload=function(){ var box=cards[i].querySelector('.rp'); box.style.backgroundImage='url("'+src+'")'; box.classList.add('has'); }; im.src=src; }).catch(function(){}); });
+}
+/* insieme: la cartina dei concerti. Ogni punto è una sera in cui qualcuno del pubblico ha improvvisato; lo tocchi, la cartina si avvicina, e lì si ascolterà quella musica.
+   Per ora i luoghi sono di prova e le registrazioni non ci sono */
+var IT=[[[6.6,45.1],[6.9,45.9],[8.5,46.4],[10.4,46.9],[12.2,47.0],[13.7,46.5],[13.8,45.6],[13.1,45.7],[12.3,45.3],[12.4,44.2],[13.6,43.5],[14.2,42.4],[15.2,41.9],[16.2,41.8],[15.9,41.5],[17.0,41.0],[18.5,40.1],[18.3,39.8],[17.1,40.5],[16.6,39.9],[17.1,39.0],[16.5,38.3],[15.7,37.9],[15.6,38.2],[16.1,39.0],[15.6,40.1],[14.7,40.6],[14.2,40.8],[13.0,41.2],[12.2,41.8],[11.1,42.4],[10.5,42.9],[10.3,43.5],[9.8,44.1],[8.9,44.4],[8.2,44.0],[7.5,43.8],[7.0,44.2]],[[12.4,38.0],[13.3,38.2],[15.6,38.3],[15.2,37.5],[15.3,36.7],[14.3,37.0],[12.9,37.6]],[[8.2,40.9],[9.2,41.3],[9.8,40.5],[9.6,39.2],[9.0,39.0],[8.4,39.2],[8.5,40.3]]];
+var LUOGHI=[['Milano',9.19,45.46],['Torino',7.68,45.07],['Bologna',11.34,44.49],['Firenze',11.25,43.77],['Roma',12.5,41.9],['Napoli',14.27,40.85],['Bari',16.87,41.12],['Catania',15.09,37.5],['Palermo',13.36,38.12],['Cagliari',9.11,39.22]];
+function mapXY(lo,la){ return [(lo-6.2)*0.743*30+6,(47.3-la)*30+6]; }
+function mapHtml(){
+  var s='<svg id="mp" viewBox="0 0 292 334" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round" stroke-linecap="round">';
+  IT.forEach(function(poly){ var p=poly.map(function(q){ return mapXY(q[0],q[1]); }), n=p.length, d='M'+((p[n-1][0]+p[0][0])/2).toFixed(1)+' '+((p[n-1][1]+p[0][1])/2).toFixed(1); for(var i=0;i<n;i++){ var a=p[i], b=p[(i+1)%n]; d+='Q'+a[0].toFixed(1)+' '+a[1].toFixed(1)+' '+((a[0]+b[0])/2).toFixed(1)+' '+((a[1]+b[1])/2).toFixed(1); } s+='<path d="'+d+'Z" opacity=".5" vector-effect="non-scaling-stroke"/>'; });
+  LUOGHI.forEach(function(l,i){ var c=mapXY(l[1],l[2]); s+='<g class="pin" data-i="'+i+'"><circle cx="'+c[0].toFixed(1)+'" cy="'+c[1].toFixed(1)+'" r="14" stroke="none" fill="transparent"/><circle cx="'+c[0].toFixed(1)+'" cy="'+c[1].toFixed(1)+'" r="4.5" vector-effect="non-scaling-stroke"/><circle cx="'+c[0].toFixed(1)+'" cy="'+c[1].toFixed(1)+'" r="1.3" fill="currentColor" stroke="none"/></g>'; });
+  return '<div class="mapv" id="mapv">'+s+'</svg></div><div class="rowi" id="mcard"><span class="tiny">tocca un punto</span><b>Le improvvisazioni, città per città</b><span class="tiny soon">luoghi di prova · registrazioni presto</span></div>';
+}
+function mapInit(){
+  var svg=document.getElementById('mp'), card=document.getElementById('mcard'), cur=-1;
+  svg.addEventListener('click',function(e){ var gEl=e.target.closest('.pin'), i=gEl?+gEl.getAttribute('data-i'):-1;
+    [].forEach.call(svg.querySelectorAll('.pin'),function(x){ x.classList.remove('on'); });
+    if(i<0||i===cur){ cur=-1; svg.style.transform='none'; card.innerHTML='<span class="tiny">tocca un punto</span><b>Le improvvisazioni, città per città</b><span class="tiny soon">luoghi di prova · registrazioni presto</span>'; return; }
+    cur=i; gEl.classList.add('on'); var c=mapXY(LUOGHI[i][1],LUOGHI[i][2]); svg.style.transformOrigin=(c[0]/292*100)+'% '+(c[1]/334*100)+'%'; svg.style.transform='scale(2.3)';
+    card.innerHTML='<span class="tiny">'+esc(LUOGHI[i][0].toLowerCase())+' · data da aggiungere</span><b>Una musica nata quella sera</b><span class="tiny soon">registrazione presto</span>'; });
 }
 var vSez=document.getElementById('sez'), szEl=document.getElementById('sz');
 function esc(x){ return String(x).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
@@ -562,10 +594,11 @@ function showSez(id){
   if(s.breath) h='<div class="bbox" id="bbox"><div class="bstage"><div class="bring" id="bring"></div><span class="tiny" id="blab"></span></div><div id="bquo"></div><button type="button" class="upd press" id="bgo">inizia</button><span class="tiny bnote">tre minuti · inspira 4, espira 6</span></div>'+h.replace(/<div class="sart">[\s\S]*?<\/div>/,'');
   if(s.tac) h='<div class="deskv" id="deskv"><div class="desk" id="desk">'+TAC.map(function(f){ return '<img src="img/'+f[0]+'" alt="" style="left:'+f[1]+'px;top:'+f[2]+'px;width:'+f[3]+'px;transform:rotate('+f[4]+'deg)">'; }).join('')+'</div></div><div class="deskh" id="deskh"><span class="tiny">'+s.n+'</span><h2 class="word">'+esc(s.t)+'</h2></div>';
   if(s.anni) h='<div class="yrw"><div class="yr" id="yr">1997</div></div>'+h+'<div class="rcs">'+ANNI.map(function(a,i){ return '<div class="rc'+(i%2?' r':'')+'" data-y="'+a[0]+'" style="width:'+[66,54,72,58,62][i%5]+'%;margin-top:'+[40,-30,70,10,-10][i%5]+'px"><div class="rp"><b>'+esc(a[1])+'</b></div><span class="tiny">'+a[0]+(a[2]?' · '+esc(a[2].toLowerCase()):'')+'</span><b class="rt">'+esc(a[1])+'</b>'+(a[4]?'<span class="tiny rn">'+esc(a[4])+'</span>':'')+'</div>'; }).join('')+'</div><p class="tiny gcred">elenco e locandine da wikipedia · da rivedere</p>';
-  vSez.onscroll=null;
+  if(s.map) h+=mapHtml();
+  vSez.onscroll=null; vSez.classList.remove('breathing');
   vSez.classList.toggle('full',!!s.tac);
   breathStop(); szEl.innerHTML=h; vSez.scrollTop=0; if(s.tac) tacInit();
-  if(s.garden) gardenInit(); if(s.breath) breathInit(); if(s.anni) anniInit();
+  if(s.garden) gardenInit(); if(s.breath) breathInit(); if(s.anni) anniInit(); if(s.map) mapInit();
 }
 /* giardini: parchi e giardini veri intorno a un punto, presi da OpenStreetMap. La posizione si chiede solo quando tocchi il tasto */
 function gardenInit(){
@@ -1015,7 +1048,7 @@ MODES.legami=(function(){
      Chi è legato al centro è vicino; chi passa da altri è più lontano e velato. Un tocco cambia voce, un taglio scioglie, tenendo premuto si sposta */
   var PL=[[.5,.5],[.5,.27],[.2,.37],[.8,.37],[.86,.62],[.14,.62],[.5,.76],[.25,.85],[.75,.85],[.5,.09]];
   var KIDS={drone:['arm1','piano','short1','basso'],arm1:['mel1','arm2'],piano:['mel1','mel2'],short1:['short2','short3','short4'],basso:['arm2','short2'],mel1:['mel2']};
-  var CAN=['arm1','piano','short1','mel1','mel2','basso','arm2','short2','short3','short4'], DR={gv:1,level:0}, NP=30, GROW=2.8;
+  var CAN=['arm1','piano','short1','mel1','mel2','basso','arm2','short2','short3','short4'], DR={gv:1,level:0}, NP=46, GROW=2.8;
   var st=[], par=[], links=[], full=0, used=false, born=[], ps=[], snaps=[], dep=[];
   function nx(i){ return ps[i].x*W; } function ny(i){ return TOP+ps[i].y*(BOT-TOP); }
   function maxLen(){ return 0.52*(BOT-TOP); }
@@ -1060,7 +1093,7 @@ MODES.legami=(function(){
     for(i=1;i<pts.length;i++) len.push(len[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));
     var tot=len[len.length-1]||1;
     for(i=0;i<NP;i++){ var s=tot*i/(NP-1); while(j<len.length-2&&len[j+1]<s) j++; var f=(s-len[j])/((len[j+1]-len[j])||1); out.push([pts[j][0]+(pts[j+1][0]-pts[j][0])*f,pts[j][1]+(pts[j+1][1]-pts[j][1])*f]); }
-    for(var pass=0;pass<3;pass++){ var sm=out.map(function(p){ return p.slice(); }); for(i=1;i<NP-1;i++){ sm[i][0]=(out[i-1][0]+2*out[i][0]+out[i+1][0])/4; sm[i][1]=(out[i-1][1]+2*out[i][1]+out[i+1][1])/4; } out=sm; }
+    for(var pass=0;pass<7;pass++){ var sm=out.map(function(p){ return p.slice(); }); for(i=1;i<NP-1;i++){ sm[i][0]=(out[i-1][0]+2*out[i][0]+out[i+1][0])/4; sm[i][1]=(out[i-1][1]+2*out[i][1]+out[i+1][1])/4; } out=sm; }
     return out;
   }
   function makePath(raw,a,b){
@@ -1071,8 +1104,9 @@ MODES.legami=(function(){
     for(var j=0;j<3;j++){
       g.strokeStyle='rgba('+INK+','+al+')'; g.lineWidth=0.9; g.beginPath();
       for(var k=0;k<=lim;k++){ var u=k/(NP-1), a=pts[Math.max(0,k-1)], b=pts[Math.min(NP-1,k+1)], dl=Math.hypot(b[0]-a[0],b[1]-a[1])||1, qx=-(b[1]-a[1])/dl, qy=(b[0]-a[0])/dl;
-        var am=(1.4+6.5*(swf?swf(u):0))*Math.pow(Math.sin(Math.PI*u),0.7)*calm, off=am*Math.sin(k*0.62+j*2.094+t*0.7+ph);
-        if(k) g.lineTo(pts[k][0]+qx*off,pts[k][1]+qy*off); else g.moveTo(pts[k][0],pts[k][1]); }
+        var am=(1.4+6.5*(swf?swf(u):0))*Math.pow(Math.sin(Math.PI*u),0.7)*calm, off=am*Math.sin(k*0.41+j*2.094+t*0.7+ph), X=pts[k][0]+qx*off, Y=pts[k][1]+qy*off;
+        if(!k) g.moveTo(X,Y); else g.quadraticCurveTo(lx,ly,(lx+X)/2,(ly+Y)/2); var lx=X, ly=Y; }
+      g.lineTo(lx,ly);
       g.stroke();
     }
   }
@@ -1135,7 +1169,7 @@ MODES.legami=(function(){
       });
       snaps=snaps.filter(function(s){ var a=(tn-s[4])/0.7; if(a>=1) return false; g.strokeStyle='rgba('+INK+','+0.7*(1-a)+')'; g.lineWidth=1; g.beginPath(); g.moveTo(s[0],s[1]); g.lineTo(s[0]+(s[2]-s[0])*0.5*(1-a),s[1]+(s[3]-s[1])*0.5*(1-a)); g.moveTo(s[2],s[3]); g.lineTo(s[2]+(s[0]-s[2])*0.5*(1-a),s[3]+(s[1]-s[3])*0.5*(1-a)); g.stroke(); return true; });
       fingers().forEach(function(q){
-        if(q.node>=0&&q.lit&&q.far&&!q.hold&&q.raw.length){ q.fx+=(q.x-q.fx)*0.25; q.fy+=(q.y-q.fy)*0.25; var to=at(q), tip=(to>=0&&to!==q.node)?[nx(to),ny(to)]:[q.fx,q.fy], lp=resmooth([[nx(q.node),ny(q.node)]].concat(q.raw,[tip])); braid(lp,NP-1,null,0.6,0,t,1); g.fillStyle='rgba('+INK+',.95)'; g.beginPath(); g.arc(tip[0],tip[1],2.6,0,TAU); g.fill(); }
+        if(q.node>=0&&q.lit&&q.far&&!q.hold&&q.raw.length){ q.fx+=(q.x-q.fx)*0.25; q.fy+=(q.y-q.fy)*0.25; var to=at(q,70), pull=(to>=0&&to!==q.node)?ss(70,24,Math.hypot(q.fx-nx(to),q.fy-ny(to))):0, tip=pull?[q.fx+(nx(to)-q.fx)*pull,q.fy+(ny(to)-q.fy)*pull]:[q.fx,q.fy], lp=resmooth([[nx(q.node),ny(q.node)]].concat(q.raw,[tip])); braid(lp,NP-1,null,0.6,0,t,1); g.fillStyle='rgba('+INK+',.95)'; g.beginPath(); g.arc(tip[0],tip[1],2.6,0,TAU); g.fill(); }
         if(q.node<0&&q.far){ g.strokeStyle='rgba('+INK+',.35)'; g.lineWidth=1; g.beginPath(); g.moveTo(q.sx,q.sy); g.lineTo(q.x,q.y); g.stroke(); }
         if(q.hold){ g.strokeStyle='rgba('+INK+',.5)'; g.lineWidth=1; g.beginPath(); g.arc(nx(q.node),ny(q.node),30,0,TAU); g.stroke(); }
       });
