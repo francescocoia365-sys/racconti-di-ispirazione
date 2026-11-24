@@ -34,7 +34,8 @@
   --sb:env(safe-area-inset-bottom,0px);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{position:fixed;inset:0;margin:0;overflow:hidden;overscroll-behavior:none;background:var(--bg);
+html{height:100%;width:100%}
+html,body{margin:0;overflow:hidden;overscroll-behavior:none;background:var(--bg);
   -webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:pan-x pan-y;
   -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 body{color:var(--label);font-family:var(--font);font-size:17px;line-height:1.35;-webkit-font-smoothing:antialiased}
@@ -42,33 +43,33 @@ a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
 img{display:block;-webkit-user-drag:none;pointer-events:none}
 :focus-visible{outline:2px solid #fff;outline-offset:3px}
-.app{position:absolute;inset:0;max-width:500px;margin:0 auto;overflow:hidden;background:var(--bg)}
+body{height:100%;width:100%}
+.app{position:fixed;top:0;bottom:0;left:0;right:0;width:100%;max-width:500px;margin:0 auto;overflow:hidden;background:var(--bg)}
+#probe{position:absolute;visibility:hidden;pointer-events:none;top:0;left:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 .view{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .4s var(--ease),transform .5s var(--ease),visibility 0s .5s}
 .view.on{opacity:1;visibility:visible;transform:none;transition:opacity .4s var(--ease),transform .5s var(--ease)}
 .press{transition:transform .25s var(--ease)}
 .press:active{transform:scale(.97)}
 
-/* ---------- Home: porte scorrevoli. Si scorre di lato; la foto resta sullo sfondo, in trasparenza ---------- */
+/* ---------- Home: porte che scorrono di lato e si coprono. Una porta è una foto, la successiva è solo una parola.
+   Tipografia: una sola famiglia larga. Le parole grandi tutte maiuscole e sottili; tutto il resto minuscolo, piccolo, spaziato. ---------- */
 #home{overflow:hidden}
 .doors{position:absolute;inset:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior:none;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;touch-action:pan-x}
 .doors::-webkit-scrollbar{display:none;width:0;height:0}
-.door{flex:0 0 100%;min-width:0;position:relative;scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden;background:#000;color:var(--label);border-left:1px solid rgba(255,255,255,.1)}
-.door .bg{position:absolute;top:0;bottom:0;left:-18%;width:136%;height:100%;object-fit:cover;opacity:.3;will-change:transform}
-.door.cover .bg{opacity:.85}
-.door::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,0) 30%,rgba(0,0,0,.25) 55%,#000 96%)}
-.door .in{position:absolute;z-index:1;left:24px;right:24px;bottom:calc(70px + var(--sb));display:flex;flex-direction:column;align-items:flex-start;gap:14px;will-change:transform,opacity}
-.brand{position:absolute;z-index:2;top:calc(20px + var(--st));left:24px;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#fff}
-.num{font-size:12px;font-weight:600;letter-spacing:.18em;color:var(--secondary);font-variant-numeric:tabular-nums}
-.word{font-family:"Unbounded",var(--font);font-weight:300;font-size:46px;line-height:1.02;letter-spacing:-.01em;text-transform:uppercase;margin:0;white-space:nowrap}
-.cover .word{font-size:40px}
-.desc{margin:0;font-size:18px;line-height:1.35;font-weight:500;letter-spacing:-.01em;color:#cfcfd6;max-width:27ch}
-.act{font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--secondary)}
-.act.on{display:inline-flex;align-items:center;height:46px;padding:0 24px;border-radius:999px;background:#fff;color:#000;font-size:16px;letter-spacing:0;text-transform:none;margin-top:4px}
-.end .word{font-size:24px;color:var(--secondary)}
-.pager{position:absolute;z-index:2;left:24px;right:24px;bottom:calc(30px + var(--sb));display:flex;gap:6px;pointer-events:none}
-.pager i{flex:1;height:2px;border-radius:2px;background:rgba(255,255,255,.2);transition:background .3s}
-.pager i.on{background:#fff}
-.upd{margin-top:10px;height:42px;padding:0 18px;border-radius:999px;background:var(--surface);color:var(--label);font-size:14px;font-weight:600}
+.door{position:sticky;left:0;flex:0 0 100%;min-width:0;height:100%;scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden;background:#000;color:var(--label);box-shadow:-50px 0 90px rgba(0,0,0,.6)}
+.door .bg{position:absolute;top:0;bottom:0;left:-10%;width:120%;height:100%;object-fit:cover;will-change:transform}
+.door.photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.28) 0%,rgba(0,0,0,0) 26%,rgba(0,0,0,0) 58%,rgba(0,0,0,.82) 100%)}
+.door .in{position:absolute;z-index:1;left:26px;right:26px;bottom:calc(40px + var(--sb));display:flex;flex-direction:column;align-items:flex-start;gap:14px;will-change:transform,opacity}
+.tiny{font-family:"Unbounded",var(--font);font-weight:300;font-size:11px;letter-spacing:.14em;text-transform:lowercase;color:rgba(255,255,255,.62)}
+.word{font-family:"Unbounded",var(--font);font-weight:300;font-size:44px;line-height:1.04;letter-spacing:.01em;text-transform:uppercase;margin:0;white-space:nowrap}
+.vword{position:absolute;z-index:1;left:50%;top:50%;margin:0;transform:translate(-50%,-50%) rotate(-90deg);font-family:"Unbounded",var(--font);font-weight:300;font-size:96px;line-height:1;letter-spacing:.01em;text-transform:uppercase;white-space:nowrap;will-change:transform}
+.type .n{position:absolute;z-index:1;top:calc(24px + var(--st));left:26px}
+.type .s{position:absolute;z-index:1;bottom:calc(34px + var(--sb));left:26px}
+.enter{position:absolute;z-index:1;right:24px;bottom:calc(26px + var(--sb));width:48px;height:48px;border:1px solid rgba(255,255,255,.55);border-radius:50%;display:grid;place-items:center}
+.enter svg{width:16px;height:16px}
+.end .in{bottom:auto;top:50%;transform:translateY(-50%);gap:18px}
+.end .word{font-size:20px;color:var(--secondary)}
+.upd{margin-top:14px;height:40px;padding:0 16px;border-radius:999px;background:var(--surface);color:var(--label);font-family:"Unbounded",var(--font);font-weight:300;font-size:11px;letter-spacing:.1em;text-transform:lowercase}
 .upd.new{background:#fff;color:#000}
 
 /* ---------- Laboratorio ---------- */
@@ -102,9 +103,19 @@ img{display:block;-webkit-user-drag:none;pointer-events:none}
 .glyph{display:flex;flex-direction:column;align-items:center;gap:18px;color:var(--label);padding:10px 0}
 .glyph svg{width:92px;height:92px}
 .glyph span{font-family:"Unbounded",var(--font);font-weight:300;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--secondary)}
-.bartop{z-index:4}
-.ctl{transition:opacity .4s}
+.bartop{z-index:4;transition:opacity .5s}
+.ctl{transition:opacity .5s}
 #lab.inmenu .ctl{opacity:0;pointer-events:none}
+#lab:not(.inmenu):not(.ctlon) .bartop,#lab:not(.inmenu):not(.ctlon) .prog,#lab:not(.ctlon) .barbot{opacity:0;pointer-events:none}
+#lab:not(.inmenu):not(.ctlon) .bartop *,#lab:not(.ctlon) .barbot *{pointer-events:none}
+.barbot{transition:opacity .5s}
+#zone{position:absolute;z-index:3;top:0;left:0;right:0;height:calc(64px + var(--st))}
+#lab.inmenu #zone{display:none}
+#zone::after{content:"";position:absolute;left:50%;bottom:26px;width:26px;height:2px;margin-left:-13px;border-radius:2px;background:rgba(255,255,255,.22);transition:opacity .5s}
+#lab.ctlon #zone::after{opacity:0}
+.piece b{font-family:"Unbounded",var(--font);font-weight:300;font-size:12px;letter-spacing:.1em;text-transform:lowercase}
+.piece span{display:none}
+.walk{font-family:"Unbounded",var(--font);font-weight:300;font-size:11px;letter-spacing:.1em;text-transform:lowercase}
 .modes{position:absolute;left:0;right:0;top:calc(78px + var(--st));display:flex;gap:6px;padding:0 14px;overflow-x:auto;scrollbar-width:none;touch-action:pan-x;-webkit-overflow-scrolling:touch}
 .modes::-webkit-scrollbar{display:none}
 .modes button{flex:none;height:38px;padding:0 15px;border-radius:999px;font-size:16px;font-weight:600;letter-spacing:-.01em;color:var(--secondary);transition:background .25s,color .25s}
@@ -123,46 +134,39 @@ img{display:block;-webkit-user-drag:none;pointer-events:none}
 </head>
 <body>
 <div class="app">
+<div id="probe"></div>
 
 <section class="view on" id="home">
   <div class="doors" id="doors">
-    <header class="door cover">
-      <span class="brand">Paolo Buonvino</span>
+    <header class="door photo">
       <img class="bg" src="img/p-cover.jpg" alt="Paolo Buonvino al pianoforte, solo sul palco, in un fascio di luce" style="object-position:50% 38%">
-      <div class="in"><h1 class="word">Racconti<br>di<br>ispirazione</h1><p class="desc">L’ispirazione è ossigeno per l’anima.</p></div>
+      <div class="in"><span class="tiny">paolo buonvino</span><h1 class="word">Racconti<br>di<br>ispirazione</h1></div>
     </header>
-    <a class="door" href="#laboratorio" id="tolab">
-      <img class="bg" src="img/p-lab.jpg" alt="" style="object-position:40% 30%">
-      <div class="in"><span class="num">01</span><h2 class="word">Laboratorio</h2><p class="desc">Suona un brano di Paolo, senza saper suonare.</p><span class="act on">Entra</span></div>
+    <a class="door type" href="#laboratorio" id="tolab" aria-label="Laboratorio: entra">
+      <span class="tiny n">01</span><h2 class="vword">Laboratorio</h2>
+      <span class="enter" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
     </a>
-    <section class="door">
+    <section class="door photo">
       <img class="bg" src="img/p-musiche.jpg" alt="" style="object-position:50% 30%">
-      <div class="in"><span class="num">02</span><h2 class="word">Musiche</h2><p class="desc">Quello che Paolo ascolta e che lo accende.</p><span class="act">Presto</span></div>
+      <div class="in"><span class="tiny">02</span><h2 class="word">Musiche</h2><span class="tiny">presto</span></div>
     </section>
-    <section class="door">
-      <img class="bg" src="img/p-respiro.jpg" alt="" style="object-position:40% 50%">
-      <div class="in"><span class="num">03</span><h2 class="word">Respiro</h2><p class="desc">Musica per rallentare e ritrovare spazio.</p><span class="act">Presto</span></div>
-    </section>
-    <section class="door">
+    <section class="door type"><span class="tiny n">03</span><h2 class="vword">Respiro</h2><span class="tiny s">presto</span></section>
+    <section class="door photo">
       <img class="bg" src="img/p-taccuino.jpg" alt="" style="object-position:50% 40%">
-      <div class="in"><span class="num">04</span><h2 class="word">Taccuino</h2><p class="desc">Le sue pagine manoscritte, da sfogliare.</p><span class="act">Presto</span></div>
+      <div class="in"><span class="tiny">04</span><h2 class="word">Taccuino</h2><span class="tiny">presto</span></div>
     </section>
-    <section class="door">
-      <img class="bg" src="img/p-letture.jpg" alt="" style="object-position:30% 50%">
-      <div class="in"><span class="num">05</span><h2 class="word">Letture</h2><p class="desc">I libri che lo hanno segnato, con due righe sue.</p><span class="act">Presto</span></div>
-    </section>
-    <section class="door end">
+    <section class="door type"><span class="tiny n">05</span><h2 class="vword">Letture</h2><span class="tiny s">presto</span></section>
+    <section class="door type end">
       <div class="in">
-        <span class="num">E ancora, presto</span>
+        <span class="tiny">e ancora, presto</span>
         <p class="word">La musica<br>che nasce insieme</p>
         <p class="word">Partiture</p>
         <p class="word">Giardini</p>
         <p class="word">Le vostre voci</p>
-        <button id="upd" class="upd press" type="button">Versione <span id="ver"></span> · Aggiorna</button>
+        <button id="upd" class="upd press" type="button">versione <span id="ver"></span> · aggiorna</button>
       </div>
     </section>
   </div>
-  <div class="pager" id="pager" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
 </section>
 
 <section class="view" id="lab" aria-label="Laboratorio">
@@ -174,6 +178,7 @@ img{display:block;-webkit-user-drag:none;pointer-events:none}
     <button class="round press ctl" id="again" type="button" aria-label="Ricomincia dall’inizio"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 9a5.5 5.5 0 1 0 1.8-4.1"/><path d="M3.2 2.6v3h3"/></svg></button>
     <button class="round press ctl" id="pause" type="button" aria-label="Pausa"><svg viewBox="0 0 18 18" fill="currentColor" aria-hidden="true"><path id="pauseicon" d="M4.5 3h3v12h-3zM10.5 3h3v12h-3z"/></svg></button>
   </div>
+  <div id="zone"></div>
   <div class="prog ctl" aria-hidden="true"><i id="prog"></i></div>
   <div class="barbot">
     <div class="walkrow"><button id="walk" class="walk press" type="button" hidden>cammina</button><button id="cal" class="walk press" type="button" hidden>tara</button></div>
@@ -198,45 +203,50 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='10', updBtn=document.getElementById('upd');
+var BUILD='11', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
   fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
-    if(j&&j.build&&j.build!==BUILD){ updBtn.classList.add('new'); updBtn.textContent='C’è la versione '+j.build+' · Aggiorna'; }
+    if(j&&j.build&&j.build!==BUILD){ updBtn.classList.add('new'); updBtn.textContent='c’è la versione '+j.build+' · aggiorna'; }
   }).catch(function(){});
 }
 updBtn.addEventListener('click',function(){
-  updBtn.textContent='Controllo…';
+  updBtn.textContent='controllo…';
   fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
-    if(j&&j.build&&j.build!==BUILD) fresh(); else updBtn.textContent='Versione '+BUILD+' · è l’ultima';
+    if(j&&j.build&&j.build!==BUILD) fresh(); else updBtn.textContent='versione '+BUILD+' · è l’ultima';
   }).catch(function(){ fresh(); });
 });
 checkVersion();
 document.addEventListener('visibilitychange',function(){ if(!document.hidden) checkVersion(); });
 
 var vHome=document.getElementById('home'), vLab=document.getElementById('lab');
-/* ---- Le parole grandi stanno sempre in una riga ---- */
+/* ---- Le parole grandi si adattano allo schermo: quelle in orizzontale alla larghezza, quelle in verticale all'altezza ---- */
 function fitWords(){
   [].forEach.call(document.querySelectorAll('.word'),function(w){
     w.style.fontSize=''; var max=w.parentNode.clientWidth, fs=parseFloat(getComputedStyle(w).fontSize), n=0;
-    while(w.scrollWidth>max&&fs>14&&n<40){ fs-=1; w.style.fontSize=fs+'px'; n++; }
+    while(w.scrollWidth>max&&fs>12&&n<60){ fs-=1; w.style.fontSize=fs+'px'; n++; }
+  });
+  [].forEach.call(document.querySelectorAll('.vword'),function(w){
+    var max=w.parentNode.clientHeight-170, lim=w.parentNode.clientWidth*0.42, fs=120, n=0;
+    w.style.fontSize=fs+'px';
+    while((w.offsetWidth>max||w.offsetHeight>lim)&&fs>20&&n<110){ fs-=1; w.style.fontSize=fs+'px'; n++; }
   });
 }
 window.addEventListener('resize',fitWords); window.addEventListener('load',fitWords);
 if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fitWords);
 
-/* ---- Porte scorrevoli: la foto scorre più piano, il testo più in fretta ---- */
-var doorsEl=document.getElementById('doors'), doorList=[].slice.call(doorsEl.children), pagerDots=document.getElementById('pager').children, doorRaf=0;
+/* ---- Porte: quella che arriva copre quella di prima; dentro, foto e parole si muovono a velocità diverse ---- */
+var doorsEl=document.getElementById('doors'), doorList=[].slice.call(doorsEl.children), doorRaf=0;
 function layDoors(){
   doorRaf=0; var w=doorsEl.clientWidth||1, sl=doorsEl.scrollLeft;
   doorList.forEach(function(d,i){
     var off=(i*w-sl)/w; if(off<-1.2||off>1.2) return;
-    var bg=d.querySelector('.bg'), inn=d.querySelector('.in');
-    if(bg) bg.style.transform='translate3d('+(-off*14)+'%,0,0)';
-    if(inn){ inn.style.transform='translate3d('+(off*70)+'px,0,0)'; inn.style.opacity=Math.max(0,1-Math.abs(off)*1.4); }
+    var bg=d.querySelector('.bg'), inn=d.querySelector('.in'), vw=d.querySelector('.vword');
+    if(bg) bg.style.transform='translate3d('+(-off*9)+'%,0,0) scale('+(1+0.06*Math.abs(off))+')';
+    if(inn&&!d.classList.contains('end')){ inn.style.transform='translate3d('+(Math.max(0,off)*90)+'px,0,0)'; inn.style.opacity=Math.max(0,1-Math.abs(off)*1.5); }
+    if(vw) vw.style.transform='translate(-50%,-50%) rotate(-90deg) translate3d('+(-Math.max(0,off)*140)+'px,0,0)';
   });
-  var cur=Math.round(sl/w); for(var k=0;k<pagerDots.length;k++) pagerDots[k].classList.toggle('on',k===cur);
 }
 doorsEl.addEventListener('scroll',function(){ if(!doorRaf) doorRaf=requestAnimationFrame(layDoors); },{passive:true});
 window.addEventListener('resize',layDoors); layDoors();
@@ -378,7 +388,8 @@ function resize(){
   var r=cv.getBoundingClientRect(); if(!r.width) return;
   W=r.width; H=r.height; DPR=Math.min(3,window.devicePixelRatio||1);
   cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR);
-  TOP=document.querySelector('.prog').getBoundingClientRect().bottom-r.top+22; BOT=document.querySelector('.barbot').getBoundingClientRect().top-r.top-18;
+  var pr=getComputedStyle(document.getElementById('probe')), st=parseFloat(pr.paddingTop)||0, sb=parseFloat(pr.paddingBottom)||0;
+  TOP=st+78; BOT=H-sb-44; return; BOT=document.querySelector('.barbot').getBoundingClientRect().top-r.top-18;
 }
 window.addEventListener('resize',resize);
 var P={};   // dita sullo schermo
@@ -460,29 +471,27 @@ MODES.stanza=(function(){
     },
     draw:function(t){
       var hh=BOT-TOP, sc=Math.min(1.15,W/390), mx=me.x*W, my=TOP+me.y*hh;
+      g.lineCap='round';
       S.forEach(function(s,i){
         if(!seen[s.id]&&s.gv<0.04) return;                // quello che non hai trovato non si vede
-        var p=POSN[s.id], x=p[0]*W, y=TOP+p[1]*hh, b=s.gv, r=(9+30*b)*(1+0.22*lvl(s))*sc;
-        g.fillStyle='rgba('+INK+','+(0.08+0.5*b)+')'; g.beginPath(); g.arc(x,y,r,0,TAU); g.fill();
-        g.fillStyle='rgba('+INK+','+(0.35+0.5*b)+')'; g.beginPath(); g.arc(x,y,2.6*sc,0,TAU); g.fill();
+        var p=POSN[s.id], x=p[0]*W, y=TOP+p[1]*hh, b=s.gv;
+        if(b>0.03){                                       // il filo: più lo senti, più è chiaro
+          g.strokeStyle='rgba('+INK+','+0.7*b+')'; g.lineWidth=0.75+0.9*b; g.beginPath(); g.moveTo(mx,my); g.lineTo(x,y); g.stroke();
+          g.strokeStyle='rgba('+INK+','+0.55*b+')'; g.lineWidth=1; g.beginPath(); g.arc(x,y,(7+22*lvl(s))*sc,0,TAU); g.stroke();
+        }
+        g.fillStyle='rgba('+INK+','+(0.3+0.7*b)+')'; g.beginPath(); g.arc(x,y,(2.4+2.2*b)*sc,0,TAU); g.fill();
       });
       buds.forEach(function(u,i){                         // i due più vicini da scoprire: un punto che chiama
         var x=u.p[0]*W, y=TOP+u.p[1]*hh, pu=(t*0.5+i*0.5)%1;
-        g.fillStyle='rgba('+INK+',.7)'; g.beginPath(); g.arc(x,y,2.6*sc,0,TAU); g.fill();
-        g.strokeStyle='rgba('+INK+','+0.45*(1-pu)+')'; g.lineWidth=1; g.beginPath(); g.arc(x,y,(5+26*pu)*sc,0,TAU); g.stroke();
+        g.fillStyle='rgba('+INK+',.6)'; g.beginPath(); g.arc(x,y,2.2*sc,0,TAU); g.fill();
+        g.strokeStyle='rgba('+INK+','+0.4*(1-pu)+')'; g.lineWidth=1; g.beginPath(); g.arc(x,y,(4+24*pu)*sc,0,TAU); g.stroke();
       });
       if(nseen>=S.length){ g.strokeStyle='rgba('+INK+','+(0.3+0.6*c)+')'; g.lineWidth=1+c; g.beginPath(); g.arc(W/2,TOP+hh/2,W*0.12,0,TAU); g.stroke(); }
-      if(buds.length&&(!moved||still>6)){                 // se resti fermo, un'ombra di te parte verso il punto: così si capisce senza parole
+      if(buds.length&&(!moved||still>6)){                 // fermo: un'ombra di te parte verso il richiamo. Mostra il gesto senza dirlo
         var u=buds[0], ph=(t*0.4)%1, e=ph*ph*(3-2*ph), gx=mx+(u.p[0]*W-mx)*e, gy=my+(TOP+u.p[1]*hh-my)*e;
-        g.strokeStyle='rgba(255,255,255,'+0.6*Math.sin(Math.PI*ph)+')'; g.lineWidth=1.25; g.beginPath(); g.arc(gx,gy,9,0,TAU); g.stroke();
+        g.strokeStyle='rgba(255,255,255,'+0.6*Math.sin(Math.PI*ph)+')'; g.lineWidth=1.25; g.beginPath(); g.arc(gx,gy,10,0,TAU); g.stroke();
       }
-      if(aimOn>0.03){
-        var ca=Math.cos(aim), sa=Math.sin(aim), hx=mx+ca*30, hy=my+sa*30;
-        g.strokeStyle='rgba(255,255,255,'+0.8*aimOn+')'; g.lineWidth=1.5; g.lineCap='round'; g.lineJoin='round';
-        g.beginPath(); g.moveTo(hx-ca*7-sa*5,hy-sa*7+ca*5); g.lineTo(hx,hy); g.lineTo(hx-ca*7+sa*5,hy-sa*7-ca*5); g.stroke();
-      }
-      g.fillStyle='#fff'; g.beginPath(); g.arc(mx,my,7,0,TAU); g.fill();
-      g.strokeStyle='rgba(255,255,255,.5)'; g.lineWidth=1.25; g.beginPath(); g.arc(mx,my,14,0,TAU); g.stroke();
+      g.fillStyle='#fff'; g.beginPath(); g.arc(mx,my,9,0,TAU); g.fill();
     }
   };
 })();
@@ -563,13 +572,13 @@ MODES.centri=(function(){
         var mx=(cx(C[0])+cx(C[1])+cx(C[2]))/3, my=(cy(C[0])+cy(C[1])+cy(C[2]))/3, R=Math.hypot(cx(C[0])-mx,cy(C[0])-my)+54;
         g.strokeStyle='rgba('+INK+','+0.7*pres+')'; g.lineWidth=1.5; g.beginPath(); g.arc(mx,my,R,0,TAU); g.stroke();
       }
-      g.font='500 15px '+FONT; g.textAlign='center'; g.textBaseline='middle';
+      g.font='300 11px Unbounded, '+FONT; g.textAlign='center'; g.textBaseline='middle';
       C.forEach(function(c,i){
         var x=cx(c), y=cy(c), s=0; LINKS.forEach(function(l){ if(l.a===i||l.b===i) s=Math.max(s,l.s); });
         g.fillStyle='#000'; g.beginPath(); g.arc(x,y,31,0,TAU); g.fill();
         g.fillStyle='rgba('+INK+','+(0.08+0.86*s)+')'; g.beginPath(); g.arc(x,y,31,0,TAU); g.fill();
         g.strokeStyle='rgba('+INK+',.45)'; g.lineWidth=1.25; g.beginPath(); g.arc(x,y,38,0,TAU); g.stroke();
-        g.fillStyle='rgba(245,245,247,'+(0.55+0.4*s)+')'; g.fillText(c.name,x,y+(c.y<0.5?-58:58));
+        g.fillStyle='rgba(245,245,247,'+(0.4+0.45*s)+')'; g.fillText(c.name,x,y+(c.y<0.5?-56:56));
       });
     }
   };
@@ -629,7 +638,11 @@ walkBtn.addEventListener('click',function(){
   }).catch(function(){ walkBtn.textContent='sensori non concessi'; });
 });
 var M=MODES.stanza, FONT=getComputedStyle(document.body).fontFamily;
-var hintTimer=null, current=null;
+var hintTimer=null, current=null, ctlTimer=null;
+function showCtl(){ vLab.classList.add('ctlon'); clearTimeout(ctlTimer); ctlTimer=setTimeout(function(){ if(!walking||true) vLab.classList.remove('ctlon'); },4500); }
+document.getElementById('zone').addEventListener('pointerdown',function(e){ e.preventDefault(); showCtl(); });
+document.querySelector('.bartop').addEventListener('pointerdown',function(){ if(current) showCtl(); });
+document.querySelector('.barbot').addEventListener('pointerdown',function(){ if(current) showCtl(); });
 function showMenu(){
   current=null; vLab.classList.add('inmenu'); menuEl.classList.remove('off'); hintEl.classList.remove('show'); walkBtn.hidden=true; stopWalk();
   if(started){ playing=false; master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(0,ctx.currentTime,0.25); setTimeout(function(){ if(!current&&ctx) ctx.suspend(); },900); }
@@ -638,7 +651,7 @@ function showMenu(){
 function enterMode(name){
   startAudio();
   current=name; M=MODES[name]; M.enter();
-  vLab.classList.remove('inmenu'); menuEl.classList.add('off');
+  vLab.classList.remove('inmenu'); vLab.classList.remove('ctlon'); menuEl.classList.add('off');
   hintEl.textContent='';
   walkBtn.hidden=!M.walk; resize();
   whenReady.then(function(){ if(current===name){ S.forEach(function(s){ if(s.g) setPan(s,0); }); startPiece(M.fromIntro?0:INTRO); } });
