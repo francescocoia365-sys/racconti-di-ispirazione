@@ -163,6 +163,15 @@ body{height:100%;width:100%}
 .bbox.done .bstage{display:none}
 .bbox.done #bquo{padding:70px 0 30px;animation:qin 2.5s ease both}
 @keyframes qin{from{opacity:0}to{opacity:1}}
+.full{overflow:hidden!important}
+#sez.full .sback{background:rgba(0,0,0,.55);color:#fff}
+.full .sz{padding:0;display:block;position:absolute;inset:0;-webkit-user-select:none;user-select:none}
+.deskv{position:absolute;inset:0;overflow:hidden;touch-action:none;background:radial-gradient(120% 90% at 50% 40%,#1b1712 0%,#0b0a08 60%,#000 100%)}
+.desk{position:absolute;left:0;top:0;width:1640px;height:2100px;transform-origin:0 0;will-change:transform}
+.desk img{position:absolute;height:auto;box-shadow:0 14px 36px rgba(0,0,0,.6),0 2px 6px rgba(0,0,0,.5);border-radius:2px;pointer-events:none;-webkit-user-drag:none}
+.deskh{position:absolute;left:26px;right:26px;top:calc(70px + var(--st));pointer-events:none;transition:opacity .8s;text-shadow:0 2px 18px #000}
+.deskh .word{margin:10px 0 0}
+.deskh.away{opacity:0}
 .tac{display:flex;gap:14px;width:calc(100% + 52px);margin:22px -26px 14px;padding:0 26px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y}
 .tac::-webkit-scrollbar{display:none}
 .tpage{flex:0 0 86%;scroll-snap-align:center;height:62vh;max-height:560px;background:#0d0d0d;border-radius:3px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.6);transform:rotate(-.6deg)}
@@ -355,7 +364,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='30', updBtn=document.getElementById('upd');
+var BUILD='31', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -489,30 +498,26 @@ function breathInit(){
     var s=sound()||{}; breath={t0:performance.now(),isIn:null,g:s.g,lp:s.lp,os:s.os}; box.classList.add('run'); box.classList.remove('done'); quo.innerHTML=''; btn.textContent='basta'; breath.raf=requestAnimationFrame(tick);
   });
 }
-/* taccuino: le pagine scritte a mano si sfogliano di lato come un diario; un tocco apre la pagina, che si ingrandisce con due dita o due tocchi e si esplora trascinando */
-var TAC=['tac-1.jpg','tac-2.jpg','tac-4.jpg','tac-3.jpg','tac-5.jpg','tac-6.jpg'];
+/* taccuino: una scrivania. I fogli stanno sparsi, storti, uno sopra l'altro; trascini per spostarti, due dita o due tocchi per avvicinarti a un foglio */
+var TAC=[['tac-1.jpg',60,150,560,-7],['tac-2.jpg',700,40,430,5],['tac-4.jpg',1120,420,440,-3],['tac-3.jpg',140,700,500,4],['tac-5.jpg',640,640,420,-11],['tac-6.jpg',980,1120,430,8],['tac-2.jpg',260,1330,400,-5],['tac-1.jpg',1040,1680,520,6]], DW=1640, DH=2100;
 function tacInit(){
-  var strip=document.getElementById('tac'), cnt=document.getElementById('tcnt'), zo=document.getElementById('zoom'), zi=document.getElementById('zimg');
-  function count(){ cnt.textContent=(Math.round(strip.scrollLeft/(strip.clientWidth*0.86))+1)+' / '+TAC.length; }
-  strip.addEventListener('scroll',count,{passive:true}); count();
-  var s=1, tx=0, ty=0, pts={}, start=null, lastTap=0, moved=false;
-  function apply(){ var w=zo.clientWidth, h=zo.clientHeight; s=Math.max(1,Math.min(6,s)); tx=Math.min(0,Math.max(w-w*s,tx)); ty=Math.min(0,Math.max(h-h*s,ty)); zi.style.transform='translate('+tx+'px,'+ty+'px) scale('+s+')'; }
-  function zoomAt(x,y,ns){ ns=Math.max(1,Math.min(6,ns)); tx=x-(x-tx)*ns/s; ty=y-(y-ty)*ns/s; s=ns; apply(); }
-  strip.addEventListener('click',function(e){ var im=e.target.closest('.tpage'); if(!im) return; zi.src=im.querySelector('img').src; s=1; tx=0; ty=0; zi.style.transition='none'; apply(); zo.classList.add('on'); });
-  document.getElementById('zclose').onclick=function(){ zo.classList.remove('on'); };
-  zo.onpointerdown=function(e){ if(e.target.id==='zclose') return; try{ zo.setPointerCapture(e.pointerId); }catch(_){ } pts[e.pointerId]={x:e.clientX,y:e.clientY}; moved=false; var k=Object.keys(pts); zi.style.transition='none';
-    if(k.length===2){ var a=pts[k[0]], b=pts[k[1]]; start={d:Math.hypot(a.x-b.x,a.y-b.y),s:s}; } };
-  zo.onpointermove=function(e){ var q=pts[e.pointerId]; if(!q) return; var r=zo.getBoundingClientRect(), k=Object.keys(pts);
-    if(k.length===1){ if(Math.hypot(e.clientX-q.x,e.clientY-q.y)>3) moved=true; tx+=e.clientX-q.x; ty+=e.clientY-q.y; q.x=e.clientX; q.y=e.clientY; apply(); }
-    else if(k.length===2&&start){ q.x=e.clientX; q.y=e.clientY; var a=pts[k[0]], b=pts[k[1]]; moved=true; zoomAt((a.x+b.x)/2-r.left,(a.y+b.y)/2-r.top,start.s*Math.hypot(a.x-b.x,a.y-b.y)/start.d); } };
-  zo.onpointerup=zo.onpointercancel=function(e){ if(!pts[e.pointerId]) return; delete pts[e.pointerId]; start=null; var now=performance.now(), r=zo.getBoundingClientRect();
-    if(!moved&&!Object.keys(pts).length){ if(now-lastTap<320){ zi.style.transition='transform .35s cubic-bezier(.2,.8,.2,1)'; zoomAt(e.clientX-r.left,e.clientY-r.top,s>1.2?1:2.8); lastTap=0; } else lastTap=now; } };
+  var v=document.getElementById('deskv'), d=document.getElementById('desk'), head=document.getElementById('deskh');
+  var s=1, tx=0, ty=0, fit=1, pts={}, start=null, lastTap=0, moved=false;
+  function apply(anim){ var w=v.clientWidth, h=v.clientHeight; s=Math.max(fit*0.85,Math.min(3,s)); var m=90; tx=Math.min(w-m,Math.max(m-DW*s,tx)); ty=Math.min(h-m,Math.max(m-DH*s,ty)); d.style.transition=anim?'transform .5s cubic-bezier(.2,.8,.2,1)':'none'; d.style.transform='translate('+tx+'px,'+ty+'px) scale('+s+')'; }
+  function zoomAt(x,y,ns,anim){ ns=Math.max(fit*0.85,Math.min(3,ns)); tx=x-(x-tx)*ns/s; ty=y-(y-ty)*ns/s; s=ns; apply(anim); }
+  function home(anim){ var w=v.clientWidth, h=v.clientHeight; fit=Math.min(w/DW,h/DH)*1.55; s=fit; tx=(w-DW*s)/2; ty=70; apply(anim); }
+  home(false);
+  v.onpointerdown=function(e){ try{ v.setPointerCapture(e.pointerId); }catch(_){ } pts[e.pointerId]={x:e.clientX,y:e.clientY}; moved=false; head.classList.add('away'); var k=Object.keys(pts); if(k.length===2){ var a=pts[k[0]], b=pts[k[1]]; start={d:Math.hypot(a.x-b.x,a.y-b.y)||1,s:s}; } };
+  v.onpointermove=function(e){ var q=pts[e.pointerId]; if(!q) return; var r=v.getBoundingClientRect(), k=Object.keys(pts);
+    if(k.length===1){ if(Math.hypot(e.clientX-q.x,e.clientY-q.y)>3) moved=true; tx+=e.clientX-q.x; ty+=e.clientY-q.y; q.x=e.clientX; q.y=e.clientY; apply(false); }
+    else if(k.length===2&&start){ q.x=e.clientX; q.y=e.clientY; var a=pts[k[0]], b=pts[k[1]]; moved=true; zoomAt((a.x+b.x)/2-r.left,(a.y+b.y)/2-r.top,start.s*Math.hypot(a.x-b.x,a.y-b.y)/start.d,false); } };
+  v.onpointerup=v.onpointercancel=function(e){ if(!pts[e.pointerId]) return; delete pts[e.pointerId]; start=null; var now=performance.now(), r=v.getBoundingClientRect();
+    if(!moved&&!Object.keys(pts).length){ if(now-lastTap<330){ if(s>fit*1.6) home(true); else zoomAt(e.clientX-r.left,e.clientY-r.top,Math.max(1,fit*3.2),true); lastTap=0; } else lastTap=now; } };
 }
 var vSez=document.getElementById('sez'), szEl=document.getElementById('sz');
 function esc(x){ return String(x).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 function showSez(id){
   var s=SEZ[id], h='';
-  if(ART[id]) h+='<div class="sart">'+ART[id]+'</div>';
   h+='<span class="tiny">'+s.n+'</span><h2 class="word">'+esc(s.t)+'</h2><p class="lead">'+esc(s.lead)+'</p>';
   (s.p||[]).forEach(function(x){ h+='<p class="par">'+esc(x)+'</p>'; });
   (s.rows||[]).forEach(function(r){ h+='<div class="rowi"><span class="tiny">'+esc(r[0])+'</span><b>'+esc(r[1])+'</b><span class="tiny soon">presto</span></div>'; });
@@ -520,7 +525,8 @@ function showSez(id){
   if(s.music) h+='<div class="rowi"><span class="tiny">spotify</span><iframe class="emb sp" title="This Is Paolo Buonvino, su Spotify" loading="lazy" allow="encrypted-media; clipboard-write; fullscreen; picture-in-picture" src="https://open.spotify.com/embed/playlist/37i9dQZF1DZ06evO4dUBlR?theme=0"></iframe></div>'
     +'<div class="rowi"><span class="tiny">youtube · i video più visti</span><div class="yt"><iframe class="emb" title="I video più visti del canale di Paolo Buonvino" loading="lazy" allowfullscreen allow="encrypted-media; picture-in-picture; fullscreen" src="https://www.youtube-nocookie.com/embed/videoseries?list=UULPQ0tBr09so4t1e8gzMhxS9Q"></iframe></div><a class="tiny lnk" target="_blank" rel="noopener" href="https://www.youtube.com/@paolobuonvino/videos">apri il canale →</a></div>';
   if(s.breath) h='<div class="bbox" id="bbox"><div class="bstage"><div class="bring" id="bring"></div><span class="tiny" id="blab"></span></div><div id="bquo"></div><button type="button" class="upd press" id="bgo">inizia</button><span class="tiny bnote">tre minuti · inspira 4, espira 6</span></div>'+h.replace(/<div class="sart">[\s\S]*?<\/div>/,'');
-  if(s.tac) h+='<div class="tac" id="tac">'+TAC.map(function(f,i){ return '<button type="button" class="tpage" aria-label="Pagina '+(i+1)+': apri"><img src="img/'+f+'" alt="" loading="lazy"></button>'; }).join('')+'</div><span class="tiny" id="tcnt"></span>';
+  if(s.tac) h='<div class="deskv" id="deskv"><div class="desk" id="desk">'+TAC.map(function(f){ return '<img src="img/'+f[0]+'" alt="" style="left:'+f[1]+'px;top:'+f[2]+'px;width:'+f[3]+'px;transform:rotate('+f[4]+'deg)">'; }).join('')+'</div></div><div class="deskh" id="deskh"><span class="tiny">'+s.n+'</span><h2 class="word">'+esc(s.t)+'</h2></div>';
+  vSez.classList.toggle('full',!!s.tac);
   breathStop(); szEl.innerHTML=h; vSez.scrollTop=0; if(s.tac) tacInit();
   if(s.garden) gardenInit(); if(s.breath) breathInit();
 }
