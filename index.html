@@ -47,8 +47,10 @@ img{display:block;-webkit-user-drag:none;pointer-events:none}
 body{height:100%;width:100%}
 .app{position:fixed;top:0;bottom:0;left:0;right:0;width:100%;max-width:500px;margin:0 auto;overflow:hidden;background:var(--bg)}
 #probe{position:absolute;visibility:hidden;pointer-events:none;top:0;left:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-.view{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .4s var(--ease),transform .5s var(--ease),visibility 0s .5s}
-.view.on{opacity:1;visibility:visible;transform:none;transition:opacity .4s var(--ease),transform .5s var(--ease)}
+.view{position:absolute;inset:0;visibility:hidden;-webkit-clip-path:circle(0px at var(--cx,50%) var(--cy,50%));clip-path:circle(0px at var(--cx,50%) var(--cy,50%));transition:clip-path .75s cubic-bezier(.6,0,.3,1),-webkit-clip-path .75s cubic-bezier(.6,0,.3,1),visibility 0s .75s}
+.view.on{visibility:visible;-webkit-clip-path:circle(150vmax at var(--cx,50%) var(--cy,50%));clip-path:circle(150vmax at var(--cx,50%) var(--cy,50%));transition:clip-path 1.05s cubic-bezier(.5,0,.2,1),-webkit-clip-path 1.05s cubic-bezier(.5,0,.2,1)}
+#home{clip-path:none!important;-webkit-clip-path:none!important;visibility:visible!important}
+@media (prefers-reduced-motion:reduce){.view,.view.on{transition:none}}
 .press{transition:transform .25s var(--ease)}
 .press:active{transform:scale(.97)}
 
@@ -119,7 +121,7 @@ body{height:100%;width:100%}
 .breath{transform-origin:100px 100px;animation:breath 11s ease-in-out infinite alternate}
 @keyframes breath{from{transform:scale(.8)}to{transform:scale(1.08)}}
 .inv{margin-top:6px;padding:6px 0;pointer-events:auto}
-#sez{background:#000;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-y;z-index:5;transform:translateY(24px)}
+#sez{background:#000;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-y;z-index:5}
 #sez::-webkit-scrollbar{display:none;width:0}
 #sez .sback{position:fixed;z-index:2;top:calc(12px + var(--st));left:14px;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;color:rgba(255,255,255,.62)}
 .sz{padding:calc(70px + var(--st)) 26px calc(70px + var(--sb));display:flex;flex-direction:column;align-items:flex-start;-webkit-user-select:text;user-select:text}
@@ -158,7 +160,7 @@ body{height:100%;width:100%}
 @media (prefers-reduced-motion:reduce){.breath{animation:none}}
 
 /* ---------- Laboratorio ---------- */
-#lab{background:#000;touch-action:none;transform:translateY(24px);z-index:5}
+#lab{background:#000;touch-action:none;z-index:5}
 #stage{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
 .bartop{position:absolute;top:0;left:0;right:0;padding:calc(12px + var(--st)) 14px 0;display:grid;grid-template-columns:44px 44px 1fr 44px 44px;align-items:center;gap:8px;pointer-events:none}
 .round{pointer-events:auto;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
@@ -336,7 +338,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='27', updBtn=document.getElementById('upd');
+var BUILD='28', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -522,6 +524,7 @@ function route(){
   else { current=null; stopWalk(); if(ctx&&master){ playing=false; master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(0,ctx.currentTime,0.25); if(drone){ drone.v=0; drone.g.gain.setTargetAtTime(0,ctx.currentTime,0.3); } setTimeout(function(){ if(!current&&ctx) ctx.suspend(); },900); } }
 }
 window.addEventListener('hashchange',route);
+document.addEventListener('pointerdown',function(e){ if(!vHome.classList.contains('on')) return; var r=document.querySelector('.app').getBoundingClientRect(); [vLab,vSez].forEach(function(v){ v.style.setProperty('--cx',(e.clientX-r.left)+'px'); v.style.setProperty('--cy',(e.clientY-r.top)+'px'); }); },true);
 
 /* ---- Il brano: dieci strati del tema, 18 battute in loop ---- */
 var INTRO=8*240/79.5, LOOP=18*240/79.5, XF=0.06;   // 8 battute di intro, poi 18 di tema in loop
@@ -923,18 +926,21 @@ function envAt(s,tb){                    // quanto suona una voce in un punto de
   return Math.min(1,(s.env[Math.min(Math.floor(tb/ENV_DT),s.env.length-1)]||0)/(s.ref*2.6));
 }
 MODES.legami=(function(){
+  /* si parte dal solo suono lungo, al centro. Disegni a mano un filo da un segno acceso a un posto vuoto: il filo cresce lungo il tuo tratto e,
+     quando arriva, entra una voce. Da dove parti conta: dal centro nascono le fondamenta, dalle fondamenta ciò che ci cresce sopra.
+     Chi è legato al centro è vicino; chi passa da altri è più lontano e velato. Un tocco cambia voce, un taglio scioglie, tenendo premuto si sposta */
   var PL=[[.5,.5],[.5,.27],[.2,.37],[.8,.37],[.86,.62],[.14,.62],[.5,.76],[.25,.85],[.75,.85],[.5,.09]];
-  var CAN=['arm1','piano','short1','mel1','mel2','basso','arm2','short2','short3','short4'], DR={gv:1,level:0};
-  var st=[], links=[], full=0, used=false, born=[], ps=[], taps=[], snaps=[];
+  var KIDS={drone:['arm1','piano','short1','basso'],arm1:['mel1','arm2'],piano:['mel1','mel2'],short1:['short2','short3','short4'],basso:['arm2','short2'],mel1:['mel2']};
+  var CAN=['arm1','piano','short1','mel1','mel2','basso','arm2','short2','short3','short4'], DR={gv:1,level:0}, NP=30, GROW=2.8;
+  var st=[], par=[], links=[], full=0, used=false, born=[], ps=[], snaps=[], dep=[];
   function nx(i){ return ps[i].x*W; } function ny(i){ return TOP+ps[i].y*(BOT-TOP); }
-  function maxLen(){ return 0.5*(BOT-TOP); }
-  function near(i){ var d=Math.hypot(nx(i)-nx(0),ny(i)-ny(0))/(0.5*(BOT-TOP)); return 1-0.62*ss(0.3,0.95,d); }     // più vicino al centro, più forte
+  function maxLen(){ return 0.52*(BOT-TOP); }
+  function near(i){ var d=Math.hypot(nx(i)-nx(0),ny(i)-ny(0))/(0.5*(BOT-TOP)); return 1-0.62*ss(0.3,0.95,d); }
   function goTo(i,q){ ps[i].tx=Math.max(0.07,Math.min(0.93,q.x/W)); ps[i].ty=Math.max(0.05,Math.min(0.95,(q.y-TOP)/(BOT-TOP))); }
-  function untie(k){ st[k]=null; links=links.filter(function(l){ return l[0]!==k&&l[1]!==k; }); prune(); }
   function at(q,r){ var best=-1,bd=r||46; for(var i=0;i<PL.length;i++){ var d=Math.hypot(q.x-nx(i),q.y-ny(i)); if(d<bd){ bd=d; best=i; } } return best; }
   function openSet(){ var o={}; st.forEach(function(id){ if(id) o[id]=1; }); return o; }
   function need(id,o){
-    var n=Object.keys(o).length-1;                           // quante voci del brano sono aperte (il centro è solo il suono lungo)
+    var n=Object.keys(o).length-1;
     if(id==='mel1') return o.arm1&&(o.piano||o.basso);       // il tema entra solo se sotto c'è chi lo regge
     if(id==='mel2') return o.mel1;
     if(id==='basso') return n>=3;
@@ -942,25 +948,41 @@ MODES.legami=(function(){
     return true;
   }
   function soon(id,from,to){ var p=pos(), m=0; for(var x=from;x<=to;x+=0.1) m=Math.max(m,envAt(BY[id],p+x)); return m; }
-  function pick(){
-    var o=openSet(), el=CAN.filter(function(id){ return !o[id]&&need(id,o); }); if(!el.length) return null;
+  function pool(from,skip){ var o=openSet(); if(skip) delete o[skip]; function ok(id){ return id!==skip&&!o[id]&&need(id,o); } var fam=(KIDS[st[from]]||[]).filter(ok); return fam.length?fam:CAN.filter(ok); }
+  function pick(from,skip){
+    var el=pool(from,skip); if(!el.length) return null;
     var snd=el.filter(function(id){ return soon(id,0,2.5)>0.14; });
-    if(!snd.length){ for(var k=2.5;k<14&&!snd.length;k+=2.5) snd=el.filter(function(id){ return soon(id,k,k+2.5)>0.14; }); }   // nessuna suona adesso: la prima che arriva
+    for(var k=2.5;k<14&&!snd.length;k+=2.5) snd=el.filter(function(id){ return soon(id,k,k+2.5)>0.14; });
     if(!snd.length) snd=el;
-    if(Object.keys(o).length<=1){ var first=snd.filter(function(id){ return id==='arm1'||id==='piano'||id==='short1'; }); if(first.length) return first[Math.floor(Math.random()*first.length)]; }   // il primo legame: armonia, piano o archi staccati
+    if(st[from]==='drone'&&Object.keys(openSet()).length<=1) return snd[Math.floor(Math.random()*Math.min(3,snd.length))];
     return snd[(snd.length>1&&Math.random()<0.3)?1:0];
   }
+  function depths(grownOnly){ var d=PL.map(function(){ return 1e9; }), grew=true; d[0]=0;
+    while(grew){ grew=false; links.forEach(function(l){ if(grownOnly&&l.g<1) return; if(d[l.a]+1<d[l.b]){ d[l.b]=d[l.a]+1; grew=true; } if(d[l.b]+1<d[l.a]){ d[l.a]=d[l.b]+1; grew=true; } }); }
+    return d; }
   function prune(){
     var again=true;
     while(again){
-      again=false; var seen={0:1}, grew=true;
-      while(grew){ grew=false; links.forEach(function(l){ if(seen[l[0]]&&!seen[l[1]]){ seen[l[1]]=1; grew=true; } else if(seen[l[1]]&&!seen[l[0]]){ seen[l[0]]=1; grew=true; } }); }
-      links=links.filter(function(l){ return seen[l[0]]&&seen[l[1]]; });
-      for(var i=1;i<st.length;i++) if(st[i]&&!seen[i]) st[i]=null;
-      var o=openSet();
-      for(i=1;i<st.length;i++) if(st[i]){ var o2=openSet(); delete o2[st[i]]; if(!need(st[i],o2)&&(st[i]==='mel1'||st[i]==='mel2')){ var k=i; st[k]=null; links=links.filter(function(l){ return l[0]!==k&&l[1]!==k; }); again=true; break; } }
+      again=false; var d=depths(false);
+      links=links.filter(function(l){ return d[l.a]<1e9&&d[l.b]<1e9; });
+      for(var i=1;i<st.length;i++) if(st[i]&&d[i]>=1e9) st[i]=null;
+      for(i=1;i<st.length;i++) if(st[i]==='mel1'||st[i]==='mel2'){ var o=openSet(); delete o[st[i]]; if(!need(st[i],o)){ var k=i; st[k]=null; links=links.filter(function(l){ return l.a!==k&&l.b!==k; }); again=true; break; } }
     }
+    dep=depths(true);
   }
+  /* il tratto disegnato diventa il filo: lo ricampiono, lo liscio e lo esprimo rispetto ai due capi, così segue i segni quando si spostano */
+  function makePath(raw,a,b){
+    var ax=nx(a), ay=ny(a), bx=nx(b), by=ny(b), pts=[[ax,ay]].concat(raw,[[bx,by]]), len=[0], i, out=[];
+    for(i=1;i<pts.length;i++) len.push(len[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));
+    var tot=len[len.length-1]||1, j=0;
+    for(i=0;i<NP;i++){ var s=tot*i/(NP-1); while(j<len.length-2&&len[j+1]<s) j++; var f=(s-len[j])/((len[j+1]-len[j])||1); out.push([pts[j][0]+(pts[j+1][0]-pts[j][0])*f,pts[j][1]+(pts[j+1][1]-pts[j][1])*f]); }
+    for(var pass=0;pass<2;pass++){ var sm=out.map(function(p){ return p.slice(); }); for(i=1;i<NP-1;i++){ sm[i][0]=(out[i-1][0]+2*out[i][0]+out[i+1][0])/4; sm[i][1]=(out[i-1][1]+2*out[i][1]+out[i+1][1])/4; } out=sm; }
+    var dx=bx-ax, dy=by-ay, m=dx*dx+dy*dy||1;
+    return out.map(function(p){ var x=p[0]-ax, y=p[1]-ay; return [(x*dx+y*dy)/m,(y*dx-x*dy)/m]; });
+  }
+  function pathPx(l){ var ax=nx(l.a), ay=ny(l.a), dx=nx(l.b)-ax, dy=ny(l.b)-ay; return l.z.map(function(z){ return [ax+z[0]*dx-z[1]*dy,ay+z[0]*dy+z[1]*dx]; }); }
+  function crosses(p1,p2,p3,p4){ function c(a,b,d){ return (b[0]-a[0])*(d[1]-a[1])-(b[1]-a[1])*(d[0]-a[0]); } return c(p1,p2,p3)*c(p1,p2,p4)<0&&c(p3,p4,p1)*c(p3,p4,p2)<0; }
+  function cutLink(l){ var tn=performance.now()/1000; snaps.push([nx(l.a),ny(l.a),nx(l.b),ny(l.b),tn]); links=links.filter(function(x){ return x!==l; }); prune(); }
   function sign(id,x,y,a,L){
     var u=11+3*L, i; g.strokeStyle='rgba('+INK+','+a+')'; g.lineWidth=1.4; g.lineCap='round'; g.lineJoin='round'; g.beginPath();
     switch(id){
@@ -980,53 +1002,71 @@ MODES.legami=(function(){
   }
   return {
     hint:'', waits:true,
-    enter:function(){ st=PL.map(function(){ return null; }); st[0]='drone'; links=[]; full=0; used=false; born=[]; taps=[]; snaps=[]; ps=PL.map(function(p){ return {x:p[0],y:p[1],tx:p[0],ty:p[1]}; }); },
-    down:function(q){ var i=at(q); q.node=i; q.from=(i>=0&&st[i])?i:-1; q.sx=q.x; q.sy=q.y; q.far=false; },
-    move:function(q){ if(Math.hypot(q.x-q.sx,q.y-q.sy)>14) q.far=true; if(q.far&&q.node>0&&q.from<0) goTo(q.node,q); },      // un posto vuoto segue il dito
+    enter:function(){ st=PL.map(function(){ return null; }); st[0]='drone'; par=[]; links=[]; full=0; used=false; born=[]; snaps=[]; ps=PL.map(function(p){ return {x:p[0],y:p[1],tx:p[0],ty:p[1]}; }); dep=depths(true); },
+    down:function(q){ var i=at(q); q.node=i; q.lit=i>=0&&!!st[i]; q.sx=q.x; q.sy=q.y; q.far=false; q.hold=false; q.t0=performance.now(); q.raw=[]; },
+    move:function(q){
+      if(Math.hypot(q.x-q.sx,q.y-q.sy)>12) q.far=true;
+      if(q.hold){ goTo(q.node,q); return; }
+      if(!q.far) return;
+      if(q.node<0){ var a=[q.px,q.py], b=[q.x,q.y]; links.slice().forEach(function(l){ var p=pathPx(l); for(var i=1;i<p.length;i++) if(crosses(a,b,p[i-1],p[i])){ cutLink(l); break; } }); return; }   // un taglio attraverso un filo lo scioglie
+      if(!q.lit){ goTo(q.node,q); return; }
+      var r=q.raw[q.raw.length-1]; if(!r||Math.hypot(q.x-r[0],q.y-r[1])>5) q.raw.push([q.x,q.y]);
+    },
     up:function(q){
-      var tn=performance.now()/1000, i=q.node; if(i<0) return;
-      if(!q.far){ if(i>0&&st[i]&&taps[i]&&tn-taps[i]<0.38){ untie(i); taps[i]=0; } else taps[i]=tn; return; }     // due tocchi su un segno acceso lo sciolgono
-      if(q.from<0) return;
-      var to=at(q); if(to===q.from) to=-1;
-      if(to<0){ if(q.from>0){ goTo(q.from,q); used=true; } return; }                                              // lasciato nel vuoto: il segno va lì
-      if(links.some(function(l){ return (l[0]===q.from&&l[1]===to)||(l[1]===q.from&&l[0]===to); })) return;
-      if(Math.hypot(nx(to)-nx(q.from),ny(to)-ny(q.from))>maxLen()*0.96) return;
-      if(!playing&&started) startPiece(INTRO,true);                                                             // il primo legame fa partire il brano, dal tema
-      if(!st[to]){ var id=pick(); if(!id) return; st[to]=id; born[to]=tn; }
-      links.push([q.from,to,tn,Math.random()<0.5?-1:1,Math.random()*6.28]); used=true;
+      var tn=performance.now()/1000, i=q.node; if(i<0||q.hold) return;
+      if(!q.far){                                                // un tocco su un segno acceso: cambia voce, se ce n'è un'altra possibile
+        if(i>0&&st[i]&&dep[i]<1e9&&par[i]!=null&&st[par[i]]){ var alt=pick(par[i],st[i]); if(alt){ st[i]=alt; born[i]=tn; prune(); } }
+        return;
+      }
+      if(!q.lit) return;
+      var to=at(q); if(to<0||to===i) return;
+      if(links.some(function(l){ return (l.a===i&&l.b===to)||(l.b===i&&l.a===to); })) return;
+      if(Math.hypot(nx(to)-nx(i),ny(to)-ny(i))>maxLen()*0.96) return;
+      if(!playing&&started){ if(ctx.state!=='running') ctx.resume(); startPiece(INTRO,true); }                    // il primo filo fa partire il brano, dal tema
+      if(!st[to]){ var id=pick(i); if(!id) return; st[to]=id; par[to]=i; }
+      links.push({a:i,b:to,t:tn,g:0,z:makePath(q.raw,i,to),ph:Math.random()*6.28}); used=true;
     },
     update:function(dt){
-      var o=openSet(), n=Object.keys(o).length; full=Math.max(0,Math.min(1,full+(n>=11?dt/14:-dt/4)));
-      var k=1-Math.exp(-dt/0.22), tn=performance.now()/1000, cut=false;
-      for(var i=1;i<ps.length;i++){ ps[i].x+=(ps[i].tx-ps[i].x)*k; ps[i].y+=(ps[i].ty-ps[i].y)*k; }
-      links=links.filter(function(l){ if(Math.hypot(nx(l[1])-nx(l[0]),ny(l[1])-ny(l[0]))<=maxLen()) return true; snaps.push([nx(l[0]),ny(l[0]),nx(l[1]),ny(l[1]),tn]); cut=true; return false; });   // tirato troppo: si spezza
-      if(cut){ prune(); o=openSet(); n=Object.keys(o).length; }
-      var gain={}; for(i=0;i<st.length;i++) if(st[i]) gain[st[i]]=i?near(i):1;
-      S.forEach(function(s){ setWant(s,o[s.id]?(MX[s.id]+(1-MX[s.id])*full)*gain[s.id]:0,true); });
+      var o=openSet(), n=Object.keys(o).length, k=1-Math.exp(-dt/0.22), tn=performance.now()/1000, i, was;
+      fingers().forEach(function(q){ if(q.node>0&&!q.far&&!q.hold&&performance.now()-q.t0>380){ q.hold=true; used=true; } });       // tenuto premuto: il segno si solleva e ti segue
+      for(i=1;i<ps.length;i++){ ps[i].x+=(ps[i].tx-ps[i].x)*k; ps[i].y+=(ps[i].ty-ps[i].y)*k; }
+      links.slice().forEach(function(l){ if(Math.hypot(nx(l.b)-nx(l.a),ny(l.b)-ny(l.a))>maxLen()) cutLink(l); });                  // tirato troppo: si spezza
+      links.forEach(function(l){ was=l.g; l.g=Math.min(1,l.g+dt/GROW); if(was<1&&l.g>=1){ dep=depths(true); if(!born[l.b]||tn-born[l.b]>3) born[l.b]=tn; } });
+      o=openSet(); n=Object.keys(o).length; full=Math.max(0,Math.min(1,full+(n>=11&&dep.every(function(d,j){ return !st[j]||d<1e9; })?dt/14:-dt/4)));
+      var live={};
+      for(i=1;i<st.length;i++) if(st[i]&&dep[i]<1e9) live[st[i]]={v:near(i)*Math.pow(0.82,dep[i]-1),mu:Math.min(0.62,0.27*(dep[i]-1))*(1-full),pan:(ps[i].x-0.5)*1.5};
+      S.forEach(function(s){ var L=live[s.id], v=L?(MX[s.id]+(1-MX[s.id])*full)*L.v:0; setWant(s,v,v>s.want?2:true); if(L){ setRoom(s,L.mu); setPan(s,L.pan); } });
       droneTo(0.011*(1-0.6*(n-1)/10));
     },
     draw:function(t){
-      var tn=performance.now()/1000, p=started&&playing?pos():0, K=40, T=1.5, i;
-      links.forEach(function(l){            // lo scambio: sopra scorre il suono del primo verso il secondo, sotto quello del secondo verso il primo
-        var ax=nx(l[0]), ay=ny(l[0]), bx=nx(l[1]), by=ny(l[1]), len=Math.hypot(bx-ax,by-ay), dx=(bx-ax)/len, dy=(by-ay)/len, px=-dy, py=dx, m=26, span=len-2*m;
-        var tense=len/maxLen(), bend=l[3]*((1-tense)*48+7*Math.sin(t*0.45+l[4])), thin=1-0.75*ss(0.7,1,tense), shake=ss(0.82,1,tense)*2.5*Math.sin(t*38+l[4]);
-        var sa=BY[st[l[0]]]||DR, sb=BY[st[l[1]]]||DR, grow=Math.min(1,(tn-l[2])/1.2); if(!sa||!sb||span<=0) return;
-        var up=[], dn=[];
-        for(var k=0;k<=K;k++){ var u=k/K, e=Math.pow(Math.sin(Math.PI*u),0.6)*thin, cv=Math.sin(Math.PI*u)*(bend+shake)+Math.sin(Math.PI*2*u)*bend*0.25, x=ax+dx*(m+span*u)+px*cv, y=ay+dy*(m+span*u)+py*cv;
-          var wa=0.5+11*envAt(sa,p-u*T)*sa.gv*e*grow, wb=0.5+11*envAt(sb,p-(1-u)*T)*sb.gv*e*grow;
-          up.push([x+px*wa,y+py*wa]); dn.push([x-px*wb,y-py*wb]); }
-        g.fillStyle='rgba('+INK+','+(0.62+0.3*full)+')'; g.beginPath(); g.moveTo(up[0][0],up[0][1]);
-        for(k=1;k<=K;k++) g.lineTo(up[k][0],up[k][1]); for(k=K;k>=0;k--) g.lineTo(dn[k][0],dn[k][1]); g.closePath(); g.fill();
+      var tn=performance.now()/1000, p=started&&playing?pos():0, i;
+      g.lineCap='round'; g.lineJoin='round';
+      links.forEach(function(l){            // tre fili sottili che si intrecciano lungo il tratto; il suono di chi sta in fondo li gonfia mentre scorre verso il centro
+        var pts=pathPx(l), sb=BY[st[l.b]]||DR, sa=BY[st[l.a]]||DR, far=dep[l.b]>=dep[l.a]?sb:sa, lim=Math.max(1,Math.floor(l.g*(NP-1))), tense=Math.hypot(nx(l.b)-nx(l.a),ny(l.b)-ny(l.a))/maxLen(), calm=1-0.7*ss(0.75,1,tense);
+        for(var j=0;j<3;j++){
+          g.strokeStyle='rgba('+INK+','+(l.g<1?0.4:0.5+0.35*full)+')'; g.lineWidth=0.9; g.beginPath();
+          for(var k=0;k<=lim;k++){ var u=k/(NP-1), a=pts[Math.max(0,k-1)], b=pts[Math.min(NP-1,k+1)], dl=Math.hypot(b[0]-a[0],b[1]-a[1])||1, qx=-(b[1]-a[1])/dl, qy=(b[0]-a[0])/dl;
+            var sw=l.g>=1?envAt(far,p-(dep[l.b]>=dep[l.a]?1-u:u)*1.5)*far.gv:0, am=(1.4+6.5*sw)*Math.pow(Math.sin(Math.PI*u),0.7)*calm, off=am*Math.sin(k*0.62+j*2.094+t*0.7+l.ph);
+            if(k) g.lineTo(pts[k][0]+qx*off,pts[k][1]+qy*off); else g.moveTo(pts[k][0],pts[k][1]); }
+          g.stroke();
+        }
+        if(l.g<1){ var tp=pts[lim]; g.fillStyle='rgba('+INK+',.95)'; g.beginPath(); g.arc(tp[0],tp[1],2.4,0,TAU); g.fill(); }
       });
       snaps=snaps.filter(function(s){ var a=(tn-s[4])/0.7; if(a>=1) return false; g.strokeStyle='rgba('+INK+','+0.7*(1-a)+')'; g.lineWidth=1; g.beginPath(); g.moveTo(s[0],s[1]); g.lineTo(s[0]+(s[2]-s[0])*0.5*(1-a),s[1]+(s[3]-s[1])*0.5*(1-a)); g.moveTo(s[2],s[3]); g.lineTo(s[2]+(s[0]-s[2])*0.5*(1-a),s[3]+(s[1]-s[3])*0.5*(1-a)); g.stroke(); return true; });
-      fingers().forEach(function(q){ if(q.from>=0&&q.far){ var to=at(q), ok=to>=0&&to!==q.from; g.setLineDash([2,6]); g.strokeStyle='rgba('+INK+',.7)'; g.lineWidth=1.1; g.beginPath(); g.moveTo(nx(q.from),ny(q.from)); g.lineTo(ok?nx(to):q.x,ok?ny(to):q.y); g.stroke(); g.setLineDash([]); } });
+      fingers().forEach(function(q){
+        if(q.node>=0&&q.lit&&q.far&&!q.hold&&q.raw.length){ g.strokeStyle='rgba('+INK+',.6)'; g.lineWidth=1; g.beginPath(); g.moveTo(nx(q.node),ny(q.node)); q.raw.forEach(function(r){ g.lineTo(r[0],r[1]); }); g.stroke(); }
+        if(q.node<0&&q.far){ g.strokeStyle='rgba('+INK+',.35)'; g.lineWidth=1; g.beginPath(); g.moveTo(q.sx,q.sy); g.lineTo(q.x,q.y); g.stroke(); }
+        if(q.hold){ g.strokeStyle='rgba('+INK+',.5)'; g.lineWidth=1; g.beginPath(); g.arc(nx(q.node),ny(q.node),30,0,TAU); g.stroke(); }
+      });
       for(i=0;i<PL.length;i++){
-        var x=nx(i), y=ny(i);
-        if(st[i]){ sign(st[i],x,y,i?0.45+0.5*(near(i)-0.38)/0.62:0.95,i?BY[st[i]].level:0); }
+        var x=nx(i), y=ny(i), on=st[i]&&dep[i]<1e9;
+        g.fillStyle='#000'; g.beginPath(); g.arc(x,y,20,0,TAU); g.fill();
+        if(on){ sign(st[i],x,y,i?(0.4+0.55*(near(i)-0.38)/0.62)*Math.pow(0.86,dep[i]-1):0.95,i?BY[st[i]].level:0); }
+        else if(st[i]){ g.strokeStyle='rgba('+INK+','+(0.35+0.25*Math.sin(t*3))+')'; g.lineWidth=1; g.beginPath(); g.arc(x,y,6,0,TAU); g.stroke(); }
         else { g.strokeStyle='rgba('+INK+','+(0.26+0.08*Math.sin(t*0.8+i))+')'; g.lineWidth=1; g.beginPath(); g.arc(x,y,4.5,0,TAU); g.stroke(); }
         if(born[i]&&tn-born[i]<2.4){ var q=(tn-born[i])/2.4; g.strokeStyle='rgba('+INK+','+0.6*(1-q)+')'; g.lineWidth=1; g.beginPath(); g.arc(x,y,22+56*q,0,TAU); g.stroke(); }
       }
-      if(!used&&!fingers().length){ var ph=(t*0.3)%1, e2=ph*ph*(3-2*ph); ghost(nx(0)+(nx(1)-nx(0))*e2,ny(0)+(ny(1)-ny(0))*e2,ph); }
+      if(!used&&!fingers().length){ var ph=(t*0.3)%1, e2=ph*ph*(3-2*ph), cx=(nx(0)+nx(1))/2+26*Math.sin(Math.PI*e2); ghost(nx(0)+(cx-nx(0))*Math.min(1,e2*2)+(nx(1)-cx)*Math.max(0,e2*2-1),ny(0)+(ny(1)-ny(0))*e2,ph); }
     }
   };
 })();
@@ -1265,7 +1305,7 @@ menuEl.addEventListener('click',function(e){ var b=e.target.closest('button'); i
 document.getElementById('back').addEventListener('click',function(){ location.hash='#home'; });
 document.getElementById('tolab').addEventListener('click',function(){ startAudio(); if(ctx&&ctx.state!=='running') ctx.resume(); });
 var progEl=document.getElementById('prog');
-document.getElementById('again').addEventListener('click',function(){ if(!started||!current) return; M.enter(); if(M.waits) idlePiece(); else startPiece(M.fromIntro?0:INTRO); });
+document.getElementById('again').addEventListener('click',function(){ if(!started||!current) return; for(var k in P) delete P[k]; M.enter(); pauseBtn.setAttribute('aria-label','Pausa'); pauseIcon.setAttribute('d','M4.5 3h3v12h-3zM10.5 3h3v12h-3z'); if(M.waits) idlePiece(); else startPiece(M.fromIntro?0:INTRO); });
 pauseBtn.addEventListener('click',function(){
   if(!started||!current) return;
   wantPlay=!wantPlay;
