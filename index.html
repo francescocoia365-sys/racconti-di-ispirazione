@@ -175,6 +175,9 @@ body{height:100%;width:100%}
 #sez.quote .bnote{display:none}
 #sez.quote #bquo{padding:0}
 #sez.quote #bgo{position:absolute;bottom:calc(40px + var(--sb));background:none;color:rgba(255,255,255,.4)}
+#sez.breathing .bstage{visibility:hidden}
+#sez.breathing #bgo{position:absolute;bottom:calc(40px + var(--sb));color:rgba(255,255,255,.28)}
+.bbox{margin:26px 0 40px}
 #sez.breathing{overflow:hidden}
 #sez.breathing .sback{opacity:0;pointer-events:none}
 #sez.breathing .bbox{position:fixed;inset:0;z-index:6;margin:0;justify-content:center;gap:34px;background:radial-gradient(90% 60% at 50% 45%,#0b1b3a 0%,#050b1c 55%,#01030a 100%);animation:qin 1.6s ease both}
@@ -406,7 +409,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='40', updBtn=document.getElementById('upd');
+var BUILD='41', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -624,7 +627,7 @@ function showSez(id){
   if(s.garden) h+='<div class="gar"><button type="button" class="upd press" id="gnear">vicino a me</button><form id="gform"><input id="gq" type="text" inputmode="search" enterkeyhint="search" autocomplete="off" placeholder="oppure una città" aria-label="Cerca una città"></form></div><p class="tiny" id="gmsg"></p><div id="glist"></div><p class="tiny gcred">dati © openstreetmap</p>';
   if(s.music) h+='<div class="rowi"><span class="tiny">spotify</span><iframe class="emb sp" title="This Is Paolo Buonvino, su Spotify" loading="lazy" allow="encrypted-media; clipboard-write; fullscreen; picture-in-picture" src="https://open.spotify.com/embed/playlist/37i9dQZF1DZ06evO4dUBlR?theme=0"></iframe></div>'
     +'<div class="rowi"><span class="tiny">youtube · i video più visti</span><div class="yt"><iframe class="emb" title="I video più visti del canale di Paolo Buonvino" loading="lazy" allowfullscreen allow="encrypted-media; picture-in-picture; fullscreen" src="https://www.youtube-nocookie.com/embed/videoseries?list=UULPQ0tBr09so4t1e8gzMhxS9Q"></iframe></div><a class="tiny lnk" target="_blank" rel="noopener" href="https://www.youtube.com/@paolobuonvino/videos">apri il canale →</a></div>';
-  if(s.breath) h='<div class="bbox" id="bbox"><div class="bstage"><div class="bring" id="bring"></div><span class="tiny" id="blab"></span></div><div id="bquo"></div><button type="button" class="upd press" id="bgo">inizia</button><span class="tiny bnote">guarda il cerchio: è così che funziona. poi chiudi gli occhi, per tre minuti: un suono e una vibrazione ti dicono quando inspirare, trattenere, espirare</span><label class="hapl" aria-hidden="true"><input type="checkbox" switch id="hap" tabindex="-1"></label></div>'+h.replace(/<div class="sart">[\s\S]*?<\/div>/,'');
+  if(s.breath) h=h+'<div class="bbox" id="bbox"><div class="bstage"><div class="bring" id="bring"></div><span class="tiny" id="blab"></span></div><div id="bquo"></div><button type="button" class="upd press" id="bgo">inizia</button><span class="tiny bnote">guarda il cerchio: è così che funziona. poi chiudi gli occhi, per tre minuti: un suono e una vibrazione ti dicono quando inspirare, trattenere, espirare</span><label class="hapl" aria-hidden="true"><input type="checkbox" switch id="hap" tabindex="-1"></label></div>';
   if(s.tac) h='<div class="deskv" id="deskv"><div class="desk" id="desk">'+TAC.map(function(f){ return '<img src="img/'+f[0]+'" alt="" style="left:'+f[1]+'px;top:'+f[2]+'px;width:'+f[3]+'px;transform:rotate('+f[4]+'deg)">'; }).join('')+'</div></div><div class="deskh" id="deskh"><span class="tiny">'+s.n+'</span><h2 class="word">'+esc(s.t)+'</h2></div>';
   if(s.anni) h='<div class="yrw"><div class="yr" id="yr">1997</div></div>'+h+'<div class="rcs">'+ANNI.map(function(a,i){ return '<div class="rc'+(i%2?' r':'')+'" data-y="'+a[0]+'" style="width:'+[66,54,72,58,62][i%5]+'%;margin-top:'+[40,-30,70,10,-10][i%5]+'px"><div class="rp"><b>'+esc(a[1])+'</b></div><span class="tiny">'+a[0]+(a[2]?' · '+esc(a[2].toLowerCase()):'')+'</span><b class="rt">'+esc(a[1])+'</b>'+(a[4]?'<span class="tiny rn">'+esc(a[4])+'</span>':'')+'</div>'; }).join('')+'</div><p class="tiny gcred">elenco e locandine da wikipedia · da rivedere</p>';
   if(s.map) h+=mapHtml();
