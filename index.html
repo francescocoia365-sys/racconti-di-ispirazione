@@ -164,7 +164,8 @@ body{height:100%;width:100%}
 .bbox.run .upd{background:none;color:rgba(255,255,255,.5)}
 .bbox.run .bnote{visibility:hidden}
 .bbox{touch-action:none;-webkit-user-select:none;user-select:none}
-.bnote{text-align:center;max-width:30ch;line-height:1.5}
+.bnote{text-align:center;max-width:32ch;line-height:1.6;font-size:12px;color:rgba(255,255,255,.75)}
+#blab{text-align:center;max-width:16ch;line-height:1.5}
 #bquo{min-height:0;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
 #bquo .lead{margin:0;max-width:24ch;text-align:center}
 .hapl{position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
@@ -405,7 +406,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='39', updBtn=document.getElementById('upd');
+var BUILD='40', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -548,7 +549,17 @@ function breathInit(){
     breathStop(); box.classList.remove('run'); box.classList.add('done'); vSez.classList.remove('breathing'); vSez.classList.add('quote'); var q=QUOTES[Math.floor(Math.random()*QUOTES.length)];
     quo.innerHTML='<p class="lead">'+esc(q[0])+'</p><span class="tiny">'+esc(q[1])+'</span>'; btn.textContent='ancora'; lab.textContent='';
   }
+  var demoRaf=0, demoT0=performance.now(), DEMO=[['inspira','una vibrazione breve',2.4],['trattieni','due vibrazioni brevi',1.8],['espira','una vibrazione lunga',3]];
+  function demo(now){
+    if(breath||!document.body.contains(ring)||box.classList.contains('done')) return;
+    var c=((now-demoT0)/1000)%7.2, k=c<2.4?0:c<4.2?1:2, u=k===0?c/2.4:k===1?1:1-(c-4.2)/3, e=u*u*(3-2*u);
+    ring.style.transform='scale('+(0.5+0.5*e)+')'; ring.style.opacity=0.4+0.4*e;
+    var txt=DEMO[k][0]+' · '+DEMO[k][1]; if(lab.textContent!==txt) lab.textContent=txt;
+    demoRaf=requestAnimationFrame(demo);
+  }
+  demoRaf=requestAnimationFrame(demo);
   btn.addEventListener('click',function(){
+    cancelAnimationFrame(demoRaf);
     if(breath){ finish(); return; }
     var s=sound()||{}; breath={t0:performance.now(),isIn:null,g:s.g,lp:s.lp,os:s.os}; box.classList.add('run'); box.classList.remove('done'); vSez.classList.remove('quote'); vSez.classList.add('breathing'); vSez.scrollTop=0; quo.innerHTML=''; btn.textContent='basta'; breath.raf=requestAnimationFrame(tick);
   });
@@ -613,7 +624,7 @@ function showSez(id){
   if(s.garden) h+='<div class="gar"><button type="button" class="upd press" id="gnear">vicino a me</button><form id="gform"><input id="gq" type="text" inputmode="search" enterkeyhint="search" autocomplete="off" placeholder="oppure una città" aria-label="Cerca una città"></form></div><p class="tiny" id="gmsg"></p><div id="glist"></div><p class="tiny gcred">dati © openstreetmap</p>';
   if(s.music) h+='<div class="rowi"><span class="tiny">spotify</span><iframe class="emb sp" title="This Is Paolo Buonvino, su Spotify" loading="lazy" allow="encrypted-media; clipboard-write; fullscreen; picture-in-picture" src="https://open.spotify.com/embed/playlist/37i9dQZF1DZ06evO4dUBlR?theme=0"></iframe></div>'
     +'<div class="rowi"><span class="tiny">youtube · i video più visti</span><div class="yt"><iframe class="emb" title="I video più visti del canale di Paolo Buonvino" loading="lazy" allowfullscreen allow="encrypted-media; picture-in-picture; fullscreen" src="https://www.youtube-nocookie.com/embed/videoseries?list=UULPQ0tBr09so4t1e8gzMhxS9Q"></iframe></div><a class="tiny lnk" target="_blank" rel="noopener" href="https://www.youtube.com/@paolobuonvino/videos">apri il canale →</a></div>';
-  if(s.breath) h='<div class="bbox" id="bbox"><div class="bstage"><div class="bring" id="bring"></div><span class="tiny" id="blab"></span></div><div id="bquo"></div><button type="button" class="upd press" id="bgo">inizia</button><span class="tiny bnote">tre minuti a occhi chiusi. un suono e una vibrazione ti dicono quando inspirare, trattenere, espirare</span><label class="hapl" aria-hidden="true"><input type="checkbox" switch id="hap" tabindex="-1"></label></div>'+h.replace(/<div class="sart">[\s\S]*?<\/div>/,'');
+  if(s.breath) h='<div class="bbox" id="bbox"><div class="bstage"><div class="bring" id="bring"></div><span class="tiny" id="blab"></span></div><div id="bquo"></div><button type="button" class="upd press" id="bgo">inizia</button><span class="tiny bnote">guarda il cerchio: è così che funziona. poi chiudi gli occhi, per tre minuti: un suono e una vibrazione ti dicono quando inspirare, trattenere, espirare</span><label class="hapl" aria-hidden="true"><input type="checkbox" switch id="hap" tabindex="-1"></label></div>'+h.replace(/<div class="sart">[\s\S]*?<\/div>/,'');
   if(s.tac) h='<div class="deskv" id="deskv"><div class="desk" id="desk">'+TAC.map(function(f){ return '<img src="img/'+f[0]+'" alt="" style="left:'+f[1]+'px;top:'+f[2]+'px;width:'+f[3]+'px;transform:rotate('+f[4]+'deg)">'; }).join('')+'</div></div><div class="deskh" id="deskh"><span class="tiny">'+s.n+'</span><h2 class="word">'+esc(s.t)+'</h2></div>';
   if(s.anni) h='<div class="yrw"><div class="yr" id="yr">1997</div></div>'+h+'<div class="rcs">'+ANNI.map(function(a,i){ return '<div class="rc'+(i%2?' r':'')+'" data-y="'+a[0]+'" style="width:'+[66,54,72,58,62][i%5]+'%;margin-top:'+[40,-30,70,10,-10][i%5]+'px"><div class="rp"><b>'+esc(a[1])+'</b></div><span class="tiny">'+a[0]+(a[2]?' · '+esc(a[2].toLowerCase()):'')+'</span><b class="rt">'+esc(a[1])+'</b>'+(a[4]?'<span class="tiny rn">'+esc(a[4])+'</span>':'')+'</div>'; }).join('')+'</div><p class="tiny gcred">elenco e locandine da wikipedia · da rivedere</p>';
   if(s.map) h+=mapHtml();
