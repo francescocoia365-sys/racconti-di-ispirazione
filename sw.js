@@ -1,9 +1,9 @@
 /* Racconti di ispirazione: funziona anche senza rete.
    La pagina e il numero di versione si chiedono sempre alla rete (così gli aggiornamenti arrivano), e si usa la copia salvata solo se la rete non c'è.
    Suoni, immagini e caratteri si salvano la prima volta e poi si prendono da lì. */
-var STATIC='racconti-static-v1', PAGE='racconti-page-v1';
+var STATIC='racconti-static-v2', PAGE='racconti-page-v1';
 self.addEventListener('install',function(e){ self.skipWaiting(); });
-self.addEventListener('activate',function(e){ e.waitUntil(self.clients.claim()); });
+self.addEventListener('activate',function(e){ e.waitUntil(caches.keys().then(function(ks){ return Promise.all(ks.filter(function(k){ return k.indexOf('racconti-static-')===0&&k!==STATIC; }).map(function(k){ return caches.delete(k); })); }).then(function(){ return self.clients.claim(); })); });   // i suoni vecchi si buttano
 self.addEventListener('fetch',function(e){
   var u=new URL(e.request.url); if(e.request.method!=='GET'||u.origin!==location.origin) return;
   if(e.request.headers.get('range')) return;
