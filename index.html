@@ -336,7 +336,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='26', updBtn=document.getElementById('upd');
+var BUILD='27', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -904,7 +904,7 @@ MODES.centri3=(function(){
    e il tema non entra finché sotto non c'è chi lo sostiene. Il legame è lo scambio: il suono di ognuno dei due scorre verso l'altro */
 var drone=null;
 function makeDrone(){
-  var out=ctx.createGain(); out.gain.value=0; var lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=1000; lp.Q.value=0.3;
+  var out=ctx.createGain(); out.gain.value=0; var lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=760; lp.Q.value=0.3;
   var send=ctx.createGain(); send.gain.value=1.3; var dry=ctx.createGain(); dry.gain.value=0.45; out.connect(lp); lp.connect(dry); dry.connect(master); lp.connect(send); send.connect(revNode);
   [[164.81,.6],[329.63,.8],[493.88,.12],[659.26,.26],[1318.51,.03]].forEach(function(f,i){
     var gn=ctx.createGain(); gn.gain.value=f[1]*0.62; gn.connect(out);
@@ -917,7 +917,7 @@ function makeDrone(){
   ns.connect(bp); bp.connect(ng); ng.connect(out); ns.start();
   drone={g:out,v:-1};
 }
-function droneTo(v){ if(!ctx||!master) return; if(!drone) makeDrone(); if(Math.abs(v-drone.v)<0.002) return; drone.v=v; drone.g.gain.setTargetAtTime(v,ctx.currentTime,v>0?2.5:0.4); }
+function droneTo(v){ if(!ctx||!master) return; if(!drone) makeDrone(); if(Math.abs(v-drone.v)<0.002) return; drone.v=v; drone.g.gain.setTargetAtTime(v,ctx.currentTime,v>0?4.5:0.4); }
 function envAt(s,tb){                    // quanto suona una voce in un punto del brano
   if(!s.env) return 0; if(tb<0) return 0; if(tb>=TOT) tb=INTRO+((tb-INTRO)%LOOP);
   return Math.min(1,(s.env[Math.min(Math.floor(tb/ENV_DT),s.env.length-1)]||0)/(s.ref*2.6));
@@ -1003,7 +1003,7 @@ MODES.legami=(function(){
       if(cut){ prune(); o=openSet(); n=Object.keys(o).length; }
       var gain={}; for(i=0;i<st.length;i++) if(st[i]) gain[st[i]]=i?near(i):1;
       S.forEach(function(s){ setWant(s,o[s.id]?(MX[s.id]+(1-MX[s.id])*full)*gain[s.id]:0,true); });
-      droneTo(0.024*(1-0.6*(n-1)/10));
+      droneTo(0.011*(1-0.6*(n-1)/10));
     },
     draw:function(t){
       var tn=performance.now()/1000, p=started&&playing?pos():0, K=40, T=1.5, i;
