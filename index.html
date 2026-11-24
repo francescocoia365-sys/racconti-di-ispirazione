@@ -336,7 +336,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='25', updBtn=document.getElementById('upd');
+var BUILD='26', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -476,7 +476,7 @@ function showSez(id){
   (s.p||[]).forEach(function(x){ h+='<p class="par">'+esc(x)+'</p>'; });
   (s.rows||[]).forEach(function(r){ h+='<div class="rowi"><span class="tiny">'+esc(r[0])+'</span><b>'+esc(r[1])+'</b><span class="tiny soon">presto</span></div>'; });
   if(s.garden) h+='<div class="gar"><button type="button" class="upd press" id="gnear">vicino a me</button><form id="gform"><input id="gq" type="text" inputmode="search" enterkeyhint="search" autocomplete="off" placeholder="oppure una città" aria-label="Cerca una città"></form></div><p class="tiny" id="gmsg"></p><div id="glist"></div><p class="tiny gcred">dati © openstreetmap</p>';
-  if(s.music) h+='<div class="rowi"><span class="tiny">spotify</span><iframe class="emb sp" title="Paolo Buonvino su Spotify" loading="lazy" allow="encrypted-media; clipboard-write; fullscreen; picture-in-picture" src="https://open.spotify.com/embed/artist/78IK4N7NFoD9w8YeniXFYE?theme=0"></iframe></div>'
+  if(s.music) h+='<div class="rowi"><span class="tiny">spotify</span><iframe class="emb sp" title="This Is Paolo Buonvino, su Spotify" loading="lazy" allow="encrypted-media; clipboard-write; fullscreen; picture-in-picture" src="https://open.spotify.com/embed/playlist/37i9dQZF1DZ06evO4dUBlR?theme=0"></iframe></div>'
     +'<div class="rowi"><span class="tiny">youtube · i video più visti</span><div class="yt"><iframe class="emb" title="I video più visti del canale di Paolo Buonvino" loading="lazy" allowfullscreen allow="encrypted-media; picture-in-picture; fullscreen" src="https://www.youtube-nocookie.com/embed/videoseries?list=UULPQ0tBr09so4t1e8gzMhxS9Q"></iframe></div><a class="tiny lnk" target="_blank" rel="noopener" href="https://www.youtube.com/@paolobuonvino/videos">apri il canale →</a></div>';
   if(s.breath) h='<div class="bbox" id="bbox"><div class="bstage"><div class="bring" id="bring"></div><span class="tiny" id="blab"></span></div><div id="bquo"></div><button type="button" class="upd press" id="bgo">inizia</button><span class="tiny bnote">tre minuti · inspira 4, espira 6</span></div>'+h.replace(/<div class="sart">[\s\S]*?<\/div>/,'');
   breathStop(); szEl.innerHTML=h; vSez.scrollTop=0;
