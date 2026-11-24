@@ -262,6 +262,8 @@ body{height:100%;width:100%}
 #lab:not(.inmenu):not(.ctlon) .bartop,#lab:not(.inmenu):not(.ctlon) .prog,#lab:not(.ctlon) .barbot{opacity:0;pointer-events:none}
 #lab:not(.inmenu):not(.ctlon) .bartop *,#lab:not(.ctlon) .barbot *{pointer-events:none}
 .barbot{transition:opacity .5s}
+#msw{position:absolute;z-index:4;left:50%;bottom:calc(14px + var(--sb));transform:translateX(-50%);padding:10px 16px;color:rgba(255,255,255,.3);font-family:"Unbounded",var(--font)}
+#lab.inmenu #msw{display:none}
 #zone{position:absolute;z-index:3;top:0;left:0;right:0;height:calc(64px + var(--st))}
 #lab.inmenu #zone{display:none}
 #zone::after{content:"";position:absolute;left:50%;bottom:26px;width:26px;height:2px;margin-left:-13px;border-radius:2px;background:rgba(255,255,255,.22);transition:opacity .5s}
@@ -377,6 +379,7 @@ body{height:100%;width:100%}
     <button class="round press ctl" id="pause" type="button" aria-label="Pausa"><svg viewBox="0 0 18 18" fill="currentColor" aria-hidden="true"><path id="pauseicon" d="M4.5 3h3v12h-3zM10.5 3h3v12h-3z"/></svg></button>
   </div>
   <div id="zone"></div>
+  <button type="button" id="msw" class="tiny" aria-label="Cambia modo"></button>
   <div class="prog ctl" aria-hidden="true"><i id="prog"></i></div>
   <div class="barbot">
     <div class="walkrow"><button id="walk" class="walk press" type="button" hidden>cammina</button><button id="cal" class="walk press" type="button" hidden>tara</button></div>
@@ -409,7 +412,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='44', updBtn=document.getElementById('upd');
+var BUILD='45', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -680,7 +683,7 @@ function route(){
   vLab.classList.toggle('on',lab); vSez.classList.toggle('on',sz); vHome.classList.toggle('on',!lab&&!sz);
   document.getElementById('zoom').classList.remove('on');
   if(sz) showSez(hs); else breathStop();
-  if(lab){ resize(); prepare(); enterMode('legami'); }
+  if(lab){ resize(); prepare(); enterMode(labMode); }
   else { current=null; stopWalk(); if(ctx&&master){ playing=false; master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(0,ctx.currentTime,0.25); if(drone){ drone.v=0; drone.g.gain.setTargetAtTime(0,ctx.currentTime,0.3); } setTimeout(function(){ if(!current&&ctx) ctx.suspend(); },900); } }
 }
 window.addEventListener('hashchange',route);
@@ -1229,6 +1232,40 @@ MODES.legami=(function(){
   };
 })();
 
+/* resta: un solo gesto. Appoggi il dito e resti: il brano si apre da solo, con i suoi tempi, e tiene il tema per quando sotto c'è abbastanza.
+   Se togli il dito si ritira come un respiro e resta il suono lungo; se torni, riprende da dove eravate. Al posto dei segni, una sola forma di luce */
+MODES.resta=(function(){
+  var TH={arm1:0,piano:7,short1:14,basso:23,mel1:32,mel2:45,arm2:57,short2:67,short3:75,short4:83};
+  var pres=0, h=0, x=.5, y=.5, tx=.5, ty=.5, used=false;
+  function tgt(q){ tx=q.x/W; ty=(q.y-TOP)/(BOT-TOP); }
+  return {
+    hint:'', waits:true,
+    enter:function(){ pres=0; h=0; x=tx=.5; y=ty=.5; used=false; },
+    down:function(q){ if(!playing&&started){ if(ctx.state!=='running') ctx.resume(); startPiece(INTRO,true); } used=true; tgt(q); },
+    move:tgt,
+    update:function(dt){
+      var on=fingers().length>0;
+      pres=Math.max(0,Math.min(100,pres+(on?dt:-dt*1.4)));
+      h+=((on?1:0)-h)*(1-Math.exp(-dt/(on?2.2:3.2)));
+      if(!on){ tx+=(0.5-tx)*(1-Math.exp(-dt/4)); ty+=(0.5-ty)*(1-Math.exp(-dt/4)); }
+      x+=(tx-x)*(1-Math.exp(-dt/0.5)); y+=(ty-y)*(1-Math.exp(-dt/0.5));
+      var full=ss(88,100,pres), open=0;
+      S.forEach(function(s){ var a=TH[s.id]==null?0:(s.id==='arm1'?(pres>0.2?1:0):ss(TH[s.id],TH[s.id]+6,pres)); if(a>0.5) open++;
+        setWant(s,a*(MX[s.id]+(1-MX[s.id])*full)*(0.12+0.88*h),true); setPan(s,(x-0.5)*0.9); setRoom(s,0.55*(1-h)); });
+      droneTo(0.011*(1-0.55*open/10));
+    },
+    draw:function(t){
+      var cx=x*W, cy=TOP+y*(BOT-TOP), lev=0, n=0; S.forEach(function(s){ lev+=s.level*s.gv; if(s.gv>0.05) n++; });
+      var R=(40+2.6*pres+90*Math.min(1,lev/3))*(0.55+0.45*h)+6*Math.sin(t*0.9), a=0.10+0.26*h+0.1*Math.min(1,lev/3);
+      var gr=g.createRadialGradient(cx,cy,0,cx,cy,R*1.9); gr.addColorStop(0,'rgba('+INK+','+a+')'); gr.addColorStop(0.45,'rgba('+INK+','+a*0.35+')'); gr.addColorStop(1,'rgba('+INK+',0)');
+      g.fillStyle=gr; g.beginPath(); g.arc(cx,cy,R*1.9,0,TAU); g.fill();
+      var k=0; S.forEach(function(s){ if(s.gv<0.03) return; k++; g.strokeStyle='rgba('+INK+','+(0.10+0.5*s.level)*Math.min(1,s.gv*2)+')'; g.lineWidth=0.8; g.beginPath(); g.arc(cx,cy,R*(0.25+k*0.16)+10*s.level,0,TAU); g.stroke(); });
+      g.fillStyle='rgba('+INK+','+(0.5+0.4*h)+')'; g.beginPath(); g.arc(cx,cy,2.6,0,TAU); g.fill();
+      if(!used){ var ph=(t*0.3)%1; g.strokeStyle='rgba(255,255,255,'+0.5*Math.sin(Math.PI*ph)+')'; g.lineWidth=1.2; g.beginPath(); g.arc(cx,cy,14+26*(1-ph),0,TAU); g.stroke(); }
+    }
+  };
+})();
+
 /* ================= Oriente ================= */
 var REST=['piano','mel1','mel2','short1','basso','arm2','short2','short3','short4'];
 function padOn(full){ setWant(BY.arm1,MX.arm1*0.8+(1-MX.arm1*0.8)*full,true); }
@@ -1451,7 +1488,9 @@ function showMenu(){
   if(started){ playing=false; master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(0,ctx.currentTime,0.25); setTimeout(function(){ if(!current&&ctx) ctx.suspend(); },900); }
 }
 /* ogni modo riparte da capo: la stanza dall'intro, gli altri dal tema, sopra gli archi lunghi */
+var labMode='resta', mswEl=null;
 function enterMode(name){
+  labMode=name; if(!mswEl){ mswEl=document.getElementById('msw'); mswEl.addEventListener('click',function(){ enterMode(labMode==='resta'?'legami':'resta'); }); } mswEl.textContent=name==='resta'?'legami':'resta';
   startAudio();
   current=name; M=MODES[name]; M.enter();
   vLab.classList.remove('inmenu'); vLab.classList.remove('ctlon'); menuEl.classList.add('off');
