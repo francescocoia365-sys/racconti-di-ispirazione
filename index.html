@@ -75,8 +75,11 @@ body{height:100%;width:100%}
 .knock .under .b2{opacity:0;animation:dx2 34s ease-in-out infinite alternate}
 @keyframes dx1{from{opacity:.24}to{opacity:.05}}
 @keyframes dx2{from{opacity:0}to{opacity:.22}}
-.word.big{font-size:21vw;line-height:.98;letter-spacing:.02em}
-@media (min-width:500px){.word.big{font-size:105px}}
+.knock .in{left:50%;right:auto;top:50%;bottom:auto;transform:translate(-50%,-50%);gap:20px}
+.word.big{width:64vw;height:64vw;display:flex;flex-direction:column;justify-content:space-between;font-size:13vw;line-height:.72;letter-spacing:0}
+.word.big .r{display:flex;justify-content:space-between}
+.word.big i{font-style:normal;display:block}
+@media (min-width:500px){.word.big{width:320px;height:320px;font-size:65px}}
 @media (prefers-reduced-motion:reduce){.amb,.knock .under .bg{animation:none}}
 .knock .enter{top:calc(12px + var(--st));bottom:auto;right:14px;border:0;color:rgba(255,255,255,.62)}
 .knock .n{position:absolute;z-index:1;top:calc(24px + var(--st));left:26px}
@@ -169,7 +172,7 @@ body{height:100%;width:100%}
     </header>
     <a class="door knock" href="#laboratorio" id="tolab" aria-label="Laboratorio: entra">
       <div class="under"><img class="bg b1" src="img/p-musiche.jpg" alt="" style="object-position:50% 30%"><img class="bg b2" src="img/p-cover.jpg" alt="" style="object-position:50% 38%"><div class="amb"></div></div>
-      <div class="in"><span class="tiny">01</span><h2 class="word big">Labo<br>rato<br>rio</h2></div>
+      <div class="in"><span class="tiny">01</span><h2 class="word big" aria-label="Laboratorio"><span class="r"><i>L</i><i>A</i><i>B</i><i>O</i></span><span class="r"><i>R</i><i>A</i><i>T</i><i>O</i></span><span class="r"><i>R</i><i>I</i><i>O</i></span></h2></div>
       <span class="enter" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
     </a>
     <section class="door photo">
@@ -247,7 +250,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='21', updBtn=document.getElementById('upd');
+var BUILD='22', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
