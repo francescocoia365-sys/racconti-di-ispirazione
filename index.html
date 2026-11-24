@@ -419,7 +419,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='59', updBtn=document.getElementById('upd');
+var BUILD='60', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -1125,8 +1125,8 @@ MODES.legami=(function(){
   function LL(lon,lat){ return [0.5+(lon-12)*0.017453/5.2,0.5-(lat*0.017453-0.3)/3.4]; }
   // 0 tu, in Europa; 1-5 le persone da raggiungere; 6-12 i suoni che compaiono sul mondo
   var PL=[[.5,.5],LL(-100,45),LL(-60,-15),LL(25,-12),LL(105,38),LL(135,-25),LL(-40,72),LL(78,20),LL(0,-75),LL(100,64),LL(-155,20),LL(25,-32),LL(138,36)], NC=5;
-  var LAY={2:{a:'l2',x:'l2x',b:'b2',n:'violino'},3:{a:'l3',x:'l3x',b:'b3',n:'secondo violino'},4:{a:'l4',x:'l4x',b:'b4',n:'violoncello'},5:{a:'l5',b:'b5',n:'quinta voce'},6:{a:'l6',b:'b6',n:'sesta voce'}};
-  var BX=['s13','s14','vno','ww','coro','archi','bass'], BN={s13:'insieme',s14:'insieme, secondo',vno:'violini',ww:'legni',coro:'coro',archi:'archi',bass:'basso'};
+  var LAY={2:{a:'l2',x:'l2x',b:'b2',n:'violino, corda di re'},3:{a:'l3',x:'l3x',b:'b3',n:'violino, corda di sol'},4:{a:'l4',x:'l4x',b:'b4',n:'violoncello'},5:{a:'l5',b:'b5',n:'armonia'},6:{a:'l6',b:'b6',n:'movimento'}};
+  var BX=['s13','s14','vno','ww','coro','archi','bass'], BN={s13:'tutti',s14:'risonanze',vno:'violini',ww:'legni',coro:'coro',archi:'archi',bass:'basso'};
   var QUOTE=['L’ispirazione, come il respiro,','è ancora più preziosa','quando diventa','un’esperienza comune.'];
   // le terre, disegnate a mano in longitudine e latitudine: bastano a riconoscerle
   var LANDS=[[[-168,66],[-156,71],[-130,70],[-110,68],[-95,72],[-82,73],[-78,63],[-65,60],[-56,52],[-66,45],[-70,42],[-76,35],[-81,31],[-80,25],[-84,30],[-90,29],[-97,26],[-97,20],[-91,18],[-87,21],[-87,16],[-83,10],[-78,8],[-80,7],[-85,11],[-95,16],[-105,20],[-110,24],[-114,30],[-117,33],[-124,40],[-124,48],[-130,55],[-140,60],[-152,59],[-162,55],[-165,62]],
@@ -1144,11 +1144,11 @@ MODES.legami=(function(){
   var st=[], lay=[], links=[], full=0, used=false, born=[], ps=[], ecv=[], fxv=[];
   var phase=0, tA=0, TBplan=0, TB=0, TF=0, TFplan=0, nconn=0, order=[], formAt=0, bAt=0, armed=false, armAt=0, holdTu=0, holdXY=[0,0], endAt=0, enterT=0, dimv=0, freed=false, bGo=false, fGo=false;
   var ZS=[0,.22,-.3,.28,-.2,.32,0,0,0,0,0,0,0], k3=0, rx=0, ry=0, tiltX=0, tiltY=0, base=null, gotTilt=false, asked=false, spin=0;
-  var ury=0, urx=0, zoom=1, pinch=0, RG=0.40;
-  function earth(){ var x=Math.max(0,Math.min(1,(full-0.14)/0.86)); return x*x*(3-2*x); }
+  var ury=0, urx=0, zoom=1, zf=1, pinch=0, RG=0.40, formDur=20, focused=false;
+  function earth(){ return ss(0,0.42,full); }
   function proj(X,Y,Z){
     var cy=Math.cos(ry*k3+spin+ury), sy=Math.sin(ry*k3+spin+ury), cx=Math.cos(rx*k3+urx), sx=Math.sin(rx*k3+urx);
-    var x1=X*cy+Z*sy, z1=-X*sy+Z*cy, y1=Y*cx-z1*sx, z2=Y*sx+z1*cx, f=zoom/(1-z2*0.55);
+    var x1=X*cy+Z*sy, z1=-X*sy+Z*cy, y1=Y*cx-z1*sx, z2=Y*sx+z1*cx, f=zoom*zf/(1-z2*0.55);
     return [W*(0.5+x1*f),TOP+(BOT-TOP)*0.5+W*y1*f,z2];
   }
   function p3(i,flat){              // posizione del punto dopo la rotazione: x, y sullo schermo e z (vicino > 0)
@@ -1176,8 +1176,8 @@ MODES.legami=(function(){
     return out.map(function(p){ var x=p[0]-ax, y=p[1]-ay; return [(x*dx+y*dy)/m,(y*dx-x*dy)/m]; });
   }
   var TINT=null;
-  function braid(pts,lim,swf,al,ph,t,calm,pl){
-    for(var j=0;j<3;j++){
+  function braid(pts,lim,swf,al,ph,t,calm,pl,thin){
+    for(var j=thin?2:0;j<3;j++){
       g.strokeStyle='rgba('+(TINT||INK)+','+(j===2?Math.min(1,al):j?al*0.13:al*0.06)+')'; g.lineWidth=j===2?1:j?4.5:11; g.lineCap='round'; g.beginPath();
       for(var k=0;k<=lim;k++){ var u=k/(NP-1), a=pts[Math.max(0,k-1)], b=pts[Math.min(NP-1,k+1)], dl=Math.hypot(b[0]-a[0],b[1]-a[1])||1, qx=-(b[1]-a[1])/dl, qy=(b[0]-a[0])/dl;
         var en=Math.pow(Math.sin(Math.PI*u),0.7), am=(2+4.5*(swf?swf(u):0))*en*calm, off=am*1.25*Math.sin(k*0.13-t*0.55+ph)+(pl||0)*13*en*Math.sin(k*0.42-t*11), X=pts[k][0]+qx*off, Y=pts[k][1]+qy*off;
@@ -1203,7 +1203,7 @@ MODES.legami=(function(){
     tA=now+0.2; phase=1; playing=true; wantPlay=true; if(ctx.state!=='running') ctx.resume();
     master.gain.cancelScheduledValues(now); master.gain.setTargetAtTime(1.8,now,0.6);
     grp('A').concat(grp('C')).forEach(function(s){ if(s.g&&s.buf) newSource(s,tA,0); });
-    sched('la',3.0,tA,3.5); sched('lb',1.3,tA+9,9); sched('lc',0.9,tA+G,11);        // il tappeto: il primo strato subito, gli altri due da soli, piano
+    sched('la',1.9,tA,3.5); sched('lb',0.85,tA+9,9); sched('lc',0.6,tA+G,11);        // il tappeto: il primo strato subito, gli altri due da soli, piano
     pauseBtn.setAttribute('aria-label','Pausa'); pauseIcon.setAttribute('d','M4.5 3h3v12h-3zM10.5 3h3v12h-3z');
   }
   function late(s){                       // uno strato che finisce di caricarsi a brano già partito: si aggancia a tempo e recupera le sue dissolvenze
@@ -1217,8 +1217,8 @@ MODES.legami=(function(){
     var L=order[nconn++], d=LAY[L], now=ctx.currentTime, Tg=nextGiro(now); lay[to]=L;
     if(d.x){ sched(d.x,0.34,now,2.2); sched(d.x,1,Tg,0.12); sched(d.x,0,Tg+G,1.5); sched(d.a,1,Tg+G,1.5); }     // prima la versione lavorata, un giro dopo quella pulita
     else { sched(d.a,0.3,now,2.2); sched(d.a,1,Tg,0.12); }
-    sched('la',3.0-0.3*nconn,now,4);
-    if(nconn>=NC){ formAt=performance.now()/1000; TBplan=Tg+G; }           // tutti legati: la carta si forma, e la sesta voce fa almeno un giro intero
+    sched('la',1.9-0.18*nconn,now,4);
+    if(nconn>=NC){ formAt=performance.now()/1000; TBplan=Tg+G; formDur=Math.max(16,TBplan-now-1); }           // tutti legati: la carta si forma, e la sesta voce fa almeno un giro intero
   }
   function goB(){
     var now=ctx.currentTime; TB=TBplan; bGo=true;
@@ -1240,7 +1240,7 @@ MODES.legami=(function(){
     hint:'', own:true, PL:PL, begin:begin, late:late, pos:function(){ return PL.map(function(_,i){ return p3(i); }); },
     dbg:function(){ return {phase:phase,nconn:nconn,full:+full.toFixed(2),tA:+(ctx?ctx.currentTime-tA:0).toFixed(1),toB:TBplan?+(TBplan-ctx.currentTime).toFixed(1):null,toF:TFplan?+(TFplan-ctx.currentTime).toFixed(1):null,armed:armed,lit:st.filter(Boolean).length,gains:S.filter(function(s){ return s.g&&s.g.gain.value>0.02; }).map(function(s){ return s.id+':'+s.g.gain.value.toFixed(2); }).join(' ')}; },
     enter:function(){
-      st=PL.map(function(){ return null; }); st[0]=true; lay=[]; links=[]; full=0; used=false; born=[]; k3=0; base=null; spin=0; ecv=[]; fxv=[]; ury=0; urx=0; zoom=1; pinch=0;
+      st=PL.map(function(){ return null; }); st[0]=true; lay=[]; links=[]; full=0; used=false; born=[]; k3=0; base=null; spin=0; ecv=[]; fxv=[]; ury=0; urx=0; zoom=1; zf=1; pinch=0; focused=false;
       phase=0; nconn=0; TBplan=0; TB=0; TF=0; TFplan=0; formAt=0; bAt=0; armed=false; armAt=0; holdTu=0; endAt=0; dimv=0; freed=false; bGo=false; fGo=false; enterT=performance.now()/1000;
       order=[2,3,4,5]; for(var i=3;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), tmp=order[i]; order[i]=order[j]; order[j]=tmp; } order.push(6);
       ps=PL.map(function(p){ return {x:p[0],y:p[1],tx:p[0],ty:p[1]}; });
@@ -1248,7 +1248,7 @@ MODES.legami=(function(){
     down:function(q){
       askTilt(); if(phase===4&&endAt&&performance.now()/1000-endAt>1.5){ this.enter(); begin(); return; }
       var i=at(q); q.node=i; q.lit=i>=0&&!!st[i]; q.sx=q.x; q.sy=q.y; q.far=false; q.hold=false; q.t0=performance.now(); q.raw=[]; q.fx=q.x; q.fy=q.y;
-      q.fxn=(phase===2&&i>0&&st[i])?i:-1; if(q.fxn>=0){ fxv[i]=fxv[i]||{lift:0}; fxv[i].held=true; used=true; }
+      q.fxn=(phase===2&&i>0&&st[i])?i:-1; if(q.fxn>=0){ fxv[i]=fxv[i]||{lift:0}; fxv[i].held=true; used=true; focused=true; }
     },
     move:function(q){
       if(Math.hypot(q.x-q.sx,q.y-q.sy)>12) q.far=true;
@@ -1272,10 +1272,10 @@ MODES.legami=(function(){
       var tn=performance.now()/1000, now=ctx.currentTime, i, kk=1-Math.exp(-dt/0.22);
       fingers().forEach(function(q){ if(phase===1&&q.node>0&&q.node<=NC&&!q.far&&!q.hold&&performance.now()-q.t0>380){ q.hold=true; used=true; } });       // tenuto premuto: il punto ti segue
       for(i=1;i<ps.length;i++){ ps[i].x+=(ps[i].tx-ps[i].x)*kk; ps[i].y+=(ps[i].ty-ps[i].y)*kk; }
-      links.forEach(function(l){ if(l.g<1) l.g=Math.min(1,l.g+dt/1.6); if(l.pl) l.pl=Math.max(0,l.pl-dt/1.8); });
+      links.forEach(function(l){ if(l.g<1) l.g=Math.min(1,l.g+dt/4); if(l.pl) l.pl=Math.max(0,l.pl-dt/1.8); });
       // la carta e il mondo: solo quando tutti sono legati, e in fretta
-      if(formAt) full=Math.min(1,(tn-formAt)/7);
-      k3+=(((nconn>=3)?(formAt?1:0.5):0)-k3)*(1-Math.exp(-dt/(formAt?2.5:9)));
+      if(formAt) full=Math.min(1,(tn-formAt)/formDur);
+      k3+=(((nconn>=3)?(formAt?1:0.5):0)-k3)*(1-Math.exp(-dt/(formAt?5:9)));
       var gx=gotTilt?tiltX:0.1*Math.sin(tn*0.06), gy=gotTilt?tiltY:0.14*Math.sin(tn*0.045); rx+=(gx-rx)*(1-Math.exp(-dt/0.35)); ry+=(gy-ry)*(1-Math.exp(-dt/0.35));
       spin+=dt*0.07*full*(fingers().length?0:1);
       var fr=fingers().filter(function(f){ return f.node<0; }); if(fr.length===2&&full>0.5){ var dd=Math.hypot(fr[0].x-fr[1].x,fr[0].y-fr[1].y); if(pinch) zoom=Math.max(0.55,Math.min(2.4,zoom*dd/pinch)); pinch=dd; } else pinch=0;
@@ -1284,13 +1284,13 @@ MODES.legami=(function(){
       if(phase===1&&bGo&&now>=TB){ phase=2; bAt=tn; }
       if(phase===2&&!freed&&now>TB+8){ freed=true; S.forEach(function(s){ if(s.grp==='A'||s.grp==='C'){ if(s.src){ try{ s.src.stop(); }catch(e){} s.src=null; } s.t0=null; } }); }
       if(phase===2){
-        for(i=NC+1;i<PL.length;i++) if(!st[i]&&tn>bAt+0.4+0.45*(i-NC-1)){ st[i]=true; born[i]=tn; links.push({a:0,b:i,t:tn,g:0,z:makePath([],0,i),ph:i}); }     // ogni suono nuovo è un punto sul mondo, legato da solo
-        var tu=fingers().length===1?fingers().filter(function(f){ return f.node<=0&&!f.far; })[0]:null; if(tu) holdXY=[tu.x,tu.y];
-        if(tu&&!armed&&now>TB+6){ holdTu=Math.min(1,(performance.now()-tu.t0)/2500); if(holdTu>=1){ armed=true; armAt=tn; TFplan=TB+Math.ceil((now+2-TB)/(3*G))*3*G; used=true; } } else if(!armed) holdTu=Math.max(0,holdTu-dt*2);
-        if(armed&&!fGo&&now>TFplan-1.2){ if(BY.fin.g&&BY.fin.buf) goF(); else TFplan+=3*G; }
+        for(i=NC+1;i<PL.length;i++) if(!st[i]&&tn>bAt+1.5+2.4*(i-NC-1)){ st[i]=true; born[i]=tn; links.push({a:0,b:i,t:tn,g:0,z:makePath([],0,i),ph:i}); }     // ogni suono nuovo è un punto sul mondo, legato da solo
+        if(!TFplan) TFplan=TB+2*3*G;
+        if(!fGo&&now>TFplan-1.2){ if(BY.fin.g&&BY.fin.buf) goF(); else TFplan+=3*G; }
         if(fGo&&now>=TF){ phase=3; }
       }
       if(phase===3&&BY.fin.buf&&now>TF+BY.fin.buf.duration-PRE-1){ phase=4; endAt=tn; }
+      var pre=TFplan?ss(TFplan-12,TFplan,now):0, aft=phase>=3?Math.min(1,(now-TF)/14):0; zf=1+0.35*pre+0.9*aft;
       // quanto si sente ciascuno
       var held=-1; for(i=1;i<PL.length;i++) if(fxv[i]&&fxv[i].held) held=i;
       dimv+=((held>=0?1:0)-dimv)*(1-Math.exp(-dt/0.3));
@@ -1306,32 +1306,32 @@ MODES.legami=(function(){
       }
     },
     draw:function(t){
-      var tn=performance.now()/1000, i, eG=earth(), asp=(BOT-TOP)/W, gone=phase>=3?Math.min(1,Math.max(0,(ctx.currentTime-TF)/12)):0, vis=1-gone, ca=Math.min(1,full/0.14)*vis;
-      if(eG>0.01&&vis>0.01){ g.lineWidth=0.7;
+      var tn=performance.now()/1000, i, eG=earth(), asp=(BOT-TOP)/W, pre=(phase===2&&TFplan)?ss(TFplan-12,TFplan,ctx.currentTime):0, gone=phase>=3?Math.min(1,Math.max(0,(ctx.currentTime-TF)/12)):0, vis=1-gone, ca=ss(0.55,1,full)*vis, ga=ss(0.34,0.7,full);
+      if(eG>0.01&&vis>0.01){ g.strokeStyle='rgba('+INK+','+(0.34-0.14*ss(0.6,1,full))*eG*vis+')'; g.lineWidth=1; g.beginPath(); g.arc(W/2,TOP+(BOT-TOP)/2,W*RG*zoom*zf*1.02,0,TAU); g.stroke(); }       // prima di tutto, un cerchio
+      if(ga>0.01&&vis>0.01){ g.lineWidth=0.7;
         for(var m=0;m<17;m++){ var mer=m<12, steps=mer?24:36; for(var hf=0;hf<2;hf++){ g.beginPath(); var open=false;        // meridiani e paralleli: piatti come una carta, poi avvolti
           for(var sI=0;sI<=steps;sI++){ var la2=mer?(-1.5708+3.1416*sI/steps):(-1.0472+0.5236*(m-12)), lo2=mer?(-3.1416+m*0.5236):(-3.1416+6.2832*sI/steps), cl2=Math.cos(la2);
             var fx2=lo2/5.2, fy2=-((la2-0.3)/3.4)*asp, q4=proj(fx2+(RG*cl2*Math.sin(lo2)-fx2)*eG,fy2+(-RG*Math.sin(la2)-fy2)*eG,RG*cl2*Math.cos(lo2)*eG), front=q4[2]>=-0.001;
             if(front===(hf===0)){ if(open) g.lineTo(q4[0],q4[1]); else { g.moveTo(q4[0],q4[1]); open=true; } } else open=false; }
-          g.strokeStyle='rgba(170,200,255,'+(hf?0.04:0.15)*eG*vis+')'; g.stroke(); } } }
+          g.strokeStyle='rgba(170,200,255,'+(hf?0.03:0.11)*ga*vis+')'; g.stroke(); } } }
       if(ca>0.01){          // le terre: compaiono tutte insieme quando l'ultimo legame è fatto
         var LP=LAND.map(function(r){ return r.map(function(pt){ var cl3=Math.cos(pt[1]), fx3=pt[0]/5.2, fy3=-((pt[1]-0.3)/3.4)*asp; return proj(fx3+(RG*cl3*Math.sin(pt[0])-fx3)*eG,fy3+(-RG*Math.sin(pt[1])-fy3)*eG,RG*cl3*Math.cos(pt[0])*eG); }); });
         g.lineWidth=1; g.lineJoin='round';
         for(var hb=0;hb<2;hb++){ if(hb&&eG<0.05) continue; g.beginPath(); LAND.forEach(function(r,ri){ var q5=LP[ri], op=false; for(var k5=0;k5<r.length-1;k5++){ var ok5=Math.abs(r[k5+1][0]-r[k5][0])<3&&((eG<0.6||q5[k5][2]>=-0.001)===(hb===0)); if(ok5){ if(!op){ g.moveTo(q5[k5][0],q5[k5][1]); op=true; } g.lineTo(q5[k5+1][0],q5[k5+1][1]); } else op=false; } });
-          g.strokeStyle='rgba(190,208,240,'+ca*(hb?0.07*eG:0.26+0.2*eG)+')'; g.stroke(); }
+          g.strokeStyle='rgba(190,208,240,'+ca*(hb?0.06:0.42)+')'; g.stroke(); }
       }
       if(full>0.02&&vis>0.01){
         var c0x=W/2, c0y=TOP+(BOT-TOP)/2, RR=Math.max(W,BOT-TOP)*0.75;
-        [['70,110,255',0.20,0],['255,120,90',0.13,2.1],['190,90,255',0.11,4.2]].forEach(function(n){ var ax=c0x+Math.cos(t*0.06+n[2])*W*0.28, ay=c0y+Math.sin(t*0.05+n[2])*W*0.34, gr=g.createRadialGradient(ax,ay,0,ax,ay,RR); gr.addColorStop(0,'rgba('+n[0]+','+n[1]*full*(0.4+0.6*vis)+')'); gr.addColorStop(1,'rgba('+n[0]+',0)'); g.fillStyle=gr; g.fillRect(0,0,W,H); });
-        STARS.forEach(function(sr,k){ var sp=1+gone*1.6, q3=proj((sr[0]+(sr[4]-sr[0])*eG)*sp,(sr[1]+(sr[5]-sr[1])*eG)*sp,(sr[2]+(sr[6]-sr[2])*eG)*sp); g.fillStyle='rgba('+HUE[k%3]+','+Math.max(0,(0.22+0.6*(q3[2]+0.25))*sr[3]*full*(0.35+0.65*vis))+')'; g.fillRect(q3[0],q3[1],1.4,1.4); });
+        [['70,110,255',0.20,0],['255,120,90',0.13,2.1],['190,90,255',0.11,4.2]].forEach(function(n){ var ax=c0x+Math.cos(t*0.06+n[2])*W*0.28, ay=c0y+Math.sin(t*0.05+n[2])*W*0.34, gr=g.createRadialGradient(ax,ay,0,ax,ay,RR); gr.addColorStop(0,'rgba('+n[0]+','+n[1]*0.8*full*(0.4+0.6*vis)+')'); gr.addColorStop(1,'rgba('+n[0]+',0)'); g.fillStyle=gr; g.fillRect(0,0,W,H); });
+        STARS.forEach(function(sr,k){ var sp=1+gone*1.6, q3=proj((sr[0]+(sr[4]-sr[0])*eG)*sp,(sr[1]+(sr[5]-sr[1])*eG)*sp,(sr[2]+(sr[6]-sr[2])*eG)*sp); g.fillStyle='rgba('+HUE[k%3]+','+Math.max(0,(0.22+0.6*(q3[2]+0.25))*sr[3]*0.5*full*(0.35+0.65*vis))+')'; g.fillRect(q3[0],q3[1],1.4,1.4); });
       }
       var dimA=1-0.65*dimv;
-      if(full>0.01&&vis>0.01){ g.lineWidth=0.7; g.strokeStyle='rgba('+INK+','+0.13*full*vis*dimA+')'; g.beginPath(); for(i=0;i<PL.length;i++){ if(!st[i]) continue; for(var j2=i+1;j2<PL.length;j2++){ if(!st[j2]) continue; g.moveTo(nx(i),ny(i)); g.lineTo(nx(j2),ny(j2)); } } g.stroke(); }
-      if(formAt&&tn-formAt<5){ for(i=0;i<3;i++){ var uu=(tn-formAt-i*0.6)/3.6; if(uu>0&&uu<1){ g.strokeStyle='rgba('+INK+','+0.5*(1-uu)+')'; g.lineWidth=1; g.beginPath(); g.arc(nx(0),ny(0),20+uu*Math.max(W,BOT-TOP)*0.75,0,TAU); g.stroke(); } } }
+      if(formAt&&tn-formAt<8){ for(i=0;i<3;i++){ var uu=(tn-formAt-i*1.1)/5.5; if(uu>0&&uu<1){ g.strokeStyle='rgba('+INK+','+0.5*(1-uu)+')'; g.lineWidth=1; g.beginPath(); g.arc(nx(0),ny(0),20+uu*Math.max(W,BOT-TOP)*0.75,0,TAU); g.stroke(); } } }
       g.lineCap='round'; g.lineJoin='round';
       if(vis>0.01) links.forEach(function(l){            // il filo ondeggia col suono di chi sta in fondo
-        var pts=pathPx(l), lv=levelOf(l.b), hl=(fxv[l.b]&&fxv[l.b].held)?1:dimA;
+        var pts=pathPx(l), lv=levelOf(l.b), hl=(fxv[l.b]&&fxv[l.b].held)?1:dimA, zb=eG>0.6?Math.min(p3(l.a)[2],p3(l.b)[2]):1, bk=zb<-0.02?0.3:1;
         TINT=full>0.3?HUE[l.b%3]:null;
-        braid(pts,Math.max(1,Math.floor(l.g*(NP-1))),function(u){ return lv; },(0.5+0.35*full+0.4*(l.pl||0))*vis*hl,l.ph,t,1,l.pl);
+        braid(pts,Math.max(1,Math.floor(l.g*(NP-1))),function(u){ return lv; },(0.5+0.25*full+0.4*(l.pl||0))*vis*hl*bk,l.ph,t,phase>=2?0.5:1,l.pl,phase>=2&&!(fxv[l.b]&&fxv[l.b].held));
       });
       TINT=null;
       fingers().forEach(function(q){
@@ -1342,21 +1342,20 @@ MODES.legami=(function(){
       if(ha>0.01&&!used){ var hx=W/2, hy=TOP+(BOT-TOP)*0.13; g.strokeStyle='rgba('+INK+','+0.85*ha+')'; g.lineWidth=1.4; g.lineCap='round'; g.beginPath(); g.arc(hx,hy,22,Math.PI,TAU); g.stroke(); [-1,1].forEach(function(sd){ g.beginPath(); g.moveTo(hx+sd*22,hy); g.lineTo(hx+sd*22,hy+16); g.stroke(); g.fillStyle='rgba('+INK+','+0.85*ha+')'; g.fillRect(hx+sd*22-4.5,hy+4,9,16); }); tinyLabel('metti le cuffie',hx,hy+46,0.9*ha); }
       if(vis>0.01) for(i=0;i<PL.length;i++){
         if(!shown(i)) continue;
-        var P0=p3(i), x=P0[0], y=P0[1], back=(eG>0.6&&P0[2]<-0.02)?0.45:1, me=(fxv[i]&&fxv[i].held), al=vis*back*(me?1:dimA);
+        var P0=p3(i), x=P0[0], y=P0[1], back=(eG>0.6&&P0[2]<-0.02)?0.3:1, me=(fxv[i]&&fxv[i].held), al=vis*back*(me?1:dimA);
         if(!i){ g.fillStyle='rgba('+INK+','+0.95*al+')'; g.beginPath(); g.arc(x,y,4.2+0.5*Math.sin(tn/1.1),0,TAU); g.fill(); g.strokeStyle='rgba('+INK+','+0.4*al+')'; g.lineWidth=1; g.beginPath(); g.arc(x,y,12,0,TAU); g.stroke(); if(!used) tinyLabel('tu',x,y+34,0.6);
         }
         else if(st[i]){ var lv2=levelOf(i); g.fillStyle='rgba('+INK+','+0.9*al+')'; g.beginPath(); g.arc(x,y,2.6+2.6*lv2,0,TAU); g.fill(); g.strokeStyle='rgba('+INK+','+0.35*al+')'; g.lineWidth=1; g.beginPath(); g.arc(x,y,9+12*lv2,0,TAU); g.stroke();
-          if(me&&eG>0.5){ var sf=p3(i,true); g.strokeStyle='rgba('+INK+',.55)'; g.lineWidth=1; g.beginPath(); g.moveTo(sf[0],sf[1]); g.lineTo(x,y); g.stroke(); g.beginPath(); g.arc(sf[0],sf[1],3,0,TAU); g.stroke(); tinyLabel(nameOf(i),Math.max(60,Math.min(W-60,x)),y-30,0.9); }
+          if(me&&eG>0.5){ var sf=p3(i,true); g.strokeStyle='rgba('+INK+',.55)'; g.lineWidth=1; g.beginPath(); g.moveTo(sf[0],sf[1]); g.lineTo(x,y); g.stroke(); g.beginPath(); g.arc(sf[0],sf[1],3,0,TAU); g.stroke(); tinyLabel(nameOf(i),Math.max(70,Math.min(W-70,x)),y-30,0.9); }
           var eI=ecv[i]||0; if(eI>0.03&&phase===1){ g.setLineDash([1,6]); g.lineWidth=1; for(var jj=1;jj<=NC;jj++){ if(jj===i||!st[jj]) continue; var pj=p3(jj), ddx=pj[0]-x, ddy=pj[1]-y, rch=Math.min(1,eI*1.1), bw=0.18*Math.sin(tn*0.5+i+jj); g.strokeStyle='rgba('+INK+','+0.5*eI+')'; g.beginPath(); g.moveTo(x,y); g.quadraticCurveTo(x+ddx*rch*0.5-ddy*bw*rch,y+ddy*rch*0.5+ddx*bw*rch,x+ddx*rch,y+ddy*rch); g.stroke(); } g.setLineDash([]); }
         }
         else { g.fillStyle='rgba('+INK+','+(0.3+0.1*Math.sin(t*0.8+i))*al+')'; g.beginPath(); g.arc(x,y,1.9,0,TAU); g.fill(); }
         if(born[i]&&tn-born[i]<2.4){ var qb=(tn-born[i])/2.4; g.strokeStyle='rgba('+INK+','+0.6*(1-qb)*vis+')'; g.lineWidth=1; g.beginPath(); g.arc(x,y,22+56*qb,0,TAU); g.stroke(); }
       }
       if(phase===1&&!used&&!fingers().length&&ag>3){ var ph=(t*0.3)%1, e2=ph*ph*(3-2*ph), cx=(nx(0)+nx(1))/2+26*Math.sin(Math.PI*e2); ghost(nx(0)+(cx-nx(0))*Math.min(1,e2*2)+(nx(1)-cx)*Math.max(0,e2*2-1),ny(0)+(ny(1)-ny(0))*e2,ph); }
-      if(phase===2){            // per chiamare il finale si tiene premuto il mondo
-        if(holdTu>0.04&&!armed){ g.strokeStyle='rgba('+INK+',.9)'; g.lineWidth=1.5; g.beginPath(); g.arc(holdXY[0],holdXY[1],30,-Math.PI/2,-Math.PI/2+TAU*holdTu); g.stroke(); }
-        if(!armed&&ctx.currentTime>TB+G&&!fingers().length) tinyLabel('quando vuoi, tieni premuto il mondo',W/2,BOT-30,0.5+0.2*Math.sin(tn*1.4));
-        if(armed){ var left=Math.max(0,TFplan-ctx.currentTime), u2=1-Math.min(1,left/(3*G)), rr=W*RG*zoom*1.32; g.strokeStyle='rgba('+INK+',.16)'; g.lineWidth=1; g.beginPath(); g.arc(W/2,TOP+(BOT-TOP)/2,rr,0,TAU); g.stroke(); g.strokeStyle='rgba('+INK+',.8)'; g.beginPath(); g.arc(W/2,TOP+(BOT-TOP)/2,rr,-Math.PI/2,-Math.PI/2+TAU*u2); g.stroke(); }
+      if(phase===2){
+        if(!focused&&st[PL.length-1]&&!fingers().length&&pre<0.05) tinyLabel('tieni premuto un punto per ascoltarlo da solo',W/2,BOT-30,0.5+0.2*Math.sin(tn*1.4));
+        if(pre>0.01){ var u2=ss(TFplan-12,TFplan,ctx.currentTime), rr=W*RG*zoom*zf*1.16; g.strokeStyle='rgba('+INK+','+0.7*pre+')'; g.lineWidth=1; g.beginPath(); g.arc(W/2,TOP+(BOT-TOP)/2,rr,-Math.PI/2,-Math.PI/2+TAU*u2); g.stroke(); }       // il cerchio si chiude: sta arrivando il finale
       }
       if(phase>=3){            // il finale: il mondo si scioglie, resta una frase
         var since=ctx.currentTime-TF, qa=Math.max(0,Math.min(1,(since-7)/6)); if(phase===4) qa=1;
