@@ -231,6 +231,7 @@ body{height:100%;width:100%}
     <p id="hint"></p>
   </div>
   <div id="menu">
+    <button type="button" class="glyph press" data-m="legami"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true"><path d="M27 26v12M31 26v12M35 26v12"/><path d="M34 26L46 13M27 36L15 46M36 36l12 12" opacity=".55"/><path d="M44 9h8M44 12h8"/><circle cx="12" cy="49" r="4"/><path d="M50 47l4 4-4 4-4-4z"/></svg><span>legami</span></button>
     <button type="button" class="glyph press" data-m="stanza"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" aria-hidden="true"><circle cx="32" cy="32" r="22"/><circle cx="32" cy="32" r="9"/><circle cx="24" cy="46" r="3.2" fill="currentColor" stroke="none"/></svg><span>palco</span></button>
     <button type="button" class="glyph press" data-m="centri"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true"><circle cx="32" cy="32" r="21"/><circle cx="32" cy="11" r="3.4" fill="currentColor" stroke="none"/><circle cx="13.8" cy="42.5" r="3.4" fill="currentColor" stroke="none"/><circle cx="50.2" cy="42.5" r="3.4" fill="currentColor" stroke="none"/></svg><span>centri · cerchio</span></button>
     <button type="button" class="glyph press" data-m="centri2"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true"><path d="M32 11L13.8 42.5h36.4z"/><path d="M32 22.5l10 17.2H22z" opacity=".55"/><path d="M32 29.5l4.6 8H27.4z" opacity=".3"/></svg><span>centri · triangolo</span></button>
@@ -256,7 +257,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='18', updBtn=document.getElementById('upd');
+var BUILD='19', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -719,6 +720,69 @@ MODES.centri3=(function(){
         tinyLabel(CNAME[i],px(i),py(i),0.5*(1-ss(0,0.4,e)));
       }
       if(!used){ var ph=(t*0.35)%1, k=ph*ph*(3-2*ph)*0.6; g.strokeStyle='rgba(255,255,255,'+0.4*Math.sin(Math.PI*ph)+')'; g.lineWidth=1; g.beginPath(); g.arc(px(0)+(x0()-px(0))*k,py(0)+(y0()-py(0))*k,rr,0,TAU); g.stroke(); }
+    }
+  };
+})();
+
+/* legami: all'inizio ci sono solo gli archi ritmici, al centro. Tiri una linea da un segno acceso a uno spento, e quello entra.
+   Ogni segno vive finché resta legato al centro: se ne spegni uno, si spegne anche ciò che passava da lui. Tutti legati: suonano insieme, in pieno */
+MODES.legami=(function(){
+  var N={short1:[.5,.5],arm1:[.5,.27],piano:[.2,.37],mel1:[.8,.37],mel2:[.86,.62],basso:[.14,.62],arm2:[.5,.76],short2:[.25,.85],short3:[.75,.85],short4:[.5,.09]};
+  var IDS=Object.keys(N), on={}, links=[], full=0, used=false, born={};
+  function nx(id){ return N[id][0]*W; } function ny(id){ return TOP+N[id][1]*(BOT-TOP); }
+  function at(q,r){ var best=null,bd=r||46; IDS.forEach(function(id){ var d=Math.hypot(q.x-nx(id),q.y-ny(id)); if(d<bd){ bd=d; best=id; } }); return best; }
+  function prune(){                     // resta acceso solo ciò che è ancora legato al centro
+    var seen={short1:1}, grew=true;
+    while(grew){ grew=false; links.forEach(function(l){ if(seen[l[0]]&&!seen[l[1]]){ seen[l[1]]=1; grew=true; } else if(seen[l[1]]&&!seen[l[0]]){ seen[l[0]]=1; grew=true; } }); }
+    links=links.filter(function(l){ return seen[l[0]]&&seen[l[1]]; }); on=seen;
+  }
+  function sign(id,x,y,a,L){            // ogni voce ha il suo segno
+    var u=11+3*L, i; g.strokeStyle='rgba('+INK+','+a+')'; g.fillStyle='rgba('+INK+','+a+')'; g.lineWidth=1.4; g.lineCap='round'; g.lineJoin='round'; g.beginPath();
+    switch(id){
+      case 'short1': for(i=-1.5;i<=1.5;i++){ g.moveTo(x+i*u*0.55,y-u*0.8); g.lineTo(x+i*u*0.55,y+u*0.8); } break;
+      case 'short2': for(i=-1;i<=1;i++){ g.moveTo(x+i*u*0.7,y-u*0.5); g.lineTo(x+i*u*0.7,y+u*0.5); } break;
+      case 'short3': for(i=-1;i<=1;i+=2){ g.moveTo(x+i*u*0.45,y-u*0.8); g.lineTo(x+i*u*0.45,y+u*0.8); } break;
+      case 'short4': g.moveTo(x-u,y); g.lineTo(x+u,y); g.moveTo(x,y-u); g.lineTo(x,y+u); break;
+      case 'arm1': g.moveTo(x-u*1.3,y-u*0.3); g.lineTo(x+u*1.3,y-u*0.3); g.moveTo(x-u*1.3,y+u*0.3); g.lineTo(x+u*1.3,y+u*0.3); break;
+      case 'arm2': for(i=-1;i<=1;i++){ g.moveTo(x-u*1.3,y+i*u*0.5); g.lineTo(x+u*1.3,y+i*u*0.5); } break;
+      case 'mel1': g.arc(x,y+u*0.6,u*1.2,Math.PI*1.15,Math.PI*1.85); break;
+      case 'mel2': g.moveTo(x-u*1.2,y); g.bezierCurveTo(x-u*0.5,y-u*1.3,x+u*0.5,y+u*1.3,x+u*1.2,y); break;
+      case 'piano': g.moveTo(x,y-u); g.lineTo(x+u,y); g.lineTo(x,y+u); g.lineTo(x-u,y); g.closePath(); break;
+      case 'basso': g.arc(x,y,u*0.95,0,TAU); break;
+    }
+    g.stroke();
+  }
+  return {
+    hint:'', fromIntro:true,
+    enter:function(){ on={short1:1}; links=[]; full=0; used=false; born={}; },
+    down:function(q){ var id=at(q); q.from=(id&&on[id])?id:null; q.sx=q.x; q.sy=q.y; q.far=false; },
+    move:function(q){ if(Math.hypot(q.x-q.sx,q.y-q.sy)>14) q.far=true; },
+    up:function(q){
+      if(!q.from) return; var to=at(q);
+      if(!q.far){ if(q.from!=='short1'){ links=links.filter(function(l){ return l[0]!==q.from&&l[1]!==q.from; }); prune(); } return; }   // un tocco su un segno acceso lo scioglie
+      if(to&&to!==q.from&&!links.some(function(l){ return (l[0]===q.from&&l[1]===to)||(l[1]===q.from&&l[0]===to); })){ links.push([q.from,to,performance.now()/1000]); if(!on[to]){ on[to]=1; born[to]=performance.now()/1000; } used=true; }
+    },
+    update:function(dt){
+      var all=IDS.every(function(id){ return on[id]; }); full=Math.max(0,Math.min(1,full+(all?dt/14:-dt/4)));
+      IDS.forEach(function(id){ setWant(BY[id],on[id]?MX[id]+(1-MX[id])*full:0,true); });
+    },
+    draw:function(t){
+      var tn=performance.now()/1000, i;
+      if(full>0.01){ g.lineWidth=1; for(i=0;i<IDS.length;i++) for(var j=i+1;j<IDS.length;j++){ g.strokeStyle='rgba('+INK+','+0.16*full+')'; g.beginPath(); g.moveTo(nx(IDS[i]),ny(IDS[i])); g.lineTo(nx(IDS[j]),ny(IDS[j])); g.stroke(); } }   // insieme: tutto si lega a tutto
+      links.forEach(function(l){            // il legame vibra con ciò che lega
+        var ax=nx(l[0]), ay=ny(l[0]), bx=nx(l[1]), by=ny(l[1]), len=Math.hypot(bx-ax,by-ay), px=-(by-ay)/len, py=(bx-ax)/len, amp=7*Math.max(BY[l[0]].level,BY[l[1]].level), grow=Math.min(1,(tn-l[2])/0.6);
+        g.strokeStyle='rgba('+INK+','+(0.5+0.4*full)+')'; g.lineWidth=1.1; g.beginPath();
+        for(var k=0;k<=24;k++){ var u=k/24*grow, d=Math.sin(Math.PI*u)*amp*Math.sin(t*19+len*0.05+u*9); if(k) g.lineTo(ax+(bx-ax)*u+px*d,ay+(by-ay)*u+py*d); else g.moveTo(ax,ay); }
+        g.stroke();
+      });
+      fingers().forEach(function(q){ if(q.from&&q.far){ var to=at(q); g.strokeStyle='rgba('+INK+',.7)'; g.lineWidth=1.1; g.beginPath(); g.moveTo(nx(q.from),ny(q.from)); g.lineTo(to&&to!==q.from?nx(to):q.x,to&&to!==q.from?ny(to):q.y); g.stroke(); } });
+      IDS.forEach(function(id){
+        var x=nx(id), y=ny(id), s=BY[id], a=on[id]?0.95:0.28;
+        g.fillStyle='#000'; g.beginPath(); g.arc(x,y,24,0,TAU); g.fill();
+        sign(id,x,y,a,on[id]?s.level:0);
+        if(born[id]&&tn-born[id]<2){ var q=(tn-born[id])/2; g.strokeStyle='rgba('+INK+','+0.6*(1-q)+')'; g.lineWidth=1; g.beginPath(); g.arc(x,y,24+50*q,0,TAU); g.stroke(); }
+      });
+      if(!used&&!fingers().length){ var ph=(t*0.3)%1, e=ph*ph*(3-2*ph); ghost(nx('short1')+(nx('arm1')-nx('short1'))*e,ny('short1')+(ny('arm1')-ny('short1'))*e,ph); }
     }
   };
 })();
