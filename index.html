@@ -412,7 +412,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='54', updBtn=document.getElementById('upd');
+var BUILD='55', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -431,6 +431,7 @@ updBtn.addEventListener('click',function(){
 });
 checkVersion();
 document.addEventListener('visibilitychange',function(){ if(!document.hidden) checkVersion(); });
+if('serviceWorker' in navigator&&BUILD!=='test') window.addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });          // per funzionare anche senza rete
 
 var vHome=document.getElementById('home'), vLab=document.getElementById('lab');
 /* ---- Le parole grandi si adattano allo schermo: quelle in orizzontale alla larghezza, quelle in verticale all'altezza ---- */
@@ -1092,11 +1093,11 @@ MODES.legami=(function(){
   /* si parte dal solo suono lungo, al centro. Disegni a mano un filo da un segno acceso a un posto vuoto: il filo cresce lungo il tuo tratto e,
      quando arriva, entra una voce. Da dove parti conta: dal centro nascono le fondamenta, dalle fondamenta ciò che ci cresce sopra.
      Chi è legato al centro è vicino; chi passa da altri è più lontano e velato. Un tocco cambia voce, un taglio scioglie, tenendo premuto si sposta */
-  var PL=[[.5,.5],[.5,.27],[.2,.37],[.8,.37],[.86,.62],[.14,.62],[.5,.76],[.25,.85],[.75,.85],[.5,.09]];
+  var PL=[[.5,.5],[.5,.27],[.2,.37],[.8,.37],[.86,.62],[.14,.62],[.5,.76],[.25,.85],[.75,.85]];
   var KIDS={drone:['arm1','piano','short1','basso'],arm1:['mel1','arm2'],piano:['mel1','mel2'],short1:['short2','short3','short4'],basso:['arm2','short2'],mel1:['mel2']};
   var CAN=['arm1','piano','short1','mel1','mel2','basso','arm2','short2','short3','short4'], DR={gv:1,level:0}, NP=46, GROW=2.8;
   var st=[], par=[], links=[], full=0, used=false, born=[], ps=[], snaps=[], dep=[];
-  var spin=0, allAt=0, wasAll=false;
+  var spin=0, allAt=0, wasAll=false, th=0, enterT=0;
   var ZS=[0,.22,-.3,.28,-.2,.32,-.26,.18,-.34,.24], k3=0, rx=0, ry=0, tiltX=0, tiltY=0, base=null, gotTilt=false, asked=false;
   function p3(i,flat){              // posizione del punto dopo la rotazione: x, y sullo schermo e z (vicino > 0)
     var X=ps[i].x-0.5, Y=(ps[i].y-0.5)*(BOT-TOP)/W, Z=ZS[i]*k3, e=earth(); if(e>0){ var lo=(ps[i].x-0.5)*3.3, la=(0.5-ps[i].y)*2.1, cl=Math.cos(la); X+=(RG*cl*Math.sin(lo)-X)*e; Y+=(-RG*Math.sin(la)-Y)*e; Z+=(RG*cl*Math.cos(lo)-Z)*e; }
@@ -1120,10 +1121,9 @@ MODES.legami=(function(){
   function openSet(){ var o={}; st.forEach(function(id){ if(id) o[id]=1; }); return o; }
   function need(id,o){
     var n=Object.keys(o).length-1;
-    if(id==='mel1') return o.arm1&&(o.piano||o.basso);       // il tema entra solo se sotto c'è chi lo regge
-    if(id==='mel2') return o.mel1;
+    if(id==='mel1'||id==='mel2') return false;               // il tema non si collega: arriva da solo, alla fine
     if(id==='basso') return n>=3;
-    if(id==='arm2') return n>=5; if(id==='short2') return n>=6; if(id==='short3') return n>=7; if(id==='short4') return n>=8;
+    if(id==='arm2') return n>=3; if(id==='short2') return n>=4; if(id==='short3') return n>=5; if(id==='short4') return n>=6;
     return true;
   }
   function soon(id,from,to){ var p=pos(), m=0; for(var x=from;x<=to;x+=0.1) m=Math.max(m,envAt(BY[id],p+x)); return m; }
@@ -1191,7 +1191,7 @@ MODES.legami=(function(){
   var NAME={arm1:'archi',piano:'pianoforte',short1:'archi staccati',mel1:'melodia',mel2:'seconda melodia',basso:'basso',arm2:'archi pieni',short2:'staccati due',short3:'staccati tre',short4:'staccati quattro'};
   return {
     hint:'', waits:true, PL:PL,
-    enter:function(){ st=PL.map(function(){ return null; }); st[0]='drone'; par=[]; links=[]; full=0; used=false; born=[]; snaps=[]; k3=0; base=null; spin=0; allAt=0; wasAll=false; fxv=[]; ury=0; urx=0; zoom=1; pinch=0; ps=PL.map(function(p){ return {x:p[0],y:p[1],tx:p[0],ty:p[1]}; }); dep=depths(true); },
+    enter:function(){ st=PL.map(function(){ return null; }); st[0]='drone'; par=[]; links=[]; full=0; used=false; born=[]; snaps=[]; k3=0; base=null; spin=0; allAt=0; wasAll=false; th=0; enterT=performance.now()/1000; fxv=[]; ury=0; urx=0; zoom=1; pinch=0; ps=PL.map(function(p){ return {x:p[0],y:p[1],tx:p[0],ty:p[1]}; }); dep=depths(true); },
     down:function(q){ askTilt(); var i=at(q); q.node=i; q.lit=i>=0&&!!st[i]; q.sx=q.x; q.sy=q.y; q.far=false; q.hold=false; q.t0=performance.now(); q.raw=[]; q.fx=q.x; q.fy=q.y; q.fxn=(full>0.5&&i>0&&st[i])?i:-1; if(q.fxn>=0) fxv[i]={mu:0,up:0,held:true,pan:0}; },
     move:function(q){
       if(Math.hypot(q.x-q.sx,q.y-q.sy)>12) q.far=true;
@@ -1226,18 +1226,21 @@ MODES.legami=(function(){
       for(i=1;i<ps.length;i++){ ps[i].x+=(ps[i].tx-ps[i].x)*k; ps[i].y+=(ps[i].ty-ps[i].y)*k; }
       if(full<0.3) links.slice().forEach(function(l){ if(Math.hypot(nx(l.b)-nx(l.a),ny(l.b)-ny(l.a))>maxLen()) cutLink(l); });                  // tirato troppo: si spezza
       links.forEach(function(l){ was=l.g; l.g=Math.min(1,l.g+dt/GROW); if(was<1&&l.g>=1){ dep=depths(true); if(!born[l.b]||tn-born[l.b]>3) born[l.b]=tn; } });
-      o=openSet(); n=Object.keys(o).length; full=Math.max(0,Math.min(1,full+(n>=10&&dep.every(function(d,j){ return !st[j]||d<1e9; })?dt/30:-dt/4)));
+      o=openSet(); n=Object.keys(o).length; full=Math.max(0,Math.min(1,full+(n>=9&&dep.every(function(d,j){ return !st[j]||d<1e9; })?dt/30:-dt/4)));
       var live={}, plk=[]; links.forEach(function(l){ if(l.pl){ l.pl=Math.max(0,l.pl-dt/1.8); plk[l.a]=Math.max(plk[l.a]||0,l.pl); plk[l.b]=Math.max(plk[l.b]||0,l.pl); } });
       for(i=1;i<st.length;i++) if(st[i]&&dep[i]<1e9) live[st[i]]={v:Math.min(1.25,near(i)*Math.pow(0.82,dep[i]-1)*(1+0.6*(plk[i]||0))),mu:Math.min(0.62,0.27*(dep[i]-1))*(1-full),pan:Math.max(-1,Math.min(1,(p3(i)[0]/W-0.5)*1.9))}; for(i=1;i<st.length;i++) if(st[i]&&live[st[i]]){ var zz=p3(i)[2]; live[st[i]].v=Math.min(1.25,live[st[i]].v*(1+0.9*zz)); live[st[i]].mu=Math.min(0.8,live[st[i]].mu+Math.max(0,-zz)*1.1*k3); }
-      var nlive=Object.keys(live).length, tsec=performance.now()/1000; k3+=((nlive>=3?1:0)-k3)*(1-Math.exp(-dt/9));          // da tre voci in su la figura prende profondità
+      var nlive=Object.keys(live).length, far0=1-Math.min(1,nlive/8); for(var kk in live){ live[kk].mu=Math.min(0.85,live[kk].mu+0.5*far0); live[kk].v*=0.72+0.28*(1-far0); }
+      th=Math.max(0,Math.min(1,th+(wasAll?dt/2.5:-dt/2))); if(th>0.01){ live.mel1={v:th,mu:0,pan:-0.15}; live.mel2={v:th,mu:0,pan:0.15}; }       // il tema: solo sul mappamondo
+      var tsec=performance.now()/1000; k3+=((nlive>=3?1:0)-k3)*(1-Math.exp(-dt/9));          // da tre voci in su la figura prende profondità
       var gx=gotTilt?tiltX:0.2*Math.sin(tsec*0.06), gy=gotTilt?tiltY:0.3*Math.sin(tsec*0.045); rx+=(gx-rx)*(1-Math.exp(-dt/0.35)); ry+=(gy-ry)*(1-Math.exp(-dt/0.35));
       for(i=1;i<st.length;i++){ var F=fxv[i]; if(!F) continue; if(!F.held){ var dk=Math.exp(-dt/2.2); F.mu*=dk; F.up*=dk; F.pan*=dk; } F.lift=(F.lift||0)+((F.held?0.3+0.6*Math.max(F.mu,F.up):0)-(F.lift||0))*(1-Math.exp(-dt/0.3)); var Lv=st[i]&&live[st[i]]; if(Lv){ Lv.mu=Math.max(Lv.mu,F.mu*0.95); Lv.v=Lv.v*(1+0.45*F.up)*(1-0.55*F.mu); Lv.pan=Math.max(-1,Math.min(1,Lv.pan+F.pan)); } }
       S.forEach(function(s){ var L=live[s.id], v=L?Math.min(1,(MX[s.id]+(1-MX[s.id])*full)*L.v):0; setWant(s,v,(L&&plk.length&&v>s.want)?false:v>s.want?2:true); if(L){ setRoom(s,L.mu); setPan(s,L.pan); } });
       droneTo(0.011*(1-0.6*(n-1)/10));
-      var all=nlive>=9; spin+=dt*0.07*full*(fingers().length?0:1);          // mentre la tieni, non gira da sola
+      var all=nlive>=8; spin+=dt*0.07*full*(fingers().length?0:1);          // mentre la tieni, non gira da sola
       var fr=fingers().filter(function(f){ return f.node<0; }); if(fr.length===2&&full>0.5){ var dd=Math.hypot(fr[0].x-fr[1].x,fr[0].y-fr[1].y); if(pinch) zoom=Math.max(0.55,Math.min(2.4,zoom*dd/pinch)); pinch=dd; } else pinch=0;
       if(full<0.3){ ury*=Math.exp(-dt/1.5); urx*=Math.exp(-dt/1.5); zoom+=(1-zoom)*(1-Math.exp(-dt/1.5)); }
-      if(all&&!wasAll){ allAt=tsec; var c0=ctx.currentTime; [329.63,493.88,659.26,987.77].forEach(function(f,k){ var o=ctx.createOscillator(), a=ctx.createGain(); o.type='sine'; o.frequency.value=f; a.gain.setValueAtTime(0,c0+k*0.12); a.gain.linearRampToValueAtTime(0.035,c0+k*0.12+0.05); a.gain.exponentialRampToValueAtTime(0.0003,c0+k*0.12+5); o.connect(a); a.connect(master); a.connect(revNode); o.start(c0+k*0.12); o.stop(c0+k*0.12+5.2); }); }
+      if(all&&!wasAll){ var barL=BEAT*4, phs=(((ctx.currentTime-t0)-INTRO)%barL+barL)%barL, wait=barL-phs; if(wait<0.25) wait+=barL; var T0=ctx.currentTime+wait; S.forEach(function(s){ if(s.g) newSource(s,T0,INTRO); }); t0=T0-INTRO;
+        allAt=tsec; var c0=ctx.currentTime; [329.63,493.88,659.26,987.77].forEach(function(f,k){ var o=ctx.createOscillator(), a=ctx.createGain(); o.type='sine'; o.frequency.value=f; a.gain.setValueAtTime(0,c0+k*0.12); a.gain.linearRampToValueAtTime(0.035,c0+k*0.12+0.05); a.gain.exponentialRampToValueAtTime(0.0003,c0+k*0.12+5); o.connect(a); a.connect(master); a.connect(revNode); o.start(c0+k*0.12); o.stop(c0+k*0.12+5.2); }); }
       wasAll=all;
     },
     draw:function(t){
@@ -1271,7 +1274,7 @@ MODES.legami=(function(){
       });
       for(i=0;i<PL.length;i++){
         var x=nx(i), y=ny(i), on=st[i]&&dep[i]<1e9;
-        if(!i&&!used) tinyLabel('tu',x,y+34,0.6);
+        if(!i&&!used){ tinyLabel('tu',x,y+34,0.6); var ag=tn-enterT, ha=ag<1?ag:ag<5?1:Math.max(0,1-(ag-5)/1.5); if(ha>0.01){ var hx=W/2, hy=TOP+(BOT-TOP)*0.2; g.strokeStyle='rgba('+INK+','+0.8*ha+')'; g.lineWidth=1.3; g.lineCap='round'; g.beginPath(); g.arc(hx,hy,17,Math.PI,TAU); g.stroke(); [-1,1].forEach(function(sd){ g.beginPath(); g.moveTo(hx+sd*17,hy); g.lineTo(hx+sd*17,hy+13); g.stroke(); g.fillStyle='rgba('+INK+','+0.8*ha+')'; g.fillRect(hx+sd*17-3.5,hy+3,7,13); }); tinyLabel('metti le cuffie',hx,hy+36,0.85*ha); } }
         if(on){ sign(st[i],x,y,i?(0.4+0.55*(near(i)-0.38)/0.62)*Math.pow(0.86,dep[i]-1):0.95,i?BY[st[i]].level:0); }
         else if(st[i]){ g.strokeStyle='rgba('+INK+','+(0.35+0.25*Math.sin(t*3))+')'; g.lineWidth=1; g.beginPath(); g.arc(x,y,6,0,TAU); g.stroke(); }
         else { g.fillStyle='rgba('+INK+','+(0.3+0.1*Math.sin(t*0.8+i))+')'; g.beginPath(); g.arc(x,y,1.9,0,TAU); g.fill(); }
@@ -1561,7 +1564,7 @@ var tolab=document.getElementById('tolab'), going=false, calmUI=window.matchMedi
 tolab.addEventListener('click',function(e){
   startAudio(); if(ctx&&ctx.state!=='running') ctx.resume();
   if(calmUI) return; e.preventDefault(); if(going) return; going=true;
-  var app=document.querySelector('.app'), ar=app.getBoundingClientRect(), fly=document.createElement('div'), PLn=MODES.legami.PL, MAP=[2,9,1,3,5,0,-1,4,7,6,8];
+  var app=document.querySelector('.app'), ar=app.getBoundingClientRect(), fly=document.createElement('div'), PLn=MODES.legami.PL, MAP=[2,-1,1,3,5,0,-1,4,7,6,8];
   fly.className='fly'; app.appendChild(fly); resize();
   [].forEach.call(tolab.querySelectorAll('.word.big i'),function(el,k){
     var r=el.getBoundingClientRect(), c=document.createElement('span'), n=MAP[k], tx=n<0?W/2:PLn[n][0]*W, ty=n<0?(TOP+BOT)/2:TOP+PLn[n][1]*(BOT-TOP);
