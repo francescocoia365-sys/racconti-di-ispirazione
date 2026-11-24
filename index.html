@@ -412,7 +412,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='56', updBtn=document.getElementById('upd');
+var BUILD='57', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -779,7 +779,7 @@ function startPiece(offset,keep){
   var now=ctx.currentTime, ts=now+0.1;
   if(!keep){ master.gain.cancelScheduledValues(now); master.gain.setTargetAtTime(0,now,0.02); master.gain.setTargetAtTime(2.0,ts,0.9); }
   t0=ts-offset; playing=true;
-  S.forEach(function(s){ if(s.g){ s.g.gain.cancelScheduledValues(now); s.g.gain.setTargetAtTime(0,now,0.02); s.want=-1; s.mu=-1; setRoom(s,0); newSource(s,ts,offset); } });
+  S.forEach(function(s){ if(s.g){ s.g.gain.cancelScheduledValues(now); s.g.gain.setTargetAtTime(0,now,0.02); s.want=-1; s.mu=-1; setRoom(s,0); setEcho(s,0); newSource(s,ts,offset); } });
   if(ctx.state!=='running') ctx.resume();
   wantPlay=true; pauseBtn.setAttribute('aria-label','Pausa'); pauseIcon.setAttribute('d','M4.5 3h3v12h-3zM10.5 3h3v12h-3z');
 }
@@ -794,6 +794,20 @@ function setWant(s,v,slow){
 }
 function setPan(s,p){ if(!started||!s.pn) return; if(Math.abs(p-s.pan)<0.03) return; s.pan=p; s.pn.pan.setTargetAtTime(p,ctx.currentTime,0.12); }
 /* mu = quanto muro c'è in mezzo: 0 nella stessa stanza, 1 dall'altra parte */
+var echoIn=null;
+function echoBus(){
+  if(echoIn) return echoIn;
+  echoIn=ctx.createGain(); var dA=ctx.createDelay(2), dB=ctx.createDelay(2), fb=ctx.createGain(), tone=ctx.createBiquadFilter(), out=ctx.createGain(), wet=ctx.createGain();
+  dA.delayTime.value=BEAT*0.75; dB.delayTime.value=BEAT*0.75; fb.gain.value=0.5; tone.type='lowpass'; tone.frequency.value=2800; out.gain.value=0.7; wet.gain.value=0.35;
+  echoIn.connect(dA); dA.connect(dB); dB.connect(tone); tone.connect(fb); fb.connect(dA);
+  if(ctx.createStereoPanner){ var pA=ctx.createStereoPanner(), pB=ctx.createStereoPanner(); pA.pan.value=-0.75; pB.pan.value=0.75; dA.connect(pA); dB.connect(pB); pA.connect(out); pB.connect(out); } else { dA.connect(out); dB.connect(out); }
+  out.connect(master); out.connect(wet); wet.connect(revNode);
+  return echoIn;
+}
+function setEcho(s,v){
+  if(!ctx||!s.g) return; if(!s.ds){ if(v<0.02) return; s.ds=ctx.createGain(); s.ds.gain.value=0; (s.pn||s.lp).connect(s.ds); s.ds.connect(echoBus()); s.ec=0; }
+  if(Math.abs(v-s.ec)<0.02) return; s.ec=v; s.ds.gain.setTargetAtTime(0.8*v,ctx.currentTime,0.4);
+}
 function setRoom(s,mu){
   if(!ctx||!s.g) return; if(Math.abs(mu-s.mu)<0.02) return; s.mu=mu;
   var now=ctx.currentTime;
@@ -1093,14 +1107,14 @@ MODES.legami=(function(){
   /* si parte dal solo suono lungo, al centro. Disegni a mano un filo da un segno acceso a un posto vuoto: il filo cresce lungo il tuo tratto e,
      quando arriva, entra una voce. Da dove parti conta: dal centro nascono le fondamenta, dalle fondamenta ciò che ci cresce sopra.
      Chi è legato al centro è vicino; chi passa da altri è più lontano e velato. Un tocco cambia voce, un taglio scioglie, tenendo premuto si sposta */
-  var PL=[[.5,.5],[.5,.27],[.2,.37],[.8,.37],[.86,.62],[.14,.62],[.5,.76],[.25,.85],[.75,.85]];
+  var PL=[[.5,.5],[.33,.22],[.13,.36],[.77,.33],[.73,.5],[.26,.67],[.56,.64],[.9,.72],[.5,.92]];
   var KIDS={drone:['arm1','piano','short1','basso'],arm1:['mel1','arm2'],piano:['mel1','mel2'],short1:['short2','short3','short4'],basso:['arm2','short2'],mel1:['mel2']};
   var CAN=['arm1','piano','short1','mel1','mel2','basso','arm2','short2','short3','short4'], DR={gv:1,level:0}, NP=46, GROW=2.8;
   var st=[], par=[], links=[], full=0, used=false, born=[], ps=[], snaps=[], dep=[];
-  var spin=0, allAt=0, wasAll=false, th=0, enterT=0;
+  var spin=0, allAt=0, wasAll=false, th=0, enterT=0, ecv=[];
   var ZS=[0,.22,-.3,.28,-.2,.32,-.26,.18,-.34,.24], k3=0, rx=0, ry=0, tiltX=0, tiltY=0, base=null, gotTilt=false, asked=false;
   function p3(i,flat){              // posizione del punto dopo la rotazione: x, y sullo schermo e z (vicino > 0)
-    var X=ps[i].x-0.5, Y=(ps[i].y-0.5)*(BOT-TOP)/W, Z=ZS[i]*k3, e=earth(); if(e>0){ var lo=(ps[i].x-0.5)*3.3, la=(0.5-ps[i].y)*2.1, cl=Math.cos(la); X+=(RG*cl*Math.sin(lo)-X)*e; Y+=(-RG*Math.sin(la)-Y)*e; Z+=(RG*cl*Math.cos(lo)-Z)*e; }
+    var X=ps[i].x-0.5, Y=(ps[i].y-0.5)*(BOT-TOP)/W, Z=ZS[i]*k3, e=earth(); if(e>0){ var lo=(ps[i].x-0.5)*5.2, la=0.3+(0.5-ps[i].y)*3.4, cl=Math.cos(la); X+=(RG*cl*Math.sin(lo)-X)*e; Y+=(-RG*Math.sin(la)-Y)*e; Z+=(RG*cl*Math.cos(lo)-Z)*e; }
     var F=flat?null:fxv[i], lf=F?(F.lift||0)*e:0, P0=proj(X*(1+lf),Y*(1+lf),Z*(1+lf)); if(F){ P0[0]+=F.pan*150*(1-e); P0[1]+=(F.mu-F.up)*200*(1-e); } return P0;
   }
   var ury=0, urx=0, zoom=1, pinch=0, RG=0.40;
@@ -1191,7 +1205,7 @@ MODES.legami=(function(){
   var NAME={arm1:'archi',piano:'pianoforte',short1:'archi staccati',mel1:'melodia',mel2:'seconda melodia',basso:'basso',arm2:'archi pieni',short2:'staccati due',short3:'staccati tre',short4:'staccati quattro'};
   return {
     hint:'', waits:true, PL:PL,
-    enter:function(){ st=PL.map(function(){ return null; }); st[0]='drone'; par=[]; links=[]; full=0; used=false; born=[]; snaps=[]; k3=0; base=null; spin=0; allAt=0; wasAll=false; th=0; enterT=performance.now()/1000; fxv=[]; ury=0; urx=0; zoom=1; pinch=0; ps=PL.map(function(p){ return {x:p[0],y:p[1],tx:p[0],ty:p[1]}; }); dep=depths(true); },
+    enter:function(){ st=PL.map(function(){ return null; }); st[0]='drone'; par=[]; links=[]; full=0; used=false; born=[]; snaps=[]; k3=0; base=null; spin=0; allAt=0; wasAll=false; th=0; enterT=performance.now()/1000; ecv=[]; fxv=[]; ury=0; urx=0; zoom=1; pinch=0; ps=PL.map(function(p){ return {x:p[0],y:p[1],tx:p[0],ty:p[1]}; }); dep=depths(true); },
     down:function(q){ askTilt(); var i=at(q); q.node=i; q.lit=i>=0&&!!st[i]; q.sx=q.x; q.sy=q.y; q.far=false; q.hold=false; q.t0=performance.now(); q.raw=[]; q.fx=q.x; q.fy=q.y; q.fxn=(full>0.5&&i>0&&st[i])?i:-1; if(q.fxn>=0) fxv[i]={mu:0,up:0,held:true,pan:0}; },
     move:function(q){
       if(Math.hypot(q.x-q.sx,q.y-q.sy)>12) q.far=true;
@@ -1233,8 +1247,9 @@ MODES.legami=(function(){
       th=Math.max(0,Math.min(1,th+(wasAll?dt/2.5:-dt/2))); if(th>0.01){ live.mel1={v:th,mu:0,pan:-0.15}; live.mel2={v:th,mu:0,pan:0.15}; }       // il tema: solo sul mappamondo
       var tsec=performance.now()/1000; k3+=((nlive>=3?(all?1:0.5):0)-k3)*(1-Math.exp(-dt/9));          // da tre voci in su la figura prende profondità
       var gx=gotTilt?tiltX:0.1*Math.sin(tsec*0.06), gy=gotTilt?tiltY:0.14*Math.sin(tsec*0.045); rx+=(gx-rx)*(1-Math.exp(-dt/0.35)); ry+=(gy-ry)*(1-Math.exp(-dt/0.35));
-      for(i=1;i<st.length;i++){ var F=fxv[i]; if(!F) continue; if(!F.held){ var dk=Math.exp(-dt/2.2); F.mu*=dk; F.up*=dk; F.pan*=dk; } F.lift=(F.lift||0)+((F.held?0.3+0.6*Math.max(F.mu,F.up):0)-(F.lift||0))*(1-Math.exp(-dt/0.3)); var Lv=st[i]&&live[st[i]]; if(Lv){ Lv.mu=Math.max(Lv.mu,F.mu*0.95); Lv.v=Lv.v*(1+0.45*F.up)*(1-0.55*F.mu); Lv.pan=Math.max(-1,Math.min(1,Lv.pan+F.pan)); } }
-      S.forEach(function(s){ var L=live[s.id], v=L?Math.min(1,(MX[s.id]+(1-MX[s.id])*full)*L.v):0; setWant(s,v,(L&&plk.length&&v>s.want)?false:v>s.want?2:true); if(L){ setRoom(s,L.mu); setPan(s,L.pan); } });
+      for(i=1;i<st.length;i++){ var Lq=st[i]&&live[st[i]], dv=Math.min(1,Math.hypot(ps[i].x-PL[i][0],ps[i].y-PL[i][1])/0.26)*(1-earth()); ecv[i]=(ecv[i]||0)+(dv-(ecv[i]||0))*(1-Math.exp(-dt/1.2)); if(Lq){ Lq.ec=0.9*ecv[i]; Lq.mu=Math.max(Lq.mu,0.5*ecv[i]); } }
+      for(i=1;i<st.length;i++){ var F=fxv[i]; if(!F) continue; F.ec=Math.max((F.ec||0)*Math.exp(-dt/7),F.up); if(!F.held){ var dk=Math.exp(-dt/2.2); F.mu*=dk; F.up*=dk; F.pan*=dk; } F.lift=(F.lift||0)+((F.held?0.3+0.6*Math.max(F.mu,F.up):0)-(F.lift||0))*(1-Math.exp(-dt/0.3)); var Lv=st[i]&&live[st[i]]; if(Lv){ Lv.mu=Math.max(Lv.mu,F.mu*0.95); Lv.v=Lv.v*(1+0.45*F.up)*(1-0.55*F.mu); Lv.pan=Math.max(-1,Math.min(1,Lv.pan+F.pan)); Lv.ec=Math.max(Lv.ec||0,F.ec); } }
+      S.forEach(function(s){ var L=live[s.id], v=L?Math.min(1,(MX[s.id]+(1-MX[s.id])*full)*L.v):0; setWant(s,v,(L&&plk.length&&v>s.want)?false:v>s.want?2:true); if(L){ setRoom(s,L.mu); setPan(s,L.pan); } setEcho(s,L?(L.ec||0):0); });
       droneTo(0.011*(1-0.6*(n-1)/10));
       var all=nlive>=8; spin+=dt*0.07*full*(fingers().length?0:1);          // mentre la tieni, non gira da sola
       var fr=fingers().filter(function(f){ return f.node<0; }); if(fr.length===2&&full>0.5){ var dd=Math.hypot(fr[0].x-fr[1].x,fr[0].y-fr[1].y); if(pinch) zoom=Math.max(0.55,Math.min(2.4,zoom*dd/pinch)); pinch=dd; } else pinch=0;
@@ -1248,7 +1263,7 @@ MODES.legami=(function(){
       var eG=earth(), asp=(BOT-TOP)/W; g.lineWidth=0.7;
       for(var m=0;eG>0.01&&m<17;m++){ var mer=m<12, steps=mer?24:36; for(var hf=0;hf<2;hf++){ g.beginPath(); var open=false;        // meridiani e paralleli: piatti come una carta, poi avvolti
           for(var sI=0;sI<=steps;sI++){ var la2=mer?(-1.5708+3.1416*sI/steps):(-1.0472+0.5236*(m-12)), lo2=mer?(-3.1416+m*0.5236):(-3.1416+6.2832*sI/steps), cl2=Math.cos(la2);
-            var fx2=lo2/3.3, fy2=-(la2/2.1)*asp, q4=proj(fx2+(RG*cl2*Math.sin(lo2)-fx2)*eG,fy2+(-RG*Math.sin(la2)-fy2)*eG,RG*cl2*Math.cos(lo2)*eG), front=q4[2]>=-0.001;
+            var fx2=lo2/5.2, fy2=-((la2-0.3)/3.4)*asp, q4=proj(fx2+(RG*cl2*Math.sin(lo2)-fx2)*eG,fy2+(-RG*Math.sin(la2)-fy2)*eG,RG*cl2*Math.cos(lo2)*eG), front=q4[2]>=-0.001;
             if(front===(hf===0)){ if(open) g.lineTo(q4[0],q4[1]); else { g.moveTo(q4[0],q4[1]); open=true; } } else open=false; }
           g.strokeStyle='rgba(170,200,255,'+(hf?0.045*eG:0.18*eG)+')'; g.stroke(); } }
       if(full>0.02){
@@ -1282,6 +1297,7 @@ MODES.legami=(function(){
           if(F3.held) tinyLabel((NAME[st[i]]||'')+(F3.mu>0.03?' · lontano '+Math.round(F3.mu*100):F3.up>0.03?' · vicino '+Math.round(F3.up*100):''),x,y-30,0.9); }
         else if(fxv[i]&&fxv[i].held){ var F2=fxv[i], ox=x-F2.pan*150, oy=y-(F2.mu-F2.up)*200; g.setLineDash([2,7]); g.strokeStyle='rgba('+INK+',.4)'; g.lineWidth=1; g.beginPath(); g.moveTo(ox,oy-200); g.lineTo(ox,oy+200); g.moveTo(ox-150,oy); g.lineTo(ox+150,oy); g.stroke(); g.setLineDash([]);
           g.beginPath(); g.arc(ox,oy,5,0,TAU); g.stroke(); tinyLabel('vicino',ox,oy-214,0.7); tinyLabel('lontano',ox,oy+214,0.7); tinyLabel(Math.round(Math.max(F2.mu,F2.up)*100)+'',x+34,y,0.8); }
+        var eI=Math.max(ecv[i]||0,(fxv[i]&&fxv[i].ec)||0); if(i&&st[i]&&eI>0.03){ g.setLineDash([1,6]); g.lineCap='round'; g.lineWidth=1; for(var jj=1;jj<st.length;jj++){ if(jj===i||!st[jj]) continue; var pj=p3(jj), ddx=pj[0]-x, ddy=pj[1]-y, rch=Math.min(1,eI*1.1), bw=0.18*Math.sin(tn*0.5+i+jj); g.strokeStyle='rgba('+INK+','+0.5*eI+')'; g.beginPath(); g.moveTo(x,y); g.quadraticCurveTo(x+ddx*rch*0.5-ddy*bw*rch,y+ddy*rch*0.5+ddx*bw*rch,x+ddx*rch,y+ddy*rch); g.stroke(); } g.setLineDash([]); }
         if(fxv[i]&&(fxv[i].mu>0.02||fxv[i].up>0.02)){ g.strokeStyle='rgba('+INK+','+(0.25+0.5*fxv[i].up)+')'; g.lineWidth=1; g.beginPath(); g.arc(x,y,22+46*fxv[i].mu+10*fxv[i].up,0,TAU); g.stroke(); }
         if(born[i]&&tn-born[i]<2.4){ var q=(tn-born[i])/2.4; g.strokeStyle='rgba('+INK+','+0.6*(1-q)+')'; g.lineWidth=1; g.beginPath(); g.arc(x,y,22+56*q,0,TAU); g.stroke(); }
       }
