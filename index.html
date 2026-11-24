@@ -161,6 +161,8 @@ body{height:100%;width:100%}
 .bbox .upd{margin:0}
 .bbox.run .upd{background:none;color:rgba(255,255,255,.5)}
 .bbox.run .bnote{visibility:hidden}
+.bbox{touch-action:none;-webkit-user-select:none;user-select:none}
+.bnote{text-align:center;max-width:30ch;line-height:1.5}
 #bquo{min-height:0;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
 #bquo .lead{margin:0;max-width:24ch;text-align:center}
 #sez.breathing{overflow:hidden}
@@ -393,7 +395,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='33', updBtn=document.getElementById('upd');
+var BUILD='34', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -516,12 +518,24 @@ function breathInit(){
     breath.g.gain.setTargetAtTime(isIn?0.11:0.02,n,isIn?IN/3:OUT/3); breath.lp.frequency.setTargetAtTime(isIn?1500:420,n,isIn?IN/3:OUT/3);
   }
   function tick(now){
-    if(!breath) return; var t=(now-breath.t0)/1000, c=t%(IN+OUT), isIn=c<IN, u=isIn?c/IN:1-(c-IN)/OUT, e=u*u*(3-2*u);
-    if(isIn!==breath.isIn){ breath.isIn=isIn; phase(isIn); lab.textContent=isIn?'inspira':'espira'; }
+    if(!breath) return; var t=(now-breath.t0)/1000, dt=Math.min(0.05,(now-(breath.last||now))/1000), e; breath.last=now;
+    if(breath.touch){                                   // col dito: il cerchio segue te
+      breath.u=Math.max(0,Math.min(1,breath.u+(breath.held?dt/breath.inD:-dt/breath.outD))); e=breath.u*breath.u*(3-2*breath.u);
+      if(t>=TOTAL&&!breath.held&&breath.u<=0.01){ finish(); return; }
+    } else {                                            // senza toccare: guida lui, 4 e 6
+      var c=t%(IN+OUT), isIn=c<IN, u=isIn?c/IN:1-(c-IN)/OUT; e=u*u*(3-2*u);
+      if(isIn!==breath.isIn){ breath.isIn=isIn; phase(isIn); lab.textContent=isIn?'inspira':'espira'; }
+      if(t>=TOTAL&&!isIn&&c>IN+OUT-0.2){ finish(); return; }
+    }
     ring.style.transform='scale('+(0.5+0.5*e)+')'; ring.style.opacity=0.45+0.5*e;
-    if(t>=TOTAL&&!isIn&&c>IN+OUT-0.2){ finish(); return; }
     breath.raf=requestAnimationFrame(tick);
   }
+  box.onpointerdown=function(ev){ if(!breath||ev.target===btn) return; var n=performance.now();
+    if(!breath.touch){ breath.touch=true; breath.u=0; breath.inD=4; breath.outD=6; }
+    else if(breath.rel){ var o=(n-breath.rel)/1000; if(o>1.5&&o<14) breath.outD=Math.min(9,Math.max(4,o*1.06)); }      // l'espirazione che hai fatto, un filo più lunga
+    breath.held=true; breath.press=n; phase(true); lab.textContent='inspira'; };
+  box.onpointerup=box.onpointercancel=function(ev){ if(!breath||!breath.held) return; var n=performance.now(), i=(n-breath.press)/1000;
+    if(i>1.2&&i<12) breath.inD=Math.min(6.5,Math.max(3,i*1.06)); breath.held=false; breath.rel=n; phase(false); lab.textContent='espira'; };
   function finish(){
     breathStop(); box.classList.remove('run'); box.classList.add('done'); vSez.classList.remove('breathing'); var q=QUOTES[Math.floor(Math.random()*QUOTES.length)];
     quo.innerHTML='<p class="lead">'+esc(q[0])+'</p><span class="tiny">'+esc(q[1])+'</span>'; btn.textContent='ancora'; lab.textContent='';
@@ -591,7 +605,7 @@ function showSez(id){
   if(s.garden) h+='<div class="gar"><button type="button" class="upd press" id="gnear">vicino a me</button><form id="gform"><input id="gq" type="text" inputmode="search" enterkeyhint="search" autocomplete="off" placeholder="oppure una città" aria-label="Cerca una città"></form></div><p class="tiny" id="gmsg"></p><div id="glist"></div><p class="tiny gcred">dati © openstreetmap</p>';
   if(s.music) h+='<div class="rowi"><span class="tiny">spotify</span><iframe class="emb sp" title="This Is Paolo Buonvino, su Spotify" loading="lazy" allow="encrypted-media; clipboard-write; fullscreen; picture-in-picture" src="https://open.spotify.com/embed/playlist/37i9dQZF1DZ06evO4dUBlR?theme=0"></iframe></div>'
     +'<div class="rowi"><span class="tiny">youtube · i video più visti</span><div class="yt"><iframe class="emb" title="I video più visti del canale di Paolo Buonvino" loading="lazy" allowfullscreen allow="encrypted-media; picture-in-picture; fullscreen" src="https://www.youtube-nocookie.com/embed/videoseries?list=UULPQ0tBr09so4t1e8gzMhxS9Q"></iframe></div><a class="tiny lnk" target="_blank" rel="noopener" href="https://www.youtube.com/@paolobuonvino/videos">apri il canale →</a></div>';
-  if(s.breath) h='<div class="bbox" id="bbox"><div class="bstage"><div class="bring" id="bring"></div><span class="tiny" id="blab"></span></div><div id="bquo"></div><button type="button" class="upd press" id="bgo">inizia</button><span class="tiny bnote">tre minuti · inspira 4, espira 6</span></div>'+h.replace(/<div class="sart">[\s\S]*?<\/div>/,'');
+  if(s.breath) h='<div class="bbox" id="bbox"><div class="bstage"><div class="bring" id="bring"></div><span class="tiny" id="blab"></span></div><div id="bquo"></div><button type="button" class="upd press" id="bgo">inizia</button><span class="tiny bnote">tre minuti · tieni premuto mentre inspiri, lascia mentre espiri</span></div>'+h.replace(/<div class="sart">[\s\S]*?<\/div>/,'');
   if(s.tac) h='<div class="deskv" id="deskv"><div class="desk" id="desk">'+TAC.map(function(f){ return '<img src="img/'+f[0]+'" alt="" style="left:'+f[1]+'px;top:'+f[2]+'px;width:'+f[3]+'px;transform:rotate('+f[4]+'deg)">'; }).join('')+'</div></div><div class="deskh" id="deskh"><span class="tiny">'+s.n+'</span><h2 class="word">'+esc(s.t)+'</h2></div>';
   if(s.anni) h='<div class="yrw"><div class="yr" id="yr">1997</div></div>'+h+'<div class="rcs">'+ANNI.map(function(a,i){ return '<div class="rc'+(i%2?' r':'')+'" data-y="'+a[0]+'" style="width:'+[66,54,72,58,62][i%5]+'%;margin-top:'+[40,-30,70,10,-10][i%5]+'px"><div class="rp"><b>'+esc(a[1])+'</b></div><span class="tiny">'+a[0]+(a[2]?' · '+esc(a[2].toLowerCase()):'')+'</span><b class="rt">'+esc(a[1])+'</b>'+(a[4]?'<span class="tiny rn">'+esc(a[4])+'</span>':'')+'</div>'; }).join('')+'</div><p class="tiny gcred">elenco e locandine da wikipedia · da rivedere</p>';
   if(s.map) h+=mapHtml();
@@ -1113,13 +1127,13 @@ MODES.legami=(function(){
   function pathPx(l){ var ax=nx(l.a), ay=ny(l.a), dx=nx(l.b)-ax, dy=ny(l.b)-ay; return l.z.map(function(z){ return [ax+z[0]*dx-z[1]*dy,ay+z[0]*dy+z[1]*dx]; }); }
   function crosses(p1,p2,p3,p4){ function c(a,b,d){ return (b[0]-a[0])*(d[1]-a[1])-(b[1]-a[1])*(d[0]-a[0]); } return c(p1,p2,p3)*c(p1,p2,p4)<0&&c(p3,p4,p1)*c(p3,p4,p2)<0; }
   function cutLink(l){ var tn=performance.now()/1000; snaps.push([nx(l.a),ny(l.a),nx(l.b),ny(l.b),tn]); links=links.filter(function(x){ return x!==l; }); prune(); }
+  var KNOT={arm1:[1,2],piano:[2,3],short1:[3,4],mel1:[1,3],mel2:[3,5],basso:[1,1],arm2:[2,5],short2:[4,5],short3:[5,6],short4:[3,7]};
   function sign(id,x,y,a){
-    g.strokeStyle='rgba('+INK+','+a+')'; g.lineWidth=1.15; g.lineJoin='round'; g.beginPath();
+    g.strokeStyle='rgba('+INK+','+a+')'; g.lineWidth=1; g.lineJoin='round'; g.beginPath();
     if(id==='drone'){ var rr=11+3*Math.sin(performance.now()/2300); g.arc(x,y,3.5,0,TAU); g.moveTo(x+rr,y); g.arc(x,y,rr,0,TAU); g.stroke(); return; }
-    var s=BY[id], p=started&&playing?pos():0, N=64, r0=id==='basso'?13:id.indexOf('arm')===0?11:id.indexOf('mel')===0?10:8;
-    for(var k=0;k<=N;k++){ var u=k/N, th=u*TAU-1.5708, r=r0+15*envAt(s,p-u*2.6)*s.gv*Math.pow(Math.sin(Math.PI*u),0.5), X=x+r*Math.cos(th), Y=y+r*Math.sin(th); if(k) g.lineTo(X,Y); else g.moveTo(X,Y); }
-    g.closePath(); g.stroke();
-    g.fillStyle='rgba('+INK+','+a+')'; g.beginPath(); g.arc(x,y,1.6,0,TAU); g.fill();
+    var K=KNOT[id], s=BY[id], R0=12+7*s.level, ph=performance.now()/1000*0.22+K[1], N=120;
+    for(var k=0;k<=N;k++){ var th=k/N*TAU, X=x+R0*Math.sin(K[0]*th+ph), Y=y+R0*Math.sin(K[1]*th+(id==='basso'?1.5708:0)); if(k) g.lineTo(X,Y); else g.moveTo(X,Y); }
+    g.stroke();
   }
   return {
     hint:'', waits:true, PL:PL,
@@ -1442,10 +1456,11 @@ pauseBtn.addEventListener('click',function(){
   else{ctx.suspend(); pauseBtn.setAttribute('aria-label','Riprendi'); pauseIcon.setAttribute('d','M5.5 3l9 6-9 6z');}
 });
 var readyRes, whenReady=new Promise(function(r){ readyRes=r; });
+var audioInit=false;
 function startAudio(){
-  if(ctx) return;
+  if(audioInit) return; audioInit=true;          // il contesto può esistere già (lo apre anche Respiro): il laboratorio va preparato comunque
   var AC=window.AudioContext||window.webkitAudioContext;
-  try{ ctx=new AC(); ctx.resume(); }catch(e){ hintEl.textContent='questo browser non suona'; hintEl.classList.add('show'); return; }
+  try{ if(!ctx) ctx=new AC(); ctx.resume(); }catch(e){ hintEl.textContent='questo browser non suona'; hintEl.classList.add('show'); return; }
   prepare().catch(function(){});
   firstReady.then(function(){ buildGraph(); started=true; readyRes(); });
 }
