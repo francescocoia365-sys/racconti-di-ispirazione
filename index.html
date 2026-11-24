@@ -123,6 +123,7 @@ body{height:100%;width:100%}
 .d-partiture .art{width:100%;max-width:none;top:42%}
 .d-partiture .in{align-items:flex-end}
 .d-voci .art{width:78vw;top:60%}
+.d-anni .art{width:96vw;max-width:480px;top:44%}
 .d-voci .in{bottom:auto;top:calc(64px + var(--st))}
 .breath{transform-origin:100px 100px;animation:breath 11s ease-in-out infinite alternate}
 @keyframes breath{from{transform:scale(.8)}to{transform:scale(1.08)}}
@@ -163,6 +164,17 @@ body{height:100%;width:100%}
 .bbox.done .bstage{display:none}
 .bbox.done #bquo{padding:70px 0 30px;animation:qin 2.5s ease both}
 @keyframes qin{from{opacity:0}to{opacity:1}}
+.yrw{position:sticky;top:0;height:0;width:100%;z-index:0;pointer-events:none}
+.yr{position:absolute;top:24vh;left:-10px;font-family:"Unbounded",var(--font);font-weight:300;font-size:40vw;line-height:1;letter-spacing:-.02em;color:rgba(255,255,255,.09);white-space:nowrap}
+@media (min-width:500px){.yr{font-size:200px}}
+.rcs{width:100%;display:flex;flex-direction:column;padding:40px 0 30vh;position:relative}
+.rc{position:relative;display:flex;flex-direction:column;gap:8px;align-self:flex-start}
+.rc.r{align-self:flex-end;text-align:right;align-items:flex-end}
+.rp{width:100%;aspect-ratio:2/3;background:#0e0e0e center/cover no-repeat;box-shadow:0 20px 50px rgba(0,0,0,.7);display:flex;align-items:flex-end;padding:14px;will-change:transform;margin-bottom:6px;outline:1px solid rgba(255,255,255,.08);outline-offset:-1px}
+.rp b{font-family:"Unbounded",var(--font);font-weight:300;font-size:22px;line-height:1.08;text-transform:uppercase;text-align:left;text-wrap:balance}
+.rp.has b{display:none}
+.rt{font-family:"Unbounded",var(--font);font-weight:300;font-size:14px;letter-spacing:.02em;text-transform:uppercase}
+.rn{color:rgba(255,220,170,.8)}
 .full{overflow:hidden!important}
 #sez.full .sback{background:rgba(0,0,0,.55);color:#fff}
 .full .sz{padding:0;display:block;position:absolute;inset:0;-webkit-user-select:none;user-select:none}
@@ -306,6 +318,11 @@ body{height:100%;width:100%}
       <div class="art" data-art="voci"></div>
       <div class="in"><span class="tiny">09</span><h2 class="word">Voci</h2></div>
     </a>
+    <a class="door d-anni type" href="#anni">
+      <div class="amb"></div>
+      <div class="art" data-art="anni"></div>
+      <div class="in"><span class="tiny">10</span><h2 class="word">Negli anni</h2></div>
+    </a>
     <section class="door type end">
       <div class="in">
         <span class="tiny">il racconto continua</span>
@@ -364,7 +381,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='31', updBtn=document.getElementById('upd');
+var BUILD='32', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -443,6 +460,8 @@ var ART=(function(){
   A.partiture=wrap(s);                                                     // un rigo
   s=''; [[14,36,96,0],[14,50,64,0],[186,82,112,1],[186,96,78,1],[186,110,50,1],[14,142,84,0],[14,156,104,0],[14,170,40,0]].forEach(function(l){ s+='<path d="M'+l[0]+' '+l[1]+'H'+(l[3]?l[0]-l[2]:l[0]+l[2])+'"/>'; });
   A.voci=wrap(s);                                                          // voci che si rispondono
+  s='<path d="M100 6V194" opacity=".5"/>'; [[20,46,34,50],[58,30,38,56],[112,70,40,60],[150,40,30,44],[36,118,44,62],[120,146,34,48]].forEach(function(r){ s+='<rect x="'+r[0]+'" y="'+r[1]+'" width="'+r[2]+'" height="'+r[3]+'" transform="rotate('+((r[0]%7)-3)*2+' '+(r[0]+r[2]/2)+' '+(r[1]+r[3]/2)+')"/>'; });
+  A.anni=wrap(s);                                                          // finestre lungo una linea del tempo
   return A;
 })();
 var SEZ={
@@ -454,6 +473,7 @@ var SEZ={
   giardini:{n:'06',t:'Giardini che ispirano',lead:'Un invito a cercare bellezza anche fuori dalle pagine.',garden:true},
   insieme:{n:'07',t:'La musica che nasce insieme',lead:'Durante i miei concerti invito una persona del pubblico a improvvisare.',p:['Ogni incontro dà vita a una composizione unica, che non esisteva prima di quel momento.'],rows:[['le improvvisazioni','Un archivio che cresce dopo ogni concerto']]},
   partiture:{n:'08',t:'Partiture da scaricare',lead:'La musica è anche un gesto che passa di mano in mano.',p:['Qui troverai alcune mie partiture da leggere, studiare e suonare.'],rows:[['da «dio ride» · piano solo','Oltre le nostre vie']]},
+  anni:{n:'10',t:'Negli anni',lead:'Film, serie, dischi, palcoscenici: quasi trent’anni di musica.',anni:true},
   voci:{n:'09',t:'Le vostre voci',lead:'Un concerto non finisce con l’ultima nota.',p:['Se qualcosa ti ha emozionato, sorpreso o fatto riflettere, potrai raccontarlo qui: un pensiero, un racconto, un disegno.'],rows:[['lascia un pensiero','I vostri messaggi e le vostre ispirazioni']]}
 };
 /* respiro: una seduta guidata di tre minuti. Si inspira per 4 secondi e si espira per 6 (sei respiri al minuto):
@@ -514,6 +534,21 @@ function tacInit(){
   v.onpointerup=v.onpointercancel=function(e){ if(!pts[e.pointerId]) return; delete pts[e.pointerId]; start=null; var now=performance.now(), r=v.getBoundingClientRect();
     if(!moved&&!Object.keys(pts).length){ if(now-lastTap<330){ if(s>fit*1.6) home(true); else zoomAt(e.clientX-r.left,e.clientY-r.top,Math.max(1,fit*3.2),true); lastTap=0; } else lastTap=now; } };
 }
+/* negli anni: una retrospettiva che scorre. Le locandine entrano da lati opposti, si inclinano e si scambiano di piano mentre scorri; dietro, l'anno cambia */
+var ANNI=[[1997,'La piovra 8','Giacomo Battiato','La piovra season 8',''],[1998,'Ecco fatto','Gabriele Muccino','Ecco fatto 1998 film',''],[1999,'Come te nessuno mai','Gabriele Muccino','But Forever in My Mind film','premio rota, mostra di venezia'],[2000,'L’ultimo bacio','Gabriele Muccino','The Last Kiss 2001 film Muccino',''],[2000,'Padre Pio','Carlo Carlei','Padre Pio: Miracle Man',''],[2003,'Ricordati di me','Gabriele Muccino','Remember Me, My Love film',''],[2004,'Paolo Borsellino','Gianluca Maria Tavarelli','Paolo Borsellino 2004 miniseries',''],[2005,'Manuale d’amore','Giovanni Veronesi','Manual of Love film',''],[2005,'Romanzo criminale','Michele Placido','Romanzo Criminale 2005 film',''],[2006,'N – Io e Napoleone','Paolo Virzì','Napoleon and Me film',''],[2007,'I Viceré','Roberto Faenza','I Viceré 2007 film',''],[2008,'Caos calmo','Antonello Grimaldi','Quiet Chaos film','david di donatello · nastro d’argento'],[2009,'Italians','Giovanni Veronesi','Italians 2009 film','nastro d’argento'],[2009,'La matassa','Ficarra e Picone','La matassa film',''],[2010,'Baciami ancora','Gabriele Muccino','Kiss Me Again 2010 film',''],[2015,'Padri e figlie','Gabriele Muccino','Fathers and Daughters film',''],[2015,'Tutto può succedere','Lucio Pellegrini','Tutto può succedere TV series',''],[2016,'I Medici','Sergio Mimica-Gezzan','Medici TV series',''],[2020,'Fatima','Marco Pontecorvo','Fatima 2020 film',''],[2021,'Taranta Reimagined','','','album'],[2022,'Çiatu','','','biennale di venezia'],[2023,'Anna','','','balletto · teatro massimo, palermo'],[2025,'Il Gattopardo','Tom Shankland','The Leopard 2025 TV series',''],[2025,'La musica oltre le storie','','','in concerto'],[2026,'Dio ride','Giovanni Veronesi','','']];
+function anniInit(){
+  var yr=document.getElementById('yr'), cards=[].slice.call(szEl.querySelectorAll('.rc')), raf=0;
+  function lay(){ raf=0; var vh=vSez.clientHeight, best=null, bd=1e9;
+    cards.forEach(function(c,i){ var r=c.getBoundingClientRect(); if(r.bottom<-200||r.top>vh+200) return; var d=(r.top+r.height/2-vh/2)/vh, dir=i%2?1:-1, a=Math.abs(d);
+      c.firstChild.style.transform='translate3d('+(dir*d*46)+'px,'+(-d*70*(0.6+(i%3)*0.3))+'px,0) rotate('+(dir*d*5)+'deg) scale('+(1-0.14*a)+')'; c.style.opacity=Math.max(0.15,1-a*0.9); c.style.zIndex=Math.round(100-a*100);
+      if(a<bd){ bd=a; best=c; } });
+    if(best&&yr.textContent!==best.getAttribute('data-y')) yr.textContent=best.getAttribute('data-y'); }
+  vSez.onscroll=function(){ if(!raf) raf=requestAnimationFrame(lay); }; lay();
+  ANNI.forEach(function(a,i){ if(!a[3]) return;
+    fetch('https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrlimit=1&prop=pageimages&piprop=thumbnail&pithumbsize=500&gsrsearch='+encodeURIComponent(a[3])).then(function(r){ return r.json(); }).then(function(j){
+      var pg=j&&j.query&&j.query.pages, k=pg&&Object.keys(pg)[0], src=k&&pg[k].thumbnail&&pg[k].thumbnail.source; if(!src||!cards[i]) return;
+      var im=new Image(); im.onload=function(){ var box=cards[i].querySelector('.rp'); box.style.backgroundImage='url("'+src+'")'; box.classList.add('has'); }; im.src=src; }).catch(function(){}); });
+}
 var vSez=document.getElementById('sez'), szEl=document.getElementById('sz');
 function esc(x){ return String(x).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 function showSez(id){
@@ -526,9 +561,11 @@ function showSez(id){
     +'<div class="rowi"><span class="tiny">youtube · i video più visti</span><div class="yt"><iframe class="emb" title="I video più visti del canale di Paolo Buonvino" loading="lazy" allowfullscreen allow="encrypted-media; picture-in-picture; fullscreen" src="https://www.youtube-nocookie.com/embed/videoseries?list=UULPQ0tBr09so4t1e8gzMhxS9Q"></iframe></div><a class="tiny lnk" target="_blank" rel="noopener" href="https://www.youtube.com/@paolobuonvino/videos">apri il canale →</a></div>';
   if(s.breath) h='<div class="bbox" id="bbox"><div class="bstage"><div class="bring" id="bring"></div><span class="tiny" id="blab"></span></div><div id="bquo"></div><button type="button" class="upd press" id="bgo">inizia</button><span class="tiny bnote">tre minuti · inspira 4, espira 6</span></div>'+h.replace(/<div class="sart">[\s\S]*?<\/div>/,'');
   if(s.tac) h='<div class="deskv" id="deskv"><div class="desk" id="desk">'+TAC.map(function(f){ return '<img src="img/'+f[0]+'" alt="" style="left:'+f[1]+'px;top:'+f[2]+'px;width:'+f[3]+'px;transform:rotate('+f[4]+'deg)">'; }).join('')+'</div></div><div class="deskh" id="deskh"><span class="tiny">'+s.n+'</span><h2 class="word">'+esc(s.t)+'</h2></div>';
+  if(s.anni) h='<div class="yrw"><div class="yr" id="yr">1997</div></div>'+h+'<div class="rcs">'+ANNI.map(function(a,i){ return '<div class="rc'+(i%2?' r':'')+'" data-y="'+a[0]+'" style="width:'+[66,54,72,58,62][i%5]+'%;margin-top:'+[40,-30,70,10,-10][i%5]+'px"><div class="rp"><b>'+esc(a[1])+'</b></div><span class="tiny">'+a[0]+(a[2]?' · '+esc(a[2].toLowerCase()):'')+'</span><b class="rt">'+esc(a[1])+'</b>'+(a[4]?'<span class="tiny rn">'+esc(a[4])+'</span>':'')+'</div>'; }).join('')+'</div><p class="tiny gcred">elenco e locandine da wikipedia · da rivedere</p>';
+  vSez.onscroll=null;
   vSez.classList.toggle('full',!!s.tac);
   breathStop(); szEl.innerHTML=h; vSez.scrollTop=0; if(s.tac) tacInit();
-  if(s.garden) gardenInit(); if(s.breath) breathInit();
+  if(s.garden) gardenInit(); if(s.breath) breathInit(); if(s.anni) anniInit();
 }
 /* giardini: parchi e giardini veri intorno a un punto, presi da OpenStreetMap. La posizione si chiede solo quando tocchi il tasto */
 function gardenInit(){
