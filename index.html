@@ -418,7 +418,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='69', updBtn=document.getElementById('upd');
+var BUILD='70', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -1124,7 +1124,7 @@ MODES.legami=(function(){
   function LL(lon,lat){ return [0.5+(lon-12)*0.017453/5.2,0.5-(lat*0.017453-0.3)/3.4]; }
   // 0 tu, in Europa; 1-5 le persone da raggiungere; 6-12 i suoni che compaiono sul mondo
   var PL=[[.5,.5],LL(-100,45),LL(-60,-15),LL(25,-12),LL(105,38),LL(135,-25),LL(-40,72),LL(78,20),LL(0,-75),LL(100,64),LL(-155,20),LL(25,-32),LL(138,36)], NC=5;
-  var FL=PL.map(function(q){ return q.slice(); }); [[.5,.5],[.15,.2],[.17,.8],[.56,.93],[.85,.25],[.86,.74]].forEach(function(q,i){ FL[i]=q; });
+  var FL=PL.map(function(q){ return q.slice(); }); [[.5,.5],[.15,.2],[.17,.8],[.56,.88],[.85,.25],[.86,.74]].forEach(function(q,i){ FL[i]=q; });
   var LAY={2:{a:'l2',x:'l2x',b:'b2',n:'violino, corda di re'},3:{a:'l3',x:'l3x',b:'b3',n:'violino, corda di sol'},4:{a:'l4',x:'l4x',b:'b4',n:'violoncello'},5:{a:'l5',b:'b5',n:'armonia'},6:{a:'l6',b:'b6',n:'movimento'}};
   var GA={2:2.3,3:2.3,4:1.1,5:0.8,6:1};
   var BX=['s13','s14','vno','ww','coro','archi','bass'], BN={s13:'tutti',s14:'risonanze',vno:'violini',ww:'legni',coro:'coro',archi:'archi',bass:'basso'};
@@ -1142,7 +1142,7 @@ MODES.legami=(function(){
     [[95,5],[104,-5],[106,-6],[103,0],[98,4]],[[109,1],[117,7],[118,1],[116,-4],[110,-3]],[[131,-1],[141,-3],[147,-6],[150,-10],[141,-9],[138,-8],[133,-4]],[[-24,65],[-18,66],[-14,65],[-18,63],[-22,64]]];
   var LAND=[]; LANDS.forEach(function(r){ var pts=[]; for(var k=0;k<r.length;k++){ var a=r[k], b=r[(k+1)%r.length], d=Math.max(Math.abs(b[0]-a[0]),Math.abs(b[1]-a[1])), nS=Math.max(1,Math.ceil(d/5)); for(var q=0;q<nS;q++){ var lo=a[0]+(b[0]-a[0])*q/nS-12, la=a[1]+(b[1]-a[1])*q/nS; if(lo<-180) lo+=360; pts.push([lo*0.017453,la*0.017453]); } } pts.push(pts[0]); LAND.push(pts); });
   var NP=46;
-  var st=[], pend=[], lay=[], links=[], full=0, used=false, born=[], ps=[], ecv=[], fxv=[];
+  var st=[], pend=[], wamp=[], lay=[], links=[], full=0, used=false, born=[], ps=[], ecv=[], fxv=[];
   var phase=0, tA=0, TBplan=0, TB=0, TF=0, TFplan=0, nconn=0, order=[], formAt=0, bAt=0, armed=false, armAt=0, holdTu=0, holdXY=[0,0], endAt=0, enterT=0, dimv=0, freed=false, bGo=false, fGo=false;
   var ZS=[0,.22,-.3,.28,-.2,.32,0,0,0,0,0,0,0], k3=0, rx=0, ry=0, tiltX=0, tiltY=0, base=null, gotTilt=false, asked=false, spin=0;
   var ury=0, urx=0, zoom=1, zf=1, pinch=0, RG=0.40, formDur=9, focused=false, cam=-1, pvLast=0, pvId=null, lastAt=0, auto=-1, tourI=-1, tourT=-99, lastTouch=-99;
@@ -1153,7 +1153,7 @@ MODES.legami=(function(){
     return [W*(0.5+x1*f),TOP+(BOT-TOP)*0.5+W*y1*f,z2];
   }
   function p3(i,flat){              // posizione del punto dopo la rotazione: x, y sullo schermo e z (vicino > 0)
-    var e=earth(), tw=performance.now()/1000, wob=i?(1-e):0, X=ps[i].x-0.5+0.014*wob*Math.sin(tw*0.31+i*1.7), Y=(ps[i].y-0.5+0.011*wob*Math.cos(tw*0.24+i*2.3))*(BOT-TOP)/W, Z=ZS[i]*k3; if(e>0){ var lo=(PL[i][0]-0.5)*5.2, la=0.3+(0.5-PL[i][1])*3.4, cl=Math.cos(la); X+=(RG*cl*Math.sin(lo)-X)*e; Y+=(-RG*Math.sin(la)-Y)*e; Z+=(RG*cl*Math.cos(lo)-Z)*e; }
+    var e=earth(), tw=performance.now()/1000, wob=i?(1-e)*(wamp[i]==null?1:wamp[i]):0, X=ps[i].x-0.5+wob*(0.06*Math.sin(tw*0.52+i*1.7)+0.03*Math.sin(tw*0.93+i*4.1)), Y=(ps[i].y-0.5+wob*(0.042*Math.cos(tw*0.43+i*2.3)+0.022*Math.sin(tw*0.81+i*0.9)))*(BOT-TOP)/W, Z=ZS[i]*k3; if(e>0){ var lo=(PL[i][0]-0.5)*5.2, la=0.3+(0.5-PL[i][1])*3.4, cl=Math.cos(la); X+=(RG*cl*Math.sin(lo)-X)*e; Y+=(-RG*Math.sin(la)-Y)*e; Z+=(RG*cl*Math.cos(lo)-Z)*e; }
     var F=flat?null:fxv[i], lf=F?(F.lift||0)*e:0; return proj(X*(1+lf),Y*(1+lf),Z*(1+lf));
   }
   var STARS=[], HUE=['255,205,150','150,185,255','255,160,200']; (function(){ var sd=7; function rnd(){ sd=(sd*16807)%2147483647; return sd/2147483647; } for(var k=0;k<170;k++){ var r=0.12+0.85*Math.sqrt(rnd()), a=rnd()*6.283+r*3.4; var la=Math.asin(2*rnd()-1), lo=rnd()*6.283; STARS.push([r*Math.cos(a)*0.62,r*Math.sin(a)*0.95,(rnd()-0.5)*0.34*(1.2-r),0.4+0.6*rnd(),RG*Math.cos(la)*Math.sin(lo),-RG*Math.sin(la),RG*Math.cos(la)*Math.cos(lo)]); } })();
@@ -1241,7 +1241,7 @@ MODES.legami=(function(){
     hint:'', own:true, PL:FL, begin:begin, late:late, pos:function(){ return PL.map(function(_,i){ return p3(i); }); },
     dbg:function(){ return {phase:phase,nconn:nconn,full:+full.toFixed(2),tA:+(ctx?ctx.currentTime-tA:0).toFixed(1),toB:TBplan?+(TBplan-ctx.currentTime).toFixed(1):null,toF:TFplan?+(TFplan-ctx.currentTime).toFixed(1):null,armed:armed,lit:st.filter(Boolean).length,gains:S.filter(function(s){ return s.g&&s.g.gain.value>0.02; }).map(function(s){ return s.id+':'+s.g.gain.value.toFixed(2); }).join(' ')}; },
     enter:function(){
-      st=PL.map(function(){ return null; }); st[0]=true; pend=[]; lay=[]; links=[]; full=0; used=false; born=[]; k3=0; base=null; spin=0; ecv=[]; fxv=[]; ury=0; urx=0; zoom=1; zf=1; pinch=0; focused=false; cam=-1; pvLast=0; pvId=null; auto=-1; tourI=-1; tourT=-99; lastTouch=-99;
+      st=PL.map(function(){ return null; }); st[0]=true; pend=[]; wamp=[]; lay=[]; links=[]; full=0; used=false; born=[]; k3=0; base=null; spin=0; ecv=[]; fxv=[]; ury=0; urx=0; zoom=1; zf=1; pinch=0; focused=false; cam=-1; pvLast=0; pvId=null; auto=-1; tourI=-1; tourT=-99; lastTouch=-99;
       phase=0; nconn=0; TBplan=0; TB=0; TF=0; TFplan=0; formAt=0; bAt=0; armed=false; armAt=0; holdTu=0; endAt=0; dimv=0; freed=false; bGo=false; fGo=false; enterT=performance.now()/1000;
       order=[2,3,4,5,6]; for(var i=4;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), tmp=order[i]; order[i]=order[j]; order[j]=tmp; } for(i=1;i<=NC;i++) lay[i]=order[i-1]; lastAt=0;
       ps=FL.map(function(p){ return {x:p[0],y:p[1],tx:p[0],ty:p[1]}; });
@@ -1273,6 +1273,7 @@ MODES.legami=(function(){
       var tn=performance.now()/1000, now=ctx.currentTime, i, kk=1-Math.exp(-dt/0.22);
       fingers().forEach(function(q){ if(phase===1&&q.node>0&&q.node<=NC&&!q.far&&!q.hold&&performance.now()-q.t0>380){ q.hold=true; used=true; } });       // tenuto premuto: il punto ti segue
       for(i=1;i<ps.length;i++){ ps[i].x+=(ps[i].tx-ps[i].x)*kk; ps[i].y+=(ps[i].ty-ps[i].y)*kk; }
+      for(i=1;i<=NC;i++) wamp[i]=(wamp[i]==null?1:wamp[i])+((st[i]?0.22:1)-(wamp[i]==null?1:wamp[i]))*(1-Math.exp(-dt/1.5));
       links.forEach(function(l){ if(l.g<1){ l.g=Math.min(1,l.g+dt/4.5); if(l.g>=1&&l.b>NC&&!st[l.b]){ st[l.b]=true; born[l.b]=tn; } } if(l.pl) l.pl=Math.max(0,l.pl-dt/1.8); });
       // la carta e il mondo: solo quando tutti sono legati, e in fretta
       if(formAt) full=Math.min(1,(tn-formAt)/formDur);
