@@ -301,12 +301,11 @@ body{height:100%;width:100%}
       <div class="in"><span class="tiny">paolo buonvino</span><h1 class="word">Racconti<span class="di">di</span><br>ispirazione</h1></div>
     </header>
     <section class="door type d-invito">
-      <img class="bg" src="img/p-letture.jpg" alt="" style="object-position:30% 50%">
       <div class="amb"></div>
       <div class="in"><span class="tiny">un invito</span><p class="ilead">L’ispirazione, ossigeno per l’anima.</p><p class="ipar">In queste pagine ho raccolto alcune delle cose che, nel tempo, hanno dato e continuano a dare ossigeno alla mia vita. Pensieri, incontri, parole, immagini, suoni ed emozioni che hanno acceso qualcosa dentro di me.</p><p class="ipar">Ho scelto di condividerli perché credo che l’ispirazione, come il respiro, sia ancora più preziosa quando diventa un’esperienza comune.</p><span class="tiny">paolo buonvino</span></div>
     </section>
     <a class="door knock" href="#laboratorio" id="tolab" aria-label="Laboratorio: entra">
-      <div class="under"><img class="bg b1" src="img/p-letture.jpg" alt="" style="object-position:30% 50%"><img class="bg b2" src="img/p-respiro.jpg" alt="" style="object-position:40% 50%"><div class="amb"></div></div>
+      <div class="under"><img class="bg b1" src="img/p-lab.jpg" alt="" style="object-position:42% 50%"><img class="bg b2" src="img/p-respiro.jpg" alt="" style="object-position:40% 50%"><div class="amb"></div></div>
       <div class="in"><span class="tiny">01</span><h2 class="word big" aria-label="Laboratorio"><span class="r"><i>L</i><i>A</i><i>B</i><i>O</i></span><span class="r"><i>R</i><i>A</i><i>T</i><i>O</i></span><span class="r"><i>R</i><i>I</i><i>O</i></span></h2></div>
       <span class="enter" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
     </a>
@@ -419,7 +418,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='60', updBtn=document.getElementById('upd');
+var BUILD='61', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -821,12 +820,12 @@ function setEcho(s,v){
   if(!ctx||!s.g) return; if(!s.ds){ if(v<0.02) return; s.ds=ctx.createGain(); s.ds.gain.value=0; (s.pn||s.lp).connect(s.ds); s.ds.connect(echoBus()); s.ec=0; }
   if(Math.abs(v-s.ec)<0.02) return; s.ec=v; s.ds.gain.setTargetAtTime(0.8*v,ctx.currentTime,0.4);
 }
-function setRoom(s,mu){
-  if(!ctx||!s.g) return; if(Math.abs(mu-s.mu)<0.02) return; s.mu=mu;
+function setRoom(s,mu,tc){
+  if(!ctx||!s.g) return; if(Math.abs(mu-s.mu)<0.02) return; s.mu=mu; tc=tc||0.5;
   var now=ctx.currentTime;
-  s.lp.frequency.setTargetAtTime(18000*Math.pow(1400/18000,mu),now,0.5);
-  s.send.gain.setTargetAtTime(0.65*mu,now,0.5);
-  s.dry.gain.setTargetAtTime(1-0.3*mu,now,0.35);
+  s.lp.frequency.setTargetAtTime(18000*Math.pow(1400/18000,mu),now,tc);
+  s.send.gain.setTargetAtTime(0.65*mu,now,tc);
+  s.dry.gain.setTargetAtTime(1-0.3*mu,now,tc);
 }
 
 /* ---- Griglia di aperture provvisoria: uno strato alla volta, il tutto solo al massimo ---- */
@@ -1144,7 +1143,7 @@ MODES.legami=(function(){
   var st=[], lay=[], links=[], full=0, used=false, born=[], ps=[], ecv=[], fxv=[];
   var phase=0, tA=0, TBplan=0, TB=0, TF=0, TFplan=0, nconn=0, order=[], formAt=0, bAt=0, armed=false, armAt=0, holdTu=0, holdXY=[0,0], endAt=0, enterT=0, dimv=0, freed=false, bGo=false, fGo=false;
   var ZS=[0,.22,-.3,.28,-.2,.32,0,0,0,0,0,0,0], k3=0, rx=0, ry=0, tiltX=0, tiltY=0, base=null, gotTilt=false, asked=false, spin=0;
-  var ury=0, urx=0, zoom=1, zf=1, pinch=0, RG=0.40, formDur=20, focused=false;
+  var ury=0, urx=0, zoom=1, zf=1, pinch=0, RG=0.40, formDur=9, focused=false, cam=1;
   function earth(){ return ss(0,0.42,full); }
   function proj(X,Y,Z){
     var cy=Math.cos(ry*k3+spin+ury), sy=Math.sin(ry*k3+spin+ury), cx=Math.cos(rx*k3+urx), sx=Math.sin(rx*k3+urx);
@@ -1194,16 +1193,16 @@ MODES.legami=(function(){
     var s=BY[id]; if(!s) return; (s.plan=s.plan||[]).push([v,at,tc]);
     if(s.g) s.g.gain.setTargetAtTime(v,Math.max(at,ctx.currentTime),tc);
   }
-  function fo(s,v){ if(!s.fo) return; if(Math.abs(v-(s.fv==null?1:s.fv))<0.02) return; s.fv=v; s.fo.gain.setTargetAtTime(v,ctx.currentTime,0.3); }
+  function fo(s,v,tc){ if(!s.fo) return; if(Math.abs(v-(s.fv==null?1:s.fv))<0.02) return; s.fv=v; s.fo.gain.setTargetAtTime(v,ctx.currentTime,tc||0.3); }
   function grp(k){ return S.filter(function(s){ return s.grp===k; }); }
   function nextGiro(t){ var k=Math.ceil((t-tA+0.1)/G); return tA+Math.max(1,k)*G; }
   function stopAll(){ var now=ctx.currentTime; S.forEach(function(s){ s.plan=[]; if(s.src){ try{ s.src.stop(now+0.05); }catch(e){} s.src=null; } s.t0=null; if(s.g){ s.g.gain.cancelScheduledValues(now); s.g.gain.setTargetAtTime(0,now,0.02); s.mu=-1; setRoom(s,0); setEcho(s,0); } if(s.fo){ s.fv=1; s.fo.gain.setTargetAtTime(1,now,0.05); } }); }
   function begin(){
     if(!started) return; var now=ctx.currentTime; stopAll(); if(typeof droneTo==='function'&&drone) droneTo(0);
     tA=now+0.2; phase=1; playing=true; wantPlay=true; if(ctx.state!=='running') ctx.resume();
-    master.gain.cancelScheduledValues(now); master.gain.setTargetAtTime(1.8,now,0.6);
+    master.gain.cancelScheduledValues(now); master.gain.setTargetAtTime(1.5,now,0.6);
     grp('A').concat(grp('C')).forEach(function(s){ if(s.g&&s.buf) newSource(s,tA,0); });
-    sched('la',1.9,tA,3.5); sched('lb',0.85,tA+9,9); sched('lc',0.6,tA+G,11);        // il tappeto: il primo strato subito, gli altri due da soli, piano
+    sched('la',1.2,tA,2.5); sched('lb',0.55,tA+4,3); sched('lc',0.4,tA+10,3);        // il tappeto: il primo strato subito, gli altri due da soli, piano
     pauseBtn.setAttribute('aria-label','Pausa'); pauseIcon.setAttribute('d','M4.5 3h3v12h-3zM10.5 3h3v12h-3z');
   }
   function late(s){                       // uno strato che finisce di caricarsi a brano già partito: si aggancia a tempo e recupera le sue dissolvenze
@@ -1215,10 +1214,10 @@ MODES.legami=(function(){
   }
   function connect(to){
     var L=order[nconn++], d=LAY[L], now=ctx.currentTime, Tg=nextGiro(now); lay[to]=L;
-    if(d.x){ sched(d.x,0.34,now,2.2); sched(d.x,1,Tg,0.12); sched(d.x,0,Tg+G,1.5); sched(d.a,1,Tg+G,1.5); }     // prima la versione lavorata, un giro dopo quella pulita
-    else { sched(d.a,0.3,now,2.2); sched(d.a,1,Tg,0.12); }
-    sched('la',1.9-0.18*nconn,now,4);
-    if(nconn>=NC){ formAt=performance.now()/1000; TBplan=Tg+G; formDur=Math.max(16,TBplan-now-1); }           // tutti legati: la carta si forma, e la sesta voce fa almeno un giro intero
+    if(d.x){ sched(d.x,1,now,BARL/3.2); sched(d.x,0,Tg+G,2.6); sched(d.a,1,Tg+G,2.6); }     // entra in una battuta, con la versione lavorata; un giro dopo passa a quella pulita
+    else sched(d.a,1,now,BARL/3.2);
+    sched('la',1.2-0.1*nconn,now,4);
+    if(nconn>=NC){ formAt=performance.now()/1000; TBplan=Tg+G; formDur=9; }           // tutti legati: la carta si forma, e la sesta voce fa almeno un giro intero
   }
   function goB(){
     var now=ctx.currentTime; TB=TBplan; bGo=true;
@@ -1240,7 +1239,7 @@ MODES.legami=(function(){
     hint:'', own:true, PL:PL, begin:begin, late:late, pos:function(){ return PL.map(function(_,i){ return p3(i); }); },
     dbg:function(){ return {phase:phase,nconn:nconn,full:+full.toFixed(2),tA:+(ctx?ctx.currentTime-tA:0).toFixed(1),toB:TBplan?+(TBplan-ctx.currentTime).toFixed(1):null,toF:TFplan?+(TFplan-ctx.currentTime).toFixed(1):null,armed:armed,lit:st.filter(Boolean).length,gains:S.filter(function(s){ return s.g&&s.g.gain.value>0.02; }).map(function(s){ return s.id+':'+s.g.gain.value.toFixed(2); }).join(' ')}; },
     enter:function(){
-      st=PL.map(function(){ return null; }); st[0]=true; lay=[]; links=[]; full=0; used=false; born=[]; k3=0; base=null; spin=0; ecv=[]; fxv=[]; ury=0; urx=0; zoom=1; zf=1; pinch=0; focused=false;
+      st=PL.map(function(){ return null; }); st[0]=true; lay=[]; links=[]; full=0; used=false; born=[]; k3=0; base=null; spin=0; ecv=[]; fxv=[]; ury=0; urx=0; zoom=1; zf=1; pinch=0; focused=false; cam=1;
       phase=0; nconn=0; TBplan=0; TB=0; TF=0; TFplan=0; formAt=0; bAt=0; armed=false; armAt=0; holdTu=0; endAt=0; dimv=0; freed=false; bGo=false; fGo=false; enterT=performance.now()/1000;
       order=[2,3,4,5]; for(var i=3;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), tmp=order[i]; order[i]=order[j]; order[j]=tmp; } order.push(6);
       ps=PL.map(function(p){ return {x:p[0],y:p[1],tx:p[0],ty:p[1]}; });
@@ -1277,14 +1276,18 @@ MODES.legami=(function(){
       if(formAt) full=Math.min(1,(tn-formAt)/formDur);
       k3+=(((nconn>=3)?(formAt?1:0.5):0)-k3)*(1-Math.exp(-dt/(formAt?5:9)));
       var gx=gotTilt?tiltX:0.1*Math.sin(tn*0.06), gy=gotTilt?tiltY:0.14*Math.sin(tn*0.045); rx+=(gx-rx)*(1-Math.exp(-dt/0.35)); ry+=(gy-ry)*(1-Math.exp(-dt/0.35));
-      spin+=dt*0.07*full*(fingers().length?0:1);
+      if(fingers().length&&phase===2&&cam>=0) cam=0;                      // se tocchi, lo sguardo torna a te
+      if(phase===2&&cam>0&&st[PL.length-1]&&tn-born[PL.length-1]>3.2) cam=0;
+      if(cam>0&&phase===2&&st[cam]&&cam>NC){ var clo=(ps[cam].x-0.5)*5.2, cla=0.3+(0.5-ps[cam].y)*3.4, dy=(-clo-spin-ry*k3)-ury; dy=Math.atan2(Math.sin(dy),Math.cos(dy)); var kc=1-Math.exp(-dt/0.7); ury+=dy*kc; urx+=((Math.max(-1.1,Math.min(1.1,-cla*0.85))-rx*k3)-urx)*kc; zoom+=(1.5-zoom)*kc; }
+      else if(cam===0){ zoom+=(1-zoom)*(1-Math.exp(-dt/1.6)); urx+=(0-urx)*(1-Math.exp(-dt/2.5)); if(Math.abs(zoom-1)<0.01) cam=-1; }
+      spin+=dt*0.07*full*((fingers().some(function(f){ return f.fxn<0; })||(phase===2&&cam>NC))?0:1);
       var fr=fingers().filter(function(f){ return f.node<0; }); if(fr.length===2&&full>0.5){ var dd=Math.hypot(fr[0].x-fr[1].x,fr[0].y-fr[1].y); if(pinch) zoom=Math.max(0.55,Math.min(2.4,zoom*dd/pinch)); pinch=dd; } else pinch=0;
       // passaggio alla parte piena, all'inizio di un giro
       if(phase===1&&TBplan&&!bGo&&now>TBplan-1.2){ if(grp('B').every(function(s){ return s.g&&s.buf; })) goB(); else TBplan+=G; }
       if(phase===1&&bGo&&now>=TB){ phase=2; bAt=tn; }
       if(phase===2&&!freed&&now>TB+8){ freed=true; S.forEach(function(s){ if(s.grp==='A'||s.grp==='C'){ if(s.src){ try{ s.src.stop(); }catch(e){} s.src=null; } s.t0=null; } }); }
       if(phase===2){
-        for(i=NC+1;i<PL.length;i++) if(!st[i]&&tn>bAt+1.5+2.4*(i-NC-1)){ st[i]=true; born[i]=tn; links.push({a:0,b:i,t:tn,g:0,z:makePath([],0,i),ph:i}); }     // ogni suono nuovo è un punto sul mondo, legato da solo
+        for(i=NC+1;i<PL.length;i++) if(!st[i]&&tn>bAt+1.5+2.6*(i-NC-1)){ st[i]=true; born[i]=tn; if(cam>=0) cam=i; links.push({a:0,b:i,t:tn,g:0,z:makePath([],0,i),ph:i}); }     // ogni suono nuovo è un punto sul mondo, legato da solo
         if(!TFplan) TFplan=TB+2*3*G;
         if(!fGo&&now>TFplan-1.2){ if(BY.fin.g&&BY.fin.buf) goF(); else TFplan+=3*G; }
         if(fGo&&now>=TF){ phase=3; }
@@ -1297,9 +1300,9 @@ MODES.legami=(function(){
       for(i=1;i<PL.length;i++){ var F=fxv[i]; if(F) F.lift+=((F.held?0.3:0)-F.lift)*(1-Math.exp(-dt/0.28)); }
       var far0=1-Math.min(1,nconn/NC);
       if(phase===1){
-        ['la','lb','lc'].forEach(function(id,k){ var s=BY[id]; if(!s.g) return; setRoom(s,0.45*far0); setPan(s,k===0?0:(k===1?-1:1)*(0.45+0.2*Math.sin(tn*0.11+k))); });
+        ['la','lb','lc'].forEach(function(id,k){ var s=BY[id]; if(!s.g) return; setRoom(s,0.45*far0,4); setPan(s,k===0?0:(k===1?-1:1)*(0.45+0.2*Math.sin(tn*0.11+k))); });
         for(i=1;i<=NC;i++){ var dv=Math.min(1,Math.hypot(ps[i].x-PL[i][0],ps[i].y-PL[i][1])/0.26)*(1-earth()); ecv[i]=(ecv[i]||0)+(dv-(ecv[i]||0))*(1-Math.exp(-dt/1.2));
-          stemsOf(i).forEach(function(id){ var s=BY[id]; if(!s||!s.g) return; setRoom(s,Math.min(0.95,0.7*far0+0.5*ecv[i])); setEcho(s,0.9*ecv[i]); setPan(s,Math.max(-1,Math.min(1,(p3(i)[0]/W-0.5)*1.1))); fo(s,0.6+0.4*(1-far0)); }); }
+          stemsOf(i).forEach(function(id){ var s=BY[id]; if(!s||!s.g) return; setRoom(s,Math.min(0.95,0.5*far0+0.5*ecv[i]),ecv[i]>0.05?0.6:4); setEcho(s,0.9*ecv[i]); setPan(s,Math.max(-1,Math.min(1,(p3(i)[0]/W-0.5)*1.1))); fo(s,0.8+0.2*(1-far0),4); }); }
       }
       if(phase===2){
         for(i=1;i<PL.length;i++) stemsOf(i).forEach(function(id){ var s=BY[id]; if(!s||!s.g) return; if(s.mu!==0) setRoom(s,0); setEcho(s,0); setPan(s,i>NC&&id==='bass'?0:Math.max(-0.35,Math.min(0.35,(p3(i)[0]/W-0.5)*0.5))); fo(s,held<0?1:(i===held?1.3:0.2)); });      // tenendo un punto, gli altri si abbassano
