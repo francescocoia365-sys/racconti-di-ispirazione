@@ -418,7 +418,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='61', updBtn=document.getElementById('upd');
+var BUILD='62', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -1202,7 +1202,7 @@ MODES.legami=(function(){
     tA=now+0.2; phase=1; playing=true; wantPlay=true; if(ctx.state!=='running') ctx.resume();
     master.gain.cancelScheduledValues(now); master.gain.setTargetAtTime(1.5,now,0.6);
     grp('A').concat(grp('C')).forEach(function(s){ if(s.g&&s.buf) newSource(s,tA,0); });
-    sched('la',1.2,tA,2.5); sched('lb',0.55,tA+4,3); sched('lc',0.4,tA+10,3);        // il tappeto: il primo strato subito, gli altri due da soli, piano
+    sched('la',1.2,tA,2.5); sched('lb',0.55,tA+5,5); sched('lc',0.4,tA+11,5);        // il tappeto: il primo strato subito, gli altri due da soli, piano
     pauseBtn.setAttribute('aria-label','Pausa'); pauseIcon.setAttribute('d','M4.5 3h3v12h-3zM10.5 3h3v12h-3z');
   }
   function late(s){                       // uno strato che finisce di caricarsi a brano già partito: si aggancia a tempo e recupera le sue dissolvenze
@@ -1214,8 +1214,8 @@ MODES.legami=(function(){
   }
   function connect(to){
     var L=order[nconn++], d=LAY[L], now=ctx.currentTime, Tg=nextGiro(now); lay[to]=L;
-    if(d.x){ sched(d.x,1,now,BARL/3.2); sched(d.x,0,Tg+G,2.6); sched(d.a,1,Tg+G,2.6); }     // entra in una battuta, con la versione lavorata; un giro dopo passa a quella pulita
-    else sched(d.a,1,now,BARL/3.2);
+    if(d.x){ sched(d.x,1,now,BARL*0.65); sched(d.x,0,Tg+G,2.6); sched(d.a,1,Tg+G,2.6); }     // entra in un paio di battute, con la versione lavorata; un giro dopo passa a quella pulita
+    else sched(d.a,1,now,BARL*0.65);
     sched('la',1.2-0.1*nconn,now,4);
     if(nconn>=NC){ formAt=performance.now()/1000; TBplan=Tg+G; formDur=9; }           // tutti legati: la carta si forma, e la sesta voce fa almeno un giro intero
   }
