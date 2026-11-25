@@ -418,7 +418,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='65', updBtn=document.getElementById('upd');
+var BUILD='66', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -1302,7 +1302,7 @@ MODES.legami=(function(){
       var pre=TFplan?ss(TFplan-12,TFplan,now):0, aft=phase>=3?Math.min(1,(now-TF)/14):0; zf=1+0.35*pre+0.9*aft;
       var pt=0, nid=(phase===1&&nconn<NC)?(LAY[order[nconn]].x||LAY[order[nconn]].a):null;
       if(nid){ fingers().forEach(function(q){ if(q.node>=0&&q.lit&&q.far&&!q.hold) for(var j=1;j<=NC;j++) if(!st[j]) pt=Math.max(pt,ss(230,30,Math.hypot(q.x-nx(j),q.y-ny(j)))); });
-        var sN=BY[nid]; if(sN&&sN.g){ setRoom(sN,0.7,0.3); if(Math.abs(pt-pvLast)>0.015){ pvLast=pt; sN.g.gain.setTargetAtTime(0.5*pt*GA[order[nconn]],now,0.4); } } }
+        var sN=BY[nid]; if(sN&&sN.g){ setRoom(sN,0.7,0.3); if(Math.abs(pt-pvLast)>0.015){ pvLast=pt; sN.g.gain.setTargetAtTime(0.3*pt*GA[order[nconn]],now,0.4); } } }
       // quanto si sente ciascuno
       var held=-1; for(i=1;i<PL.length;i++) if(fxv[i]&&fxv[i].held) held=i; if(held<0&&auto>0){ held=auto; fxv[auto]=fxv[auto]||{lift:0}; }
       dimv+=((held>=0?1:0)-dimv)*(1-Math.exp(-dt/(auto>0?0.9:0.3)));
