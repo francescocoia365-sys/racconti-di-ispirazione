@@ -418,7 +418,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='62', updBtn=document.getElementById('upd');
+var BUILD='63', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -1140,7 +1140,7 @@ MODES.legami=(function(){
     [[95,5],[104,-5],[106,-6],[103,0],[98,4]],[[109,1],[117,7],[118,1],[116,-4],[110,-3]],[[131,-1],[141,-3],[147,-6],[150,-10],[141,-9],[138,-8],[133,-4]],[[-24,65],[-18,66],[-14,65],[-18,63],[-22,64]]];
   var LAND=[]; LANDS.forEach(function(r){ var pts=[]; for(var k=0;k<r.length;k++){ var a=r[k], b=r[(k+1)%r.length], d=Math.max(Math.abs(b[0]-a[0]),Math.abs(b[1]-a[1])), nS=Math.max(1,Math.ceil(d/5)); for(var q=0;q<nS;q++){ var lo=a[0]+(b[0]-a[0])*q/nS-12, la=a[1]+(b[1]-a[1])*q/nS; if(lo<-180) lo+=360; pts.push([lo*0.017453,la*0.017453]); } } pts.push(pts[0]); LAND.push(pts); });
   var NP=46;
-  var st=[], lay=[], links=[], full=0, used=false, born=[], ps=[], ecv=[], fxv=[];
+  var st=[], pend=[], lay=[], links=[], full=0, used=false, born=[], ps=[], ecv=[], fxv=[];
   var phase=0, tA=0, TBplan=0, TB=0, TF=0, TFplan=0, nconn=0, order=[], formAt=0, bAt=0, armed=false, armAt=0, holdTu=0, holdXY=[0,0], endAt=0, enterT=0, dimv=0, freed=false, bGo=false, fGo=false;
   var ZS=[0,.22,-.3,.28,-.2,.32,0,0,0,0,0,0,0], k3=0, rx=0, ry=0, tiltX=0, tiltY=0, base=null, gotTilt=false, asked=false, spin=0;
   var ury=0, urx=0, zoom=1, zf=1, pinch=0, RG=0.40, formDur=9, focused=false, cam=1;
@@ -1217,11 +1217,11 @@ MODES.legami=(function(){
     if(d.x){ sched(d.x,1,now,BARL*0.65); sched(d.x,0,Tg+G,2.6); sched(d.a,1,Tg+G,2.6); }     // entra in un paio di battute, con la versione lavorata; un giro dopo passa a quella pulita
     else sched(d.a,1,now,BARL*0.65);
     sched('la',1.2-0.1*nconn,now,4);
-    if(nconn>=NC){ formAt=performance.now()/1000; TBplan=Tg+G; formDur=9; }           // tutti legati: la carta si forma, e la sesta voce fa almeno un giro intero
+    if(nconn>=NC){ formAt=performance.now()/1000; TBplan=Tg+G; formDur=12; }           // tutti legati: la carta si forma, e la sesta voce fa almeno un giro intero
   }
   function goB(){
     var now=ctx.currentTime; TB=TBplan; bGo=true;
-    grp('B').forEach(function(s){ if(!s.g) return; s.plan=[]; s.g.gain.cancelScheduledValues(now); s.g.gain.setValueAtTime(0,now); newSource(s,TB,0); sched(s.id,1,TB,0.03); });
+    grp('B').forEach(function(s){ if(!s.g) return; s.plan=[]; s.g.gain.cancelScheduledValues(now); s.g.gain.setValueAtTime(0,now); newSource(s,TB,0); if(BX.indexOf(s.id)<0) sched(s.id,1,TB,0.03); });
     S.forEach(function(s){ if(s.grp==='A'&&s.id!=='la'&&s.id!=='lb') sched(s.id,0,TB,0.03); });
     sched('la',0,TB,2.5); sched('lb',0,TB,2.5); sched('lc',0,TB,3);
     master.gain.setTargetAtTime(1.3,TB,1.2);
@@ -1239,7 +1239,7 @@ MODES.legami=(function(){
     hint:'', own:true, PL:PL, begin:begin, late:late, pos:function(){ return PL.map(function(_,i){ return p3(i); }); },
     dbg:function(){ return {phase:phase,nconn:nconn,full:+full.toFixed(2),tA:+(ctx?ctx.currentTime-tA:0).toFixed(1),toB:TBplan?+(TBplan-ctx.currentTime).toFixed(1):null,toF:TFplan?+(TFplan-ctx.currentTime).toFixed(1):null,armed:armed,lit:st.filter(Boolean).length,gains:S.filter(function(s){ return s.g&&s.g.gain.value>0.02; }).map(function(s){ return s.id+':'+s.g.gain.value.toFixed(2); }).join(' ')}; },
     enter:function(){
-      st=PL.map(function(){ return null; }); st[0]=true; lay=[]; links=[]; full=0; used=false; born=[]; k3=0; base=null; spin=0; ecv=[]; fxv=[]; ury=0; urx=0; zoom=1; zf=1; pinch=0; focused=false; cam=1;
+      st=PL.map(function(){ return null; }); st[0]=true; pend=[]; lay=[]; links=[]; full=0; used=false; born=[]; k3=0; base=null; spin=0; ecv=[]; fxv=[]; ury=0; urx=0; zoom=1; zf=1; pinch=0; focused=false; cam=1;
       phase=0; nconn=0; TBplan=0; TB=0; TF=0; TFplan=0; formAt=0; bAt=0; armed=false; armAt=0; holdTu=0; endAt=0; dimv=0; freed=false; bGo=false; fGo=false; enterT=performance.now()/1000;
       order=[2,3,4,5]; for(var i=3;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), tmp=order[i]; order[i]=order[j]; order[j]=tmp; } order.push(6);
       ps=PL.map(function(p){ return {x:p[0],y:p[1],tx:p[0],ty:p[1]}; });
@@ -1271,14 +1271,14 @@ MODES.legami=(function(){
       var tn=performance.now()/1000, now=ctx.currentTime, i, kk=1-Math.exp(-dt/0.22);
       fingers().forEach(function(q){ if(phase===1&&q.node>0&&q.node<=NC&&!q.far&&!q.hold&&performance.now()-q.t0>380){ q.hold=true; used=true; } });       // tenuto premuto: il punto ti segue
       for(i=1;i<ps.length;i++){ ps[i].x+=(ps[i].tx-ps[i].x)*kk; ps[i].y+=(ps[i].ty-ps[i].y)*kk; }
-      links.forEach(function(l){ if(l.g<1) l.g=Math.min(1,l.g+dt/4); if(l.pl) l.pl=Math.max(0,l.pl-dt/1.8); });
+      links.forEach(function(l){ if(l.g<1){ l.g=Math.min(1,l.g+dt/3.2); if(l.g>=1&&l.b>NC&&!st[l.b]){ st[l.b]=true; born[l.b]=tn; sched(BX[l.b-NC-1],1,ctx.currentTime,1.6); } } if(l.pl) l.pl=Math.max(0,l.pl-dt/1.8); });
       // la carta e il mondo: solo quando tutti sono legati, e in fretta
       if(formAt) full=Math.min(1,(tn-formAt)/formDur);
       k3+=(((nconn>=3)?(formAt?1:0.5):0)-k3)*(1-Math.exp(-dt/(formAt?5:9)));
       var gx=gotTilt?tiltX:0.1*Math.sin(tn*0.06), gy=gotTilt?tiltY:0.14*Math.sin(tn*0.045); rx+=(gx-rx)*(1-Math.exp(-dt/0.35)); ry+=(gy-ry)*(1-Math.exp(-dt/0.35));
       if(fingers().length&&phase===2&&cam>=0) cam=0;                      // se tocchi, lo sguardo torna a te
-      if(phase===2&&cam>0&&st[PL.length-1]&&tn-born[PL.length-1]>3.2) cam=0;
-      if(cam>0&&phase===2&&st[cam]&&cam>NC){ var clo=(ps[cam].x-0.5)*5.2, cla=0.3+(0.5-ps[cam].y)*3.4, dy=(-clo-spin-ry*k3)-ury; dy=Math.atan2(Math.sin(dy),Math.cos(dy)); var kc=1-Math.exp(-dt/0.7); ury+=dy*kc; urx+=((Math.max(-1.1,Math.min(1.1,-cla*0.85))-rx*k3)-urx)*kc; zoom+=(1.5-zoom)*kc; }
+      if(phase===2&&cam>0&&st[PL.length-1]&&tn-born[PL.length-1]>3.5) cam=0;
+      if(cam>0&&phase===2&&cam>NC){ var clo=(ps[cam].x-0.5)*5.2, cla=0.3+(0.5-ps[cam].y)*3.4, dy=(-clo-spin-ry*k3)-ury; dy=Math.atan2(Math.sin(dy),Math.cos(dy)); var kc=1-Math.exp(-dt/0.7); ury+=dy*kc; urx+=((Math.max(-1.1,Math.min(1.1,-cla*0.85))-rx*k3)-urx)*kc; zoom+=(1.5-zoom)*kc; }
       else if(cam===0){ zoom+=(1-zoom)*(1-Math.exp(-dt/1.6)); urx+=(0-urx)*(1-Math.exp(-dt/2.5)); if(Math.abs(zoom-1)<0.01) cam=-1; }
       spin+=dt*0.07*full*((fingers().some(function(f){ return f.fxn<0; })||(phase===2&&cam>NC))?0:1);
       var fr=fingers().filter(function(f){ return f.node<0; }); if(fr.length===2&&full>0.5){ var dd=Math.hypot(fr[0].x-fr[1].x,fr[0].y-fr[1].y); if(pinch) zoom=Math.max(0.55,Math.min(2.4,zoom*dd/pinch)); pinch=dd; } else pinch=0;
@@ -1287,7 +1287,7 @@ MODES.legami=(function(){
       if(phase===1&&bGo&&now>=TB){ phase=2; bAt=tn; }
       if(phase===2&&!freed&&now>TB+8){ freed=true; S.forEach(function(s){ if(s.grp==='A'||s.grp==='C'){ if(s.src){ try{ s.src.stop(); }catch(e){} s.src=null; } s.t0=null; } }); }
       if(phase===2){
-        for(i=NC+1;i<PL.length;i++) if(!st[i]&&tn>bAt+1.5+2.6*(i-NC-1)){ st[i]=true; born[i]=tn; if(cam>=0) cam=i; links.push({a:0,b:i,t:tn,g:0,z:makePath([],0,i),ph:i}); }     // ogni suono nuovo è un punto sul mondo, legato da solo
+        for(i=NC+1;i<PL.length;i++) if(!st[i]&&!pend[i]&&tn>bAt+1.5+4.2*(i-NC-1)){ pend[i]=true; if(cam>=0) cam=i; links.push({a:0,b:i,t:tn,g:0,z:makePath([],0,i),ph:i}); }     // ogni suono nuovo è un punto sul mondo, legato da solo
         if(!TFplan) TFplan=TB+2*3*G;
         if(!fGo&&now>TFplan-1.2){ if(BY.fin.g&&BY.fin.buf) goF(); else TFplan+=3*G; }
         if(fGo&&now>=TF){ phase=3; }
