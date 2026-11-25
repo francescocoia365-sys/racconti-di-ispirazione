@@ -418,7 +418,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='66', updBtn=document.getElementById('upd');
+var BUILD='67', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -1218,7 +1218,7 @@ MODES.legami=(function(){
     if(d.x){ sched(d.x,GA[L],now,BARL*1.1); sched(d.x,0,Tg+G,2.6); sched(d.a,GA[L],Tg+G,2.6); }     // entra in un paio di battute, con la versione lavorata; un giro dopo passa a quella pulita
     else sched(d.a,GA[L],now,BARL*1.1);
     sched('la',1.2-0.1*nconn,now,4);
-    if(nconn>=NC){ formAt=performance.now()/1000; TBplan=Tg+G; formDur=12; }           // tutti legati: la carta si forma, e la sesta voce fa almeno un giro intero
+    if(nconn>=NC){ formAt=performance.now()/1000; TBplan=(Tg-now>=8)?Tg:Tg+G; formDur=Math.max(7.5,Math.min(12,TBplan-now-0.5)); }           // tutti legati: la carta si forma, e la sesta voce fa almeno un giro intero
   }
   function goB(){
     var now=ctx.currentTime; TB=TBplan; bGo=true;
