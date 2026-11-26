@@ -69,6 +69,8 @@ body{height:100%;width:100%}
 .door .bg{position:absolute;top:0;bottom:0;left:-10%;width:120%;height:100%;object-fit:cover;will-change:transform}
 .door.photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.28) 0%,rgba(0,0,0,0) 26%,rgba(0,0,0,0) 58%,rgba(0,0,0,.82) 100%)}
 .door .in{position:absolute;z-index:1;left:26px;right:26px;bottom:calc(40px + var(--sb));display:flex;flex-direction:column;align-items:flex-start;gap:14px;will-change:transform,opacity}
+.sezhint{position:fixed;left:0;right:0;bottom:calc(28px + var(--sb));z-index:30;text-align:center;pointer-events:none;font-family:"Unbounded",var(--font);font-weight:300;font-size:11px;letter-spacing:.12em;text-transform:lowercase;color:rgba(255,255,255,.86);text-shadow:0 0 14px rgba(0,0,0,.9),0 0 4px rgba(0,0,0,.8);opacity:0;transition:opacity .6s}
+.sezhint.on{opacity:1}
 #home:not(.on) .swipehint{opacity:0!important}
 .swipehint{position:absolute;left:0;right:0;top:calc(30px + var(--st));z-index:6;display:flex;align-items:center;justify-content:center;gap:10px;pointer-events:none;font-family:"Unbounded",var(--font);font-weight:300;font-size:10.5px;letter-spacing:.16em;text-transform:lowercase;color:rgba(255,255,255,.72);transition:opacity .5s}
 .swipehint i{display:block;width:22px;height:1px;background:currentColor;position:relative;animation:swp 2.4s ease-in-out infinite}
@@ -426,7 +428,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='73', updBtn=document.getElementById('upd');
+var BUILD='74', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -647,6 +649,13 @@ function mapInit(){
 }
 var vSez=document.getElementById('sez'), szEl=document.getElementById('sz');
 function esc(x){ return String(x).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+/* ogni sezione si apre con una riga che dice cosa si può fare; sparisce al primo gesto */
+var SEZHINT={musiche:'scorri e scegli cosa ascoltare',taccuino:'trascina per muoverti \u00b7 due dita per ingrandire',letture:'scorri per leggere',giardini:'cerca un giardino vicino a te',partiture:'scorri per leggere',voci:'scorri per leggere',anni:'scorri: gli anni passano',invito:''}, sezHintEl=null, sezHintT=0;
+function sezHint(id){
+  if(!sezHintEl){ sezHintEl=document.createElement('div'); sezHintEl.className='sezhint'; sezHintEl.setAttribute('aria-hidden','true'); document.body.appendChild(sezHintEl);
+    var off=function(){ if(Date.now()-sezHintT>900) sezHintEl.classList.remove('on'); }; vSez.addEventListener('pointerdown',off,{passive:true}); vSez.addEventListener('scroll',off,{passive:true}); window.addEventListener('hashchange',function(){ if(!SEZ[location.hash.slice(1)]) sezHintEl.classList.remove('on'); }); }
+  var txt=SEZHINT[id]||''; sezHintEl.textContent=txt; sezHintT=Date.now(); sezHintEl.classList.toggle('on',!!txt); clearTimeout(sezHint.tm); sezHint.tm=setTimeout(function(){ sezHintEl.classList.remove('on'); },9000);
+}
 function showSez(id){
   var s=SEZ[id], h='';
   h+='<span class="tiny">'+s.n+'</span><h2 class="word">'+esc(s.t)+'</h2><p class="lead">'+esc(s.lead)+'</p>';
@@ -661,7 +670,7 @@ function showSez(id){
   if(s.map) h+=mapHtml();
   vSez.onscroll=null; vSez.classList.remove('breathing'); vSez.classList.remove('quote');
   vSez.classList.toggle('full',!!s.tac);
-  breathStop(); szEl.innerHTML=h; vSez.scrollTop=0; if(s.tac) tacInit();
+  breathStop(); szEl.innerHTML=h; vSez.scrollTop=0; if(s.tac) tacInit(); sezHint(id);
   if(s.garden) gardenInit(); if(s.breath) breathInit(); if(s.anni) anniInit(); if(s.map) mapInit();
 }
 /* giardini: parchi e giardini veri intorno a un punto, presi da OpenStreetMap. La posizione si chiede solo quando tocchi il tasto */
@@ -1246,7 +1255,7 @@ MODES.legami=(function(){
   }
   function stemsOf(i){ var L=lay[i]; if(i>NC) return [BX[i-NC-1]]; if(!L) return []; var d=LAY[L]; return phase>=2?[d.b]:d.x?[d.a,d.x]:[d.a]; }
   function levelOf(i){ var m=0; stemsOf(i).forEach(function(id){ var s=BY[id]; if(s) m=Math.max(m,s.level||0); }); return m; }
-  function guide(txt){ if(txt!==gTxt){ gA-=0.07; if(gA<=0){ gTxt=txt; gA=0; } } else gA=Math.min(1,gA+0.045); if(gTxt) tinyLabel(gTxt,W/2,BOT-30,0.66*gA); }
+  function guide(txt){ if(txt!==gTxt){ gA-=0.07; if(gA<=0){ gTxt=txt; gA=0; } } else gA=Math.min(1,gA+0.045); if(gTxt&&gA>0.01){ g.font='300 12.5px Unbounded, '+FONT; g.textAlign='center'; g.textBaseline='middle'; g.fillStyle='rgba(245,245,247,'+0.86*gA+')'; g.fillText(gTxt,W/2,BOT-34); } }
   function nameOf(i){ return i>NC?BN[BX[i-NC-1]]:(LAY[lay[i]]||{}).n||''; }
 
   return {
@@ -1384,7 +1393,7 @@ MODES.legami=(function(){
       if(phase===1){ var drag=fingers().some(function(q){ return q.node>=0&&q.lit&&q.far&&!q.hold; }), hold1=fingers().some(function(q){ return q.hold; });
         guide(ag<7.5?'':formAt?'ora resta in ascolto':hold1?'spostalo: pi\u00f9 lo allontani, pi\u00f9 il suono cambia':drag?(pt>0.12?'la senti? \u00e8 la sua voce che si avvicina':'portalo fino a un punto'):nconn===0?'prova a collegare tutti i puntini':nconn===NC-1?'ne manca uno: \u00e8 appena comparso':nconn===2?'puoi anche tenere premuto un punto e spostarlo':'ancora: lega gli altri punti \u00b7 '+nconn+' di '+NC); }
       if(phase===2&&focused) guide((tn-focAt<9&&pre<0.05)?'trascina per girare il mondo, due dita per avvicinarti':'');
-      if(phase===1&&!used&&!fingers().length&&ag>3){ var g1=lay[1]===6?2:1, ph=(t*0.3)%1, e2=ph*ph*(3-2*ph), cx=(nx(0)+nx(g1))/2+26*Math.sin(Math.PI*e2); ghost(nx(0)+(cx-nx(0))*Math.min(1,e2*2)+(nx(g1)-cx)*Math.max(0,e2*2-1),ny(0)+(ny(g1)-ny(0))*e2,ph); }
+      if(phase===1&&nconn===0&&!fingers().length&&ag>3){ var g1=lay[1]===6?2:1, ph=(t*0.3)%1, e2=ph*ph*(3-2*ph), cx=(nx(0)+nx(g1))/2+26*Math.sin(Math.PI*e2); ghost(nx(0)+(cx-nx(0))*Math.min(1,e2*2)+(nx(g1)-cx)*Math.max(0,e2*2-1),ny(0)+(ny(g1)-ny(0))*e2,ph); }
       if(phase===2){
         if(!focused&&st[PL.length-1]&&!fingers().length&&pre<0.05){ var la3=Math.min(1,(tn-bAt-3)/3); if(la3>0){ tinyLabel('ogni punto \u00e8 una voce',W/2,BOT-52,0.62*la3); tinyLabel('cercane una, e resta ad ascoltarla',W/2,BOT-30,0.62*la3); } }
         if(pre>0.01){ var u2=ss(TFplan-12,TFplan,ctx.currentTime), rr=W*RG*zoom*zf*1.16; g.strokeStyle='rgba('+INK+','+0.7*pre+')'; g.lineWidth=1; g.beginPath(); g.arc(W/2,TOP+(BOT-TOP)/2,rr,-Math.PI/2,-Math.PI/2+TAU*u2); g.stroke(); }       // il cerchio si chiude: sta arrivando il finale
