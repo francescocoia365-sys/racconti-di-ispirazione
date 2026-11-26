@@ -426,7 +426,7 @@ document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:f
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
 /* ---- Versione e aggiornamento: l'app salvata sulla Home tiene in memoria la pagina vecchia ---- */
-var BUILD='72', updBtn=document.getElementById('upd');
+var BUILD='73', updBtn=document.getElementById('upd');
 document.getElementById('ver').textContent=BUILD;
 function fresh(){ location.replace(location.pathname+'?v='+Date.now()+location.hash); }
 function checkVersion(){
@@ -1382,7 +1382,7 @@ MODES.legami=(function(){
         if(born[i]&&tn-born[i]<3.2){ var qb=(tn-born[i])/3.2; g.strokeStyle='rgba('+INK+','+0.4*(1-qb)*(1-qb)*vis+')'; g.lineWidth=1; g.beginPath(); g.arc(x,y,22+56*qb,0,TAU); g.stroke(); }
       }
       if(phase===1){ var drag=fingers().some(function(q){ return q.node>=0&&q.lit&&q.far&&!q.hold; }), hold1=fingers().some(function(q){ return q.hold; });
-        guide(ag<7.5?'':formAt?'ora resta in ascolto':hold1?'spostalo: pi\u00f9 lo allontani, pi\u00f9 il suono cambia':drag?(pt>0.12?'la senti? \u00e8 la sua voce che si avvicina':'portalo fino a un punto'):nconn===0?'parti da te: trascina il dito fino a un punto':nconn===NC-1?'ne manca uno: \u00e8 appena comparso':nconn===2?'puoi anche tenere premuto un punto e spostarlo':'ancora: lega gli altri punti \u00b7 '+nconn+' di '+NC); }
+        guide(ag<7.5?'':formAt?'ora resta in ascolto':hold1?'spostalo: pi\u00f9 lo allontani, pi\u00f9 il suono cambia':drag?(pt>0.12?'la senti? \u00e8 la sua voce che si avvicina':'portalo fino a un punto'):nconn===0?'prova a collegare tutti i puntini':nconn===NC-1?'ne manca uno: \u00e8 appena comparso':nconn===2?'puoi anche tenere premuto un punto e spostarlo':'ancora: lega gli altri punti \u00b7 '+nconn+' di '+NC); }
       if(phase===2&&focused) guide((tn-focAt<9&&pre<0.05)?'trascina per girare il mondo, due dita per avvicinarti':'');
       if(phase===1&&!used&&!fingers().length&&ag>3){ var g1=lay[1]===6?2:1, ph=(t*0.3)%1, e2=ph*ph*(3-2*ph), cx=(nx(0)+nx(g1))/2+26*Math.sin(Math.PI*e2); ghost(nx(0)+(cx-nx(0))*Math.min(1,e2*2)+(nx(g1)-cx)*Math.max(0,e2*2-1),ny(0)+(ny(g1)-ny(0))*e2,ph); }
       if(phase===2){
